@@ -111,7 +111,7 @@ namespace Telegrator.Hosting
             //hostApplicationBuilder.Services.AddSingleton<IHost>(this);
 
             hostApplicationBuilder.Services.AddSingleton<ITelegramBotHost>(this);
-            hostApplicationBuilder.Services.AddSingleton<IReactiveTelegramBot>(this);
+            hostApplicationBuilder.Services.AddSingleton<ITelegratorBot>(this);
             hostApplicationBuilder.Services.AddSingleton<IHandlersCollection>(handlers);
         }
     }

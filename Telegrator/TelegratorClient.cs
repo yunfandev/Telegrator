@@ -11,7 +11,7 @@ namespace Telegrator
     /// Main client class for the Telegrator library.
     /// Extends TelegramBotClient with reactive capabilities for handling updates.
     /// </summary>
-    public class TelegratorClient : TelegramBotClient, IReactiveTelegramBot, ICollectingProvider
+    public class TelegratorClient : TelegramBotClient, ITelegratorBot, ICollectingProvider
     {
         /// <summary>
         /// The update router for handling incoming updates.

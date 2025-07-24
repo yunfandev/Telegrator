@@ -39,8 +39,11 @@ Telegrator is a next-generation framework for building Telegram bots in C#, insp
 ### 1. Installation
 
 ```shell
-# Coming soon: will be available via NuGet
-# dotnet add package Telegrator
+# .NET CLI
+dotnet add package Telegrator
+
+# NuGet CLI
+NuGet\Install-Package Telegrator
 ```
 
 ### 2. Minimal Bot Example
@@ -59,7 +62,7 @@ public class HelloHandler : MessageHandler
 }
 
 // Registration and launch:
-var bot = new ReactiveClient("<YOUR_BOT_TOKEN>");
+var bot = new TelegratorClient("<YOUR_BOT_TOKEN>");
 bot.Handlers.AddHandler<HelloHandler>();
 bot.StartReceiving();
 ```

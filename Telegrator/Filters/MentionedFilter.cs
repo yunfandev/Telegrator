@@ -7,7 +7,7 @@ namespace Telegrator.Filters
     /// Filter that checks if a message contains a mention of the bot or a specific user.
     /// Requires a <see cref="MessageHasEntityFilter"/> to be applied first to identify mention entities.
     /// </summary>
-    public class MentionedFilter : Filter<Message>
+    public class MentionedFilter : MessageFilterBase
     {
         /// <summary>
         /// The username to check for in the mention (null means check for bot's username).
@@ -39,14 +39,14 @@ namespace Telegrator.Filters
         /// <param name="context">The filter execution context containing the message and completed filters.</param>
         /// <returns>True if the message contains the specified mention; otherwise, false.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the bot username is null and no specific mention is provided.</exception>
-        public override bool CanPass(FilterExecutionContext<Message> context)
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
         {
-            if (context.Input.Text == null)
+            if (Target.Text == null)
                 return false;
 
             string userName = Mention ?? context.BotInfo.User.Username ?? throw new ArgumentNullException(nameof(context), "MentionedFilter requires BotInfo to be initialized");
             MessageHasEntityFilter entityFilter = context.CompletedFilters.Get<MessageHasEntityFilter>(0);
-            return entityFilter.FoundEntities.Any(ent => context.Input.Text.Substring(ent.Offset + 1, ent.Length - 1) == userName);
+            return entityFilter.FoundEntities.Any(ent => Target.Text.Substring(ent.Offset + 1, ent.Length - 1) == userName);
         }
     }
 }

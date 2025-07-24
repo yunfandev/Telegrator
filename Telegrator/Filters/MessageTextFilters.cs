@@ -9,7 +9,7 @@ namespace Telegrator.Filters
     /// Abstract base class for filters that operate on message text content.
     /// Provides common functionality for extracting and validating message text.
     /// </summary>
-    public abstract class MessageTextFilter : Filter<Message>
+    public abstract class MessageTextFilter : MessageFilterBase
     {
         /// <summary>
         /// Gets the current message being processed by the filter.
@@ -29,6 +29,9 @@ namespace Telegrator.Filters
         /// <returns>True if the message is valid and can be processed further; otherwise, false.</returns>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
+            if (!base.CanPass(context))
+                return false;
+
             Message = context.Update.Message!;
             if (Message is not { Id: > 0 })
                 return false;
@@ -36,14 +39,6 @@ namespace Telegrator.Filters
             Text = Message.Text ?? string.Empty;
             return CanPassNext(context);
         }
-
-        /// <summary>
-        /// Abstract method that must be implemented by derived classes to perform
-        /// specific text-based filtering logic.
-        /// </summary>
-        /// <param name="_">The filter execution context (unused in this context).</param>
-        /// <returns>True if the text content passes the filter criteria; otherwise, false.</returns>
-        protected abstract bool CanPassNext(FilterExecutionContext<Message> _);
     }
 
     /// <summary>

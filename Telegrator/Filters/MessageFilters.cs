@@ -1,15 +1,40 @@
 ﻿using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegrator;
 using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
 {
     /// <summary>
+    /// Base abstract class for all filter of <see cref="Message"/> updates
+    /// </summary>
+    public abstract class MessageFilterBase : Filter<Message>
+    {
+        /// <summary>
+        /// Target message for filterring
+        /// </summary>
+        protected Message Target { get; private set; } = null!;
+
+        /// <inheritdoc/>
+        public override bool CanPass(FilterExecutionContext<Message> context)
+        {
+            MessageRepliedFilter? repliedFilter = context.CompletedFilters.Get<MessageRepliedFilter>().SingleOrDefault();
+            Target = repliedFilter?.Reply ?? context.Input;
+            return CanPassNext(context);
+        }
+
+        /// <summary>
+        /// Determines whether the filter can pass for the given context.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected abstract bool CanPassNext(FilterExecutionContext<Message> context);
+    }
+
+    /// <summary>
     /// Filters messages by their <see cref="MessageType"/>.
     /// </summary>
-    public class MessageTypeFilter : Filter<Message>
+    public class MessageTypeFilter : MessageFilterBase
     {
         private readonly MessageType type;
 
@@ -20,54 +45,54 @@ namespace Telegrator.Filters
         public MessageTypeFilter(MessageType type) => this.type = type;
 
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
-            => context.Input.Type == type;
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+            => Target.Type == type;
     }
 
     /// <summary>
     /// Filters messages that are automatic forwards.
     /// </summary>
-    public class IsAutomaticFormwardMessageFilter : Filter<Message>
+    public class IsAutomaticFormwardMessageFilter : MessageFilterBase
     {
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
-            => context.Input.IsAutomaticForward;
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+            => Target.IsAutomaticForward;
     }
 
     /// <summary>
     /// Filters messages that are sent from offline.
     /// </summary>
-    public class IsFromOfflineMessageFilter : Filter<Message>
+    public class IsFromOfflineMessageFilter : MessageFilterBase
     {
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
-            => context.Input.IsFromOffline;
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+            => Target.IsFromOffline;
     }
 
     /// <summary>
     /// Filters service messages (e.g., chat events).
     /// </summary>
-    public class IsServiceMessageMessageFilter : Filter<Message>
+    public class IsServiceMessageMessageFilter : MessageFilterBase
     {
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
-            => context.Input.IsServiceMessage;
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+            => Target.IsServiceMessage;
     }
 
     /// <summary>
     /// Filters messages that are topic messages.
     /// </summary>
-    public class IsTopicMessageMessageFilter : Filter<Message>
+    public class IsTopicMessageMessageFilter : MessageFilterBase
     {
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
-            => context.Input.IsTopicMessage;
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+            => Target.IsTopicMessage;
     }
 
     /// <summary>
     /// Filters messages by dice throw value and optionally by dice type.
     /// </summary>
-    public class DiceThrowedFilter : Filter<Message>
+    public class DiceThrowedFilter : MessageFilterBase
     {
         private readonly DiceType? Dice;
         private readonly int Value;
@@ -89,15 +114,15 @@ namespace Telegrator.Filters
         public DiceThrowedFilter(DiceType diceType, int value) : this(value) => Dice = diceType;
 
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
         {
-            if (context.Input.Dice == null)
+            if (Target.Dice == null)
                 return false;
 
-            if (Dice != null && context.Input.Dice.Emoji != GetEmojyForDiceType(Dice))
+            if (Dice != null && Target.Dice.Emoji != GetEmojyForDiceType(Dice))
                 return false;
 
-            return context.Input.Dice.Value == Value;
+            return Target.Dice.Value == Value;
         }
 
         private static string? GetEmojyForDiceType(DiceType? diceType) => diceType switch
@@ -136,7 +161,7 @@ namespace Telegrator.Filters
     /// <summary>
     /// Filters messages that contain a specific entity type, content, offset, or length.
     /// </summary>
-    public class MessageHasEntityFilter : Filter<Message>
+    public class MessageHasEntityFilter : MessageFilterBase
     {
         private readonly StringComparison _stringComparison = StringComparison.CurrentCulture;
         private readonly MessageEntityType? EntityType;
@@ -202,12 +227,12 @@ namespace Telegrator.Filters
         }
 
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
         {
             if (context.Input is not { Entities.Length: > 0 })
                 return false;
 
-            FoundEntities = context.Input.Entities.Where(entity => FilterEntity(context.Input.Text, entity)).ToArray();
+            FoundEntities = Target.Entities.Where(entity => FilterEntity(Target.Text, entity)).ToArray();
             return FoundEntities.Length != 0;
         }
 

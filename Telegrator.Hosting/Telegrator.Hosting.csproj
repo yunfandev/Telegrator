@@ -10,7 +10,6 @@
 	  <PackageProjectUrl></PackageProjectUrl>
 	  <Title>Telegrator : Telegram.Bot mediator framework</Title>
 	  <PackageIcon>telegrator_nuget.png</PackageIcon>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/Rikitav/Telegrator</RepositoryUrl>
 	  <PackageTags>telegram;bot;mediator;attributes;aspect;hosting;host;framework;easy;simple;handlers</PackageTags>
 	  <EnableNETAnalyzers>True</EnableNETAnalyzers>

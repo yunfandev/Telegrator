@@ -7,7 +7,7 @@ namespace Telegrator.Filters
     /// Abstract base class for filters that operate on message senders.
     /// Provides functionality to access and validate the user who sent the message.
     /// </summary>
-    public abstract class MessageSenderFilter : Filter<Message>
+    public abstract class MessageSenderFilter : MessageFilterBase
     {
         /// <summary>
         /// Gets the user who sent the message.
@@ -22,20 +22,15 @@ namespace Telegrator.Filters
         /// <returns>True if the message has a valid sender; otherwise, false.</returns>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
-            User = context.Input.From!;
+            if (!base.CanPass(context))
+                return false;
+
+            User = Target.From!;
             if (User is not { Id: > 0 })
                 return false;
 
             return CanPassNext(context);
         }
-
-        /// <summary>
-        /// Abstract method that must be implemented by derived classes to perform
-        /// specific filtering logic on the message sender.
-        /// </summary>
-        /// <param name="context">The filter execution context.</param>
-        /// <returns>True if the sender passes the specific filter criteria; otherwise, false.</returns>
-        protected abstract bool CanPassNext(FilterExecutionContext<Message> context);
     }
 
     /// <summary>

@@ -7,7 +7,7 @@ namespace Telegrator.Filters
     /// <summary>
     /// Base class for filters that operate on the chat of the message being processed.
     /// </summary>
-    public abstract class MessageChatFilter : Filter<Message>
+    public abstract class MessageChatFilter : MessageFilterBase
     {
         /// <summary>
         /// Gets the chat of the message being processed.
@@ -15,18 +15,18 @@ namespace Telegrator.Filters
         public Chat Chat { get; private set; } = null!;
 
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
         {
-            Chat = context.Input.Chat;
+            Chat = Target.Chat;
             return CanPassNext(context.CreateChild(Chat));
         }
 
         /// <summary>
         /// Determines whether the filter passes for the given chat context.
         /// </summary>
-        /// <param name="_">The filter execution context for the chat.</param>
+        /// <param name="context">The filter execution context for the chat.</param>
         /// <returns>True if the filter passes; otherwise, false.</returns>
-        protected abstract bool CanPassNext(FilterExecutionContext<Chat> _);
+        protected abstract bool CanPassNext(FilterExecutionContext<Chat> context);
     }
 
     /// <summary>
