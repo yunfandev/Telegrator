@@ -1,6 +1,6 @@
 # Telegrator
 
-![Telegrator Banner](https://github.com/Rikitav/Telegrator/blob/master/resources%2Ftgr-banner.png)
+![Telegrator Banner](https://github.com/Rikitav/Telegrator/blob/master/resources%2Ftelegrator-banner.png)
 
 > **A modern reactive framework for Telegram bots in C# with aspect-oriented design, mediator-based dispatching, and flexible architecture.**
 
