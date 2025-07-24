@@ -1,0 +1,267 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+
+namespace Telegrator.Generators
+{
+    /// <summary>
+    /// Source Generator для автоматической генерации Markdown-документации по публичному API Telegrator.
+    /// </summary>
+    [Generator]
+    public class ApiMarkdownGenerator : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            IncrementalValueProvider<ImmutableArray<BaseTypeDeclarationSyntax>> typeDeclarations = context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    predicate: (node, _) => node is ClassDeclarationSyntax || node is InterfaceDeclarationSyntax || node is StructDeclarationSyntax || node is EnumDeclarationSyntax,
+                    transform: (ctx, _) => (BaseTypeDeclarationSyntax)ctx.Node
+                )
+                .Where(typeDecl => typeDecl != null)
+                .Collect();
+
+            var combined = typeDeclarations.Combine(context.CompilationProvider);
+
+            context.RegisterSourceOutput(combined, (spc, source) =>
+            {
+                IReadOnlyList<BaseTypeDeclarationSyntax> typeDecls = source.Left;
+                Compilation compilation = source.Right;
+                string markdown = GenerateMarkdown(typeDecls, compilation);
+                spc.AddSource("TelegramReactive_Api.md", markdown);
+            });
+        }
+
+        private string GenerateMarkdown(IReadOnlyList<BaseTypeDeclarationSyntax> typeDecls, Compilation compilation)
+        {
+            StringBuilder sourceBuilder = new StringBuilder("/*\n");
+            
+            // Writing caution message
+            sourceBuilder.AppendLine("> [!CAUTION]");
+            sourceBuilder.AppendLine("> This page was generated using hand-writen compiler's XML-Summaries output parser");
+            sourceBuilder.AppendLine("> If you find any missing syntax, errors in structure, mis-formats or empty sections, please contact owner or open an issue\n");
+
+            // Collecting only public types
+            IEnumerable<INamedTypeSymbol> publicTypes = typeDecls
+                .Select(type => type.TryGetNamedType(compilation))
+                .Where(symbol => symbol != null)
+                .Where(symbol => symbol.DeclaredAccessibility == Accessibility.Public);
+
+            // Grouping by namespace
+            IOrderedEnumerable<IGrouping<string, INamedTypeSymbol>> namespaces = publicTypes
+                .GroupBy(t => t.ContainingNamespace.ToDisplayString())
+                .OrderBy(g => g.Key);
+
+            foreach (IGrouping<string, INamedTypeSymbol> nsGroup in namespaces)
+            {
+                string ns = nsGroup.Key == "Telegrator" ? nsGroup.Key : nsGroup.Key.Substring("Telegrator.".Length);
+                sourceBuilder.AppendFormat("# {0}\n\n", ns);
+
+                foreach (INamedTypeSymbol type in nsGroup.OrderBy(t => t.Name))
+                {
+                    // Формируем generic-параметры для заголовка класса
+                    string genericArgs = type.FormatGenericTypes();
+                    sourceBuilder.AppendFormat("## {0} `{1}{2}`\n\n", type.TypeKind, type.Name, genericArgs);
+
+                    string? typeSummary = type.ExtractSummary();
+                    if (!string.IsNullOrWhiteSpace(typeSummary))
+                        sourceBuilder.AppendFormat("> {0}\n\n", typeSummary);
+
+                    // Writing members
+                    if (type.TypeKind == TypeKind.Enum)
+                    {
+                        WriteEnumValues(sourceBuilder, type);
+                    }
+                    else
+                    {
+                        WriteConstructors(sourceBuilder, type);
+                        WriteProperties(sourceBuilder, type);
+                        WriteMethods(sourceBuilder, type);
+                    }
+                }
+            }
+
+            return sourceBuilder.AppendLine().AppendLine("*/").ToString();
+        }
+
+        private static void WriteConstructors(StringBuilder sourceBuilder, INamedTypeSymbol type)
+        {
+            if (type.TypeKind == TypeKind.Enum)
+                return;
+            // Getting ctors
+            List<IMethodSymbol> ctors = type.Constructors
+                .Where(c => c.DeclaredAccessibility == Accessibility.Public)
+                .ToList();
+
+            // Checking for any
+            if (ctors.Count == 0)
+                return;
+
+            // Writing
+            sourceBuilder.AppendLine("**Constructors:**");
+            foreach (IMethodSymbol ctor in ctors)
+            {
+                // Формируем строку вида ClassName<Type1, T>(Param1, Param2) с generic-аргументами
+                string genericArgs = type.FormatGenericTypes();
+                string parameters = string.Join(", ", ctor.Parameters.Select(p => p.Type.GetShortName()));
+                string signature = string.Format("{0}{1}({2})", type.Name, genericArgs, parameters);
+                sourceBuilder.Append(" - `").Append(signature).Append("`").AppendLine();
+
+                // Writing summary
+                string? propSummary = ctor.ExtractSummary();
+                if (!string.IsNullOrWhiteSpace(propSummary))
+                    sourceBuilder.Append("   > ").Append(propSummary).AppendLine();
+            }
+
+            sourceBuilder.AppendLine();
+        }
+
+        private static void WriteEnumValues(StringBuilder sourceBuilder, INamedTypeSymbol type)
+        {
+            var members = type.GetMembers().OfType<IFieldSymbol>().Where(f => f.HasConstantValue && f.DeclaredAccessibility == Accessibility.Public).ToList();
+            if (members.Count == 0)
+                return;
+
+            sourceBuilder.AppendLine("**Values:**");
+            foreach (IFieldSymbol field in members)
+            {
+                sourceBuilder.Append("- `").Append(field.Name).Append("`");
+                string? summary = field.ExtractSummary();
+                if (!string.IsNullOrWhiteSpace(summary))
+                    sourceBuilder.Append(" — ").Append(summary);
+                sourceBuilder.AppendLine();
+            }
+            sourceBuilder.AppendLine();
+        }
+
+        private static void WriteProperties(StringBuilder sourceBuilder, INamedTypeSymbol type)
+        {
+            // Getting properties
+            List<IPropertySymbol> props = type
+                .GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.DeclaredAccessibility == Accessibility.Public)
+                .ToList();
+
+            // Checking for any
+            if (props.Count == 0)
+                return;
+
+            // Writing
+            sourceBuilder.AppendLine("**Properties:**");
+            foreach (IPropertySymbol prop in props)
+            {
+                // Writing member
+                sourceBuilder.AppendFormat("- `{0}`\n", prop.Name);
+
+                // Writing summary
+                string? propSummary = prop.ExtractSummary();
+                if (!string.IsNullOrWhiteSpace(propSummary))
+                    sourceBuilder.AppendFormat("   > {0}", propSummary);
+                
+                sourceBuilder.AppendLine();
+            }
+
+            sourceBuilder.AppendLine();
+        }
+
+        private static void WriteMethods(StringBuilder sourceBuilder, INamedTypeSymbol type)
+        {
+            // Getting methods
+            List<IMethodSymbol> methods = type
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => m.DeclaredAccessibility == Accessibility.Public)
+                .Where(m => m.MethodKind == MethodKind.Ordinary)
+                .ToList();
+
+            // Checking for any
+            if (methods.Count == 0)
+                return;
+
+            // Writing
+            sourceBuilder.AppendLine("**Methods:**");
+            foreach (IMethodSymbol method in methods)
+            {
+                // Формируем generic-параметры для метода
+                string genericArgs = method.FormatGenericTypes();
+                string parameters = string.Join(", ", method.Parameters.Select(p => p.Type.GetShortName()));
+                sourceBuilder.AppendFormat(" - `{0}{1}({2})`\n", method.Name, genericArgs, parameters);
+
+                // Writing summary
+                string? propSummary = method.ExtractSummary();
+                if (!string.IsNullOrWhiteSpace(propSummary))
+                    sourceBuilder.AppendFormat("   > {0}", propSummary);
+
+                sourceBuilder.AppendLine();
+            }
+
+            sourceBuilder.AppendLine();
+        }
+    }
+
+    internal static partial class TypesExtensions
+    {
+        public static string? ExtractSummary(this ISymbol symbol)
+        {
+            string? xmlDoc = symbol.GetDocumentationCommentXml();
+            if (string.IsNullOrWhiteSpace(xmlDoc))
+                return null;
+
+            try
+            {
+                XDocument doc = XDocument.Parse(xmlDoc);
+                XElement? summary = doc.Root?.Element("summary");
+
+                if (summary == null)
+                    return null;
+
+                // Убираем лишние пробелы и переносы строк
+                return summary.Value.Trim().Replace("\n", " ").Replace("  ", " ");
+            }
+            catch
+            {
+                // Игнорируем ошибки парсинга XML
+                return null;
+            }
+        }
+
+        public static string FormatGenericTypes(this INamedTypeSymbol methodSymbol)
+        {
+            if (methodSymbol.TypeParameters.Length == 0)
+                return string.Empty;
+
+            string typeParams = string.Join(", ", methodSymbol.TypeParameters.Select(tp => tp.Name));
+            return string.Format("<{0}>", typeParams);
+        }
+
+        public static string FormatGenericTypes(this IMethodSymbol methodSymbol)
+        {
+            if (methodSymbol.TypeParameters.Length == 0)
+                return string.Empty;
+
+            string typeParams = string.Join(", ", methodSymbol.TypeParameters.Select(tp => tp.Name));
+            return string.Format("<{0}>", typeParams);
+        }
+
+        public static string GetShortName(this ITypeSymbol type)
+        {
+            if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+            {
+                string genericArgs = string.Join(", ", namedType.TypeArguments.Select(GetShortName));
+                return string.Format("{0}<{1}>", namedType.Name, genericArgs);
+            }
+
+            if (type.TypeKind == TypeKind.TypeParameter)
+            {
+                return type.Name;
+            }
+
+            return type.Name;
+        }
+    }
+} 

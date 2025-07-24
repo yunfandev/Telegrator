@@ -1,0 +1,73 @@
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegrator.Hosting.Configuration;
+using Telegrator.Configuration;
+using Telegrator.Hosting;
+using Telegrator.Hosting.Components;
+using Telegrator.Hosting.Providers;
+using Telegrator.MadiatorCore;
+
+#pragma warning disable IDE0001
+namespace Telegrator.Hosting
+{
+    public class TelegramBotHostBuilder : ITelegramBotHostBuilder
+    {
+        private readonly HostApplicationBuilder _innerBuilder;
+        private readonly TelegramBotHostBuilderSettings _settings;
+        private readonly HostHandlersCollection _handlers;
+
+        /// <inheritdoc/>
+        public IHandlersCollection Handlers => _handlers;
+
+        /// <inheritdoc/>
+        public IServiceCollection Services => _innerBuilder.Services;
+
+        /// <inheritdoc/>
+        public IConfigurationManager Configuration => _innerBuilder.Configuration;
+
+        /// <inheritdoc/>
+        public ILoggingBuilder Logging => _innerBuilder.Logging;
+
+        /// <inheritdoc/>
+        public IHostEnvironment Environment => _innerBuilder.Environment;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TelegramBotHostBuilder"/> class.
+        /// </summary>
+        internal TelegramBotHostBuilder(TelegramBotHostBuilderSettings? settings = null)
+        {
+            _settings = settings ?? new TelegramBotHostBuilderSettings();
+            _innerBuilder = new HostApplicationBuilder(settings?.ToApplicationBuilderSettings());
+            _handlers = new HostHandlersCollection(Services, _settings);
+
+            Services.Configure<TelegramBotOptions>(Configuration.GetSection(nameof(TelegramBotOptions)));
+            Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
+            Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
+        }
+
+        /// <summary>
+        /// Builds the host.
+        /// </summary>
+        /// <returns></returns>
+        public TelegramBotHost Build()
+        {
+            foreach (var preBuildRoutine in _handlers.PreBuilderRoutines)
+            {
+                try
+                {
+                    preBuildRoutine.Invoke(this);
+                }
+                catch (NotImplementedException)
+                {
+                    _ = 0xBAD + 0xC0DE;
+                }
+            }
+
+            return new TelegramBotHost(_innerBuilder, _handlers);
+        }
+    }
+}
