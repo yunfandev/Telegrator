@@ -10,6 +10,9 @@ using Telegrator.MadiatorCore.Descriptors;
 
 namespace Telegrator.Hosting
 {
+    /// <summary>
+    /// Represents a hosted telegram bot
+    /// </summary>
     public class TelegramBotHost : ITelegramBotHost
     {
         private readonly IHost _innerHost;
@@ -32,7 +35,8 @@ namespace Telegrator.Hosting
         /// <summary>
         /// Initializes a new instance of the <see cref="TelegramBotHost"/> class.
         /// </summary>
-        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="hostApplicationBuilder">The service provider.</param>
+        /// <param name="handlers"></param>
         internal TelegramBotHost(HostApplicationBuilder hostApplicationBuilder, HostHandlersCollection handlers)
         {
             RegisterHostServices(hostApplicationBuilder, handlers);
@@ -44,20 +48,50 @@ namespace Telegrator.Hosting
             LogHandlers(handlers);
         }
 
+        /// <summary>
+        /// Creates new <see cref="TelegramBotHostBuilder"/> with default configuration, services and long-polling update receiving scheme
+        /// </summary>
+        /// <returns></returns>
         public static TelegramBotHostBuilder CreateBuilder()
         {
-            TelegramBotHostBuilder builder = new TelegramBotHostBuilder(null);
+            HostApplicationBuilder innerBuilder = new HostApplicationBuilder(settings: null);
+            TelegramBotHostBuilder builder = new TelegramBotHostBuilder(innerBuilder, null);
             builder.Services.AddTelegramBotHostDefaults();
             builder.Services.AddTelegramReceiver();
             return builder;
         }
 
+        /// <summary>
+        /// Creates new <see cref="TelegramBotHostBuilder"/> with default services and long-polling update receiving scheme
+        /// </summary>
+        /// <returns></returns>
         public static TelegramBotHostBuilder CreateBuilder(TelegramBotHostBuilderSettings? settings)
         {
-            TelegramBotHostBuilder builder = new TelegramBotHostBuilder(settings);
+            HostApplicationBuilder innerBuilder = new HostApplicationBuilder(settings?.ToApplicationBuilderSettings());
+            TelegramBotHostBuilder builder = new TelegramBotHostBuilder(innerBuilder, settings);
             builder.Services.AddTelegramBotHostDefaults();
             builder.Services.AddTelegramReceiver();
             return builder;
+        }
+
+        /// <summary>
+        /// Creates new EMPTY <see cref="TelegramBotHostBuilder"/> WITHOUT any services or update receiving schemes
+        /// </summary>
+        /// <returns></returns>
+        public static TelegramBotHostBuilder CreateEmptyBuilder()
+        {
+            HostApplicationBuilder innerBuilder = Host.CreateEmptyApplicationBuilder(null);
+            return new TelegramBotHostBuilder(innerBuilder, null);
+        }
+
+        /// <summary>
+        /// Creates new EMPTY <see cref="TelegramBotHostBuilder"/> WITHOUT any services or update receiving schemes
+        /// </summary>
+        /// <returns></returns>
+        public static TelegramBotHostBuilder CreateEmptyBuilder(TelegramBotHostBuilderSettings? settings)
+        {
+            HostApplicationBuilder innerBuilder = Host.CreateEmptyApplicationBuilder(null);
+            return new TelegramBotHostBuilder(innerBuilder, settings);
         }
 
         /// <inheritdoc/>

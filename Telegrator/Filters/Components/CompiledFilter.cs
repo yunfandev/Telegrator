@@ -37,7 +37,12 @@
             foreach (IFilter<T> filter in Filters)
             {
                 if (!filter.CanPass(context))
+                {
+                    if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
+                        LeveledDebug.FilterWriteLine("(E) {0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
+
                     return false;
+                }
 
                 context.CompletedFilters.Add(filter);
             }

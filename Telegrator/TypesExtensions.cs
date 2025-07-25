@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
@@ -902,4 +903,28 @@ namespace Telegrator
         }
     }
 
+    /// <summary>
+    /// Contains extension method for number types
+    /// </summary>
+    public static class NumbersExtensions
+    {
+        /// <summary>
+        /// Check if int value has int flag using bit compare
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        public static bool HasFlag(this int value, int flag)
+            => (value & flag) == flag;
+
+        /// <summary>
+        /// Check if int value has enum flag using bit compare
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        public static bool HasFlag<T>(this int value, T flag) where T : Enum
+            => value.HasFlag(Convert.ToInt32(flag));
+    }
 }

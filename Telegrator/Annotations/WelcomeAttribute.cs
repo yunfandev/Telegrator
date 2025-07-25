@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types.Enums;
+﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegrator.Filters;
 
 namespace Telegrator.Annotations
@@ -12,7 +13,8 @@ namespace Telegrator.Annotations
         /// <summary>
         /// Creates new instance of <see cref="WelcomeAttribute"/>
         /// </summary>
-        public WelcomeAttribute() : base(new MessageChatTypeFilter(ChatType.Private), new CommandAlliasFilter("start"))
+        /// <param name="onlyFirst"></param>
+        public WelcomeAttribute(bool onlyFirst = false) : base(new MessageChatTypeFilter(ChatType.Private), new CommandAlliasFilter("start"), Filter<Message>.If(ctx => !onlyFirst || ctx.Input.Id == 0))
         { }
     }
 }

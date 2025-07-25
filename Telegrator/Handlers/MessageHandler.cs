@@ -12,8 +12,7 @@ namespace Telegrator.Handlers
     /// Attribute that marks a handler to process message updates.
     /// This handler will be triggered when users send messages in chats.
     /// </summary>
-    /// <param name="concurrency">The maximum number of concurrent executions allowed (default: 0 for unlimited).</param>
-    public class MessageHandlerAttribute(int concurrency = 0) : UpdateHandlerAttribute<MessageHandler>(UpdateType.Message, concurrency)
+    public class MessageHandlerAttribute(int importance = 0) : UpdateHandlerAttribute<MessageHandler>(UpdateType.Message, importance)
     {
         /// <summary>
         /// Checks if the update contains a valid message.

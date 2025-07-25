@@ -1,9 +1,7 @@
 ﻿using System.Collections;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegrator;
 using Telegrator.Configuration;
-using Telegrator.MadiatorCore;
 
 namespace Telegrator.MadiatorCore.Descriptors
 {
@@ -28,6 +26,11 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// Gets the <see cref="UpdateType"/> of handlers in this collection.
         /// </summary>
         public UpdateType HandlingType => _handlingType;
+
+        /// <summary>
+        /// Gets count of registered handlers in list
+        /// </summary>
+        public int Count => _innerCollection.Count;
 
         /// <summary>
         /// Gets or sets the <see cref="HandlerDescriptor"/> at the specified index.

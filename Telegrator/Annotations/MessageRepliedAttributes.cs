@@ -10,9 +10,18 @@ namespace Telegrator.Annotations
     { }
 
     /// <summary>
-    /// Attribute for filtering messages in reply chain.
+    /// Attribute for checking message's reply chain.
     /// </summary>
-    public class MessageRepliedAttribute(int replyDepth = 1)
-        : MessageFilterAttribute(new MessageRepliedFilter(replyDepth))
+    public class HasReplyAttribute(int replyDepth = 1)
+        : MessageFilterAttribute(new MessageHasReplyFilter(replyDepth))
+    { }
+
+    /// <summary>
+    /// Helper filter class for filters that operate on replied messages.
+    /// Provides functionality to traverse reply chains and access replied message content.
+    /// </summary>
+    /// <param name="replyDepth"></param>
+    public class FromReplyChainAttribute(int replyDepth = 1)
+        : MessageFilterAttribute(new FromReplyChainFilter(replyDepth))
     { }
 }

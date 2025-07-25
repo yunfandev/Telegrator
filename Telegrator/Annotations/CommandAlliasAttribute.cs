@@ -47,7 +47,7 @@ namespace Telegrator.Annotations
         /// </summary>
         /// <param name="alliases">The command aliases to match against.</param>
         public CommandAlliasAttribute(params string[] alliases)
-            : base(new CommandAlliasFilter(alliases)) => Alliases = alliases;
+            : base(new CommandAlliasFilter(alliases)) => Alliases = alliases.Select(c => c.TrimStart('/')).ToArray();
 
         /// <summary>
         /// Gets the filtering target (Message) from the update.

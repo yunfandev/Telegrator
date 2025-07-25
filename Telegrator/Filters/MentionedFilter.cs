@@ -28,7 +28,7 @@ namespace Telegrator.Filters
         /// <param name="mention">The username to check for in the mention.</param>
         public MentionedFilter(string mention)
         {
-            Mention = mention;
+            Mention = mention.TrimStart('@');
         }
 
         /// <summary>

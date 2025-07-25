@@ -46,16 +46,24 @@ namespace Telegrator.MadiatorCore.Descriptors
             if (UpdateValidator != null)
             {
                 if (!UpdateValidator.CanPass(filterContext))
+                {
+                    LeveledDebug.FilterWriteLine("(E) UpdateValidator filter of {0} for Update ({2}) didnt pass!", filterContext.Data["handler_name"]);
                     return false;
+                }
 
+                //LeveledDebug.FilterWriteLine("UpdateValidator of {0} for Update ({2}) passed", filterContext.Data["handler_name"]);
                 filterContext.CompletedFilters.Add(UpdateValidator);
             }
 
             if (StateKeeperValidator != null)
             {
                 if (!StateKeeperValidator.CanPass(filterContext))
+                {
+                    LeveledDebug.FilterWriteLine("(E) StateKeeperValidator filter of {0} for Update ({2}) didnt pass!", filterContext.Data["handler_name"]);
                     return false;
+                }
 
+                //LeveledDebug.FilterWriteLine("StateKeeperValidator of {0} for Update ({2}) passed", filterContext.Data["handler_name"]);
                 filterContext.CompletedFilters.Add(StateKeeperValidator);
             }
 
@@ -64,8 +72,14 @@ namespace Telegrator.MadiatorCore.Descriptors
                 foreach (IFilter<Update> filter in UpdateFilters)
                 {
                     if (!filter.CanPass(filterContext))
-                        return false;
+                    {
+                        if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
+                            LeveledDebug.FilterWriteLine("(E) {0} filter of {1} didnt pass!", filter.GetType().Name, filterContext.Data["handler_name"]);
 
+                        return false;
+                    }
+
+                    //LeveledDebug.FilterWriteLine("{0} filter of {1} for Update ({2}) passed", filter.GetType().Name, filterContext.Data["handler_name"]);
                     filterContext.CompletedFilters.Add(filter);
                 }
             }

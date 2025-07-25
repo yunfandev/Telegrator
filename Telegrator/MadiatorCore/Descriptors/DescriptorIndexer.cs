@@ -3,9 +3,9 @@
 namespace Telegrator.MadiatorCore.Descriptors
 {
     /// <summary>
-    /// Represents an indexer for handler descriptors, containing concurrency and priority information.
+    /// Represents an indexer for handler descriptors, containing importance and priority information.
     /// </summary>
-    public readonly struct DescriptorIndexer(int routerIndex, int concurrency, int priority) : IComparable<DescriptorIndexer>
+    public readonly struct DescriptorIndexer(int routerIndex, int importance, int priority) : IComparable<DescriptorIndexer>
     {
         /// <summary>
         /// Index of this descriptor when it was added to router
@@ -15,7 +15,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <summary>
         /// Of this handlert type
         /// </summary>
-        public readonly int Importance = concurrency;
+        public readonly int Importance = importance;
 
         /// <summary>
         /// The priority of the handler.
@@ -28,7 +28,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <param name="routerIndex"></param>
         /// <param name="pollingHandler">The handler attribute.</param>
         public DescriptorIndexer(int routerIndex, UpdateHandlerAttributeBase pollingHandler)
-            : this(routerIndex, pollingHandler.Concurrency, pollingHandler.Priority) { }
+            : this(routerIndex, pollingHandler.Importance, pollingHandler.Priority) { }
 
         /// <summary>
         /// Returns a new <see cref="DescriptorIndexer"/> with updated priority.
@@ -39,12 +39,12 @@ namespace Telegrator.MadiatorCore.Descriptors
             => new DescriptorIndexer(RouterIndex, Importance, priority);
 
         /// <summary>
-        /// Returns a new <see cref="DescriptorIndexer"/> with updated concurrency.
+        /// Returns a new <see cref="DescriptorIndexer"/> with updated importance.
         /// </summary>
-        /// <param name="concurrency">The new concurrency value.</param>
+        /// <param name="importance">The new importance value.</param>
         /// <returns>A new <see cref="DescriptorIndexer"/> instance.</returns>
-        public DescriptorIndexer UpdateConcurrency(int concurrency)
-            => new DescriptorIndexer(RouterIndex, concurrency, Priority);
+        public DescriptorIndexer UpdateImportance(int importance)
+            => new DescriptorIndexer(RouterIndex, importance, Priority);
 
         /// <summary>
         /// Returns a new <see cref="DescriptorIndexer"/> with updated RouterIndex.
@@ -79,7 +79,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <summary>
         /// Returns a string representation of the indexer.
         /// </summary>
-        /// <returns>A string in the format (C:concurrency, P:priority).</returns>
+        /// <returns>A string in the format (C:importance, P:priority).</returns>
         public override string ToString()
         {
             return string.Format("(I:{0}, C:{1}, P:{2})", RouterIndex, Importance, Priority);

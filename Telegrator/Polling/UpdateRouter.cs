@@ -1,7 +1,9 @@
-﻿using Telegram.Bot;
+﻿using System;
+using System.Text;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegrator.Polling;
+using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
@@ -92,6 +94,7 @@ namespace Telegrator.Polling
         /// <returns>A task representing the asynchronous error handling operation.</returns>
         public virtual Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
         {
+            LeveledDebug.RouterWriteLine("Handling exception {0}", exception.GetType().Name);
             ExceptionHandler?.HandleException(botClient, exception, source, cancellationToken);
             return Task.CompletedTask;
         }
@@ -105,21 +108,60 @@ namespace Telegrator.Polling
         /// <returns>A task representing the asynchronous update handling operation.</returns>
         public virtual Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            // Logging
+            LeveledDebug.RouterWriteLine("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
+            LogUpdate(update);
+
             // Queuing handlers for execution
             foreach (DescribedHandlerInfo handler in GetHandlers(botClient, update, cancellationToken))
                 HandlersPool.Enqueue(handler);
 
+            LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
             return Task.CompletedTask;
         }
 
         private IEnumerable<DescribedHandlerInfo> GetHandlers(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // Getting handlers in update awaiting pool
-            IEnumerable<DescribedHandlerInfo> handlers = AwaitingProvider.GetHandlers(this, botClient, update, cancellationToken);
-            if (handlers.Any() && Options.ExclusiveAwaitingHandlerRouting)
-                return handlers;
+            try
+            {
+                // Getting handlers in update awaiting pool
+                IEnumerable<DescribedHandlerInfo> handlers = AwaitingProvider.GetHandlers(this, botClient, update, cancellationToken);
+                if (handlers.Any() && Options.ExclusiveAwaitingHandlerRouting)
+                    return handlers;
 
-            return handlers.Concat(HandlersProvider.GetHandlers(this, botClient, update, cancellationToken));
+                return handlers.Concat(HandlersProvider.GetHandlers(this, botClient, update, cancellationToken));
+            }
+            catch (OperationCanceledException)
+            {
+                _ = 0xBAD + 0xC0DE;
+                return [];
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler?.HandleException(botClient, ex, HandleErrorSource.PollingError, cancellationToken);
+                return [];
+            }
+        }
+
+        private static void LogUpdate(Update update)
+        {
+            switch (update.Type)
+            {
+                case UpdateType.Message:
+                    {
+                        Message msg = update.Message ?? throw new NullReferenceException();
+                        StringBuilder sb = new StringBuilder("Update.Message");
+
+                        if (msg.From != null)
+                            sb.AppendFormat(" from {0} ({1})", msg.From.Username, msg.From.Id);
+
+                        if (msg.Text != null)
+                            sb.AppendFormat("'{0}'", msg.Text);
+
+                        LeveledDebug.RouterWriteLine(sb.ToString());
+                        break;
+                    }
+            }
         }
     }
 }

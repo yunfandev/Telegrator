@@ -10,15 +10,15 @@ namespace Telegrator.Handlers
     /// Attribute that marks a handler to process callback query updates.
     /// This handler will be triggered when users interact with inline keyboards or other callback mechanisms.
     /// </summary>
-    /// <param name="concurrency">The maximum number of concurrent executions allowed (default: 0 for unlimited).</param>
-    public sealed class CallbackQueryHandlerAttribute(int concurrency = 0) : UpdateHandlerAttribute<CallbackQueryHandler>(UpdateType.CallbackQuery, concurrency)
+    /// <param name="importance"></param>
+    public sealed class CallbackQueryHandlerAttribute(int importance = 0) : UpdateHandlerAttribute<CallbackQueryHandler>(UpdateType.CallbackQuery, importance)
     {
         /// <summary>
         /// Always returns true, allowing any callback query update to pass through this filter.
         /// </summary>
         /// <param name="context">The filter execution context (unused).</param>
         /// <returns>Always returns true to allow any callback query update.</returns>
-        public override bool CanPass(FilterExecutionContext<Update> context) => true;
+        public override bool CanPass(FilterExecutionContext<Update> context) => context.Input is { CallbackQuery: { } };
     }
 
     /// <summary>

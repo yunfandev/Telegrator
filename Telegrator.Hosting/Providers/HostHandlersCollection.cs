@@ -8,28 +8,35 @@ using Telegrator.Providers;
 
 namespace Telegrator.Hosting.Providers
 {
+    /// <summary>
+    /// Pre host building task
+    /// </summary>
+    /// <param name="builder"></param>
+    public delegate void PreBuildingRoutine(TelegramBotHostBuilder builder);
+
+    /// <inheritdoc/>
     public class HostHandlersCollection(IServiceCollection hostServiceColletion, IHandlersCollectingOptions options) : HandlersCollection(options)
     {
         private readonly IServiceCollection Services = hostServiceColletion;
-        public readonly List<Action<TelegramBotHostBuilder>> PreBuilderRoutines = [];
+
+        /// <inheritdoc/>
         protected override bool MustHaveParameterlessCtor => false;
 
+        /// <summary>
+        /// List of tasks that should be completed right before building the bot
+        /// </summary>
+        public readonly List<PreBuildingRoutine> PreBuilderRoutines = [];
+
+        /// <inheritdoc/>
         public override IHandlersCollection AddHandler(Type handlerType)
         {
-            //
-            if (handlerType.GetInterface(nameof(IPreBuildingRoutine)) != null)
-            {
-                MethodInfo? methodInfo = handlerType.GetMethod(nameof(IPreBuildingRoutine.PreBuildingRoutine), BindingFlags.Static | BindingFlags.Public);
-                if (methodInfo != null)
-                {
-                    Action<TelegramBotHostBuilder> routineDelegate = methodInfo.CreateDelegate<Action<TelegramBotHostBuilder>>(null);
-                    PreBuilderRoutines.Add(routineDelegate);
-                }
-            }
+            if (handlerType.IsPreBuildingRoutine(out MethodInfo? routineMethod))
+                PreBuilderRoutines.Add(routineMethod.CreateDelegate<PreBuildingRoutine>(null));
 
             return base.AddHandler(handlerType);
         }
 
+        /// <inheritdoc/>
         public override IHandlersCollection AddDescriptor(HandlerDescriptor descriptor)
         {
             switch (descriptor.Type)

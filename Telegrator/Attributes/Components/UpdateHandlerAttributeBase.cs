@@ -26,9 +26,9 @@ namespace Telegrator.Attributes.Components
         public UpdateType Type { get; private set; }
         
         /// <summary>
-        /// Gets or sets concurrency of this <see cref="UpdateHandlerBase"/> in same <see cref="UpdateType"/> pool
+        /// Gets or sets importance of this <see cref="UpdateHandlerBase"/> in same <see cref="UpdateType"/> pool
         /// </summary>
-        public int Concurrency { get; set; }
+        public int Importance { get; set; }
 
         /// <summary>
         /// Gets or sets priority of this <see cref="UpdateHandlerBase"/> in same type handlers pool
@@ -40,11 +40,11 @@ namespace Telegrator.Attributes.Components
         /// </summary>
         /// <param name="expectingHandlerType"></param>
         /// <param name="updateType"></param>
-        /// <param name="concurrency"></param>
+        /// <param name="importance"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="Exception"></exception>
-        protected internal UpdateHandlerAttributeBase(Type[] expectingHandlerType, UpdateType updateType, int concurrency = 0)
+        protected internal UpdateHandlerAttributeBase(Type[] expectingHandlerType, UpdateType updateType, int importance = 0)
         {
             if (expectingHandlerType == null)
                 throw new ArgumentNullException(nameof(expectingHandlerType));
@@ -57,11 +57,11 @@ namespace Telegrator.Attributes.Components
 
             ExpectingHandlerType = expectingHandlerType;
             Type = updateType;
-            Concurrency = concurrency;
+            Importance = importance;
         }
 
         /// <summary>
-        /// Gets an <see cref="DescriptorIndexer"/> of this <see cref="UpdateHandlerAttributeBase"/> from <see cref="Concurrency"/> and <see cref="Priority"/>
+        /// Gets an <see cref="DescriptorIndexer"/> of this <see cref="UpdateHandlerAttributeBase"/> from <see cref="Importance"/> and <see cref="Priority"/>
         /// </summary>
         /// <returns></returns>
         public DescriptorIndexer GetIndexer()

@@ -95,7 +95,7 @@ namespace Telegrator.Handlers.Building.Components
         /// <returns>The builder instance.</returns>
         public void SetConcurreny(int concurrency)
         {
-            Indexer = Indexer.UpdateConcurrency(concurrency);
+            Indexer = Indexer.UpdateImportance(concurrency);
         }
 
         /// <summary>

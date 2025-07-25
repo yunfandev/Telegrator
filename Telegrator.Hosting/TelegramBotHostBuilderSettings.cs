@@ -5,7 +5,7 @@ using Telegrator.Configuration;
 namespace Telegrator.Hosting
 {
     /// <summary>
-    /// 
+    /// Settings os hosted Telegram bot
     /// </summary>
     public class TelegramBotHostBuilderSettings() : IHandlersCollectingOptions
     {

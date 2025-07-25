@@ -32,7 +32,7 @@ namespace Telegrator.Filters
             if (!base.CanPass(context))
                 return false;
 
-            Message = context.Update.Message!;
+            Message = context.Input!;
             if (Message is not { Id: > 0 })
                 return false;
 

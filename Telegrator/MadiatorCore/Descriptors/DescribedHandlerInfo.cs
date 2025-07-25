@@ -3,7 +3,6 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
 using Telegrator.Handlers.Components;
-using Telegrator.MadiatorCore;
 
 namespace Telegrator.MadiatorCore.Descriptors
 {
@@ -111,5 +110,9 @@ namespace Telegrator.MadiatorCore.Descriptors
                     .ConfigureAwait(false);
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+            => DisplayString ?? HandlerInstance.GetType().Name;
     }
 }

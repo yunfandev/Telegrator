@@ -139,6 +139,7 @@ namespace Telegrator.MadiatorCore.Descriptors
             UpdateType = handlerAttribute.Type;
             Indexer = handlerAttribute.GetIndexer();
             Filters = new DescriptorFiltersSet(handlerAttribute, stateKeeperAttribute, filters);
+            DisplayString = HandlerInspector.GetDisplayName(handlerType);
         }
 
         /// <summary>
@@ -402,5 +403,9 @@ namespace Telegrator.MadiatorCore.Descriptors
             ServiceKey = serviceKey ?? throw new ArgumentNullException(nameof(serviceKey));
             InstanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+            => DisplayString ?? HandlerType.Name;
     }
 }

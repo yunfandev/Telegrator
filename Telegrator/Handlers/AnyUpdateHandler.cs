@@ -10,8 +10,8 @@ namespace Telegrator.Handlers
     /// Attribute that marks a handler to process any type of update.
     /// This handler will be triggered for all incoming updates regardless of their type.
     /// </summary>
-    /// <param name="concurrency">The maximum number of concurrent executions allowed (default: -1 for unlimited).</param>
-    public class AnyUpdateHandlerAttribute(int concurrency = -1) : UpdateHandlerAttribute<AnyUpdateHandler>(UpdateType.Unknown, concurrency)
+    /// <param name="importance"></param>
+    public class AnyUpdateHandlerAttribute(int importance = -1) : UpdateHandlerAttribute<AnyUpdateHandler>(UpdateType.Unknown, importance)
     {
         /// <summary>
         /// Always returns true, allowing any update to pass through this filter.

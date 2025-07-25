@@ -9,8 +9,7 @@ namespace Telegrator.Handlers
     /// Attribute that marks a handler to process command messages.
     /// This handler will be triggered when users send bot commands (messages starting with '/').
     /// </summary>
-    /// <param name="concurrency">The maximum number of concurrent executions allowed (default: 1).</param>
-    public class CommandHandlerAttribute(int concurrency = 1) : UpdateHandlerAttribute<CommandHandler>(UpdateType.Message, concurrency)
+    public class CommandHandlerAttribute(int importance = 1) : UpdateHandlerAttribute<CommandHandler>(UpdateType.Message, importance)
     {
         /// <summary>
         /// Gets the command that was extracted from the message (without the '/' prefix and bot username).

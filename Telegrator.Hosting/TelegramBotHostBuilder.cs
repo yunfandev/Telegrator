@@ -14,6 +14,9 @@ using Telegrator.MadiatorCore;
 #pragma warning disable IDE0001
 namespace Telegrator.Hosting
 {
+    /// <summary>
+    /// Represents a hosted telegram bots and services builder that helps manage configuration, logging, lifetime, and more.
+    /// </summary>
     public class TelegramBotHostBuilder : ITelegramBotHostBuilder
     {
         private readonly HostApplicationBuilder _innerBuilder;
@@ -38,10 +41,12 @@ namespace Telegrator.Hosting
         /// <summary>
         /// Initializes a new instance of the <see cref="TelegramBotHostBuilder"/> class.
         /// </summary>
-        internal TelegramBotHostBuilder(TelegramBotHostBuilderSettings? settings = null)
+        /// <param name="hostApplicationBuilder"></param>
+        /// <param name="settings"></param>
+        internal TelegramBotHostBuilder(HostApplicationBuilder hostApplicationBuilder, TelegramBotHostBuilderSettings? settings = null)
         {
+            _innerBuilder = hostApplicationBuilder;
             _settings = settings ?? new TelegramBotHostBuilderSettings();
-            _innerBuilder = new HostApplicationBuilder(settings?.ToApplicationBuilderSettings());
             _handlers = new HostHandlersCollection(Services, _settings);
 
             Services.Configure<TelegramBotOptions>(Configuration.GetSection(nameof(TelegramBotOptions)));
@@ -55,7 +60,7 @@ namespace Telegrator.Hosting
         /// <returns></returns>
         public TelegramBotHost Build()
         {
-            foreach (var preBuildRoutine in _handlers.PreBuilderRoutines)
+            foreach (PreBuildingRoutine preBuildRoutine in _handlers.PreBuilderRoutines)
             {
                 try
                 {

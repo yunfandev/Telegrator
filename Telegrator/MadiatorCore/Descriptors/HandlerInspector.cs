@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Attributes.Components;
@@ -11,6 +12,16 @@ namespace Telegrator.MadiatorCore.Descriptors
     /// </summary>
     public static class HandlerInspector
     {
+        /// <summary>
+        /// Gets handler's display name
+        /// </summary>
+        /// <param name="handlerType"></param>
+        /// <returns></returns>
+        public static string? GetDisplayName(MemberInfo handlerType)
+        {
+            return handlerType.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName;
+        }
+
         /// <summary>
         /// Gets the handler attribute from the specified member info.
         /// </summary>

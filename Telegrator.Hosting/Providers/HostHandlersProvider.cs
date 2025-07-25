@@ -11,18 +11,25 @@ using Telegrator.Providers;
 
 namespace Telegrator.Hosting.Providers
 {
+    /// <inheritdoc/>
     public class HostHandlersProvider : HandlersProvider
     {
         private readonly IServiceProvider Services;
         private readonly ILogger<HostHandlersProvider> Logger;
 
-        public HostHandlersProvider(IHandlersCollection handlers, IOptions<TelegramBotOptions> options, ITelegramBotInfo botInfo, IServiceProvider serviceProvider, ILogger<HostHandlersProvider> logger)
-            : base(handlers, options.Value, botInfo)
+        /// <inheritdoc/>
+        public HostHandlersProvider(
+            IHandlersCollection handlers,
+            IOptions<TelegramBotOptions> options,
+            ITelegramBotInfo botInfo,
+            IServiceProvider serviceProvider,
+            ILogger<HostHandlersProvider> logger) : base(handlers, options.Value, botInfo)
         {
             Services = serviceProvider;
             Logger = logger;
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<DescribedHandlerInfo> GetHandlers(IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
             IEnumerable<DescribedHandlerInfo> handlers = base.GetHandlers(updateRouter, client, update, cancellationToken).ToArray();
@@ -30,6 +37,7 @@ namespace Telegrator.Hosting.Providers
             return handlers;
         }
 
+        /// <inheritdoc/>
         public override UpdateHandlerBase GetHandlerInstance(HandlerDescriptor descriptor, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

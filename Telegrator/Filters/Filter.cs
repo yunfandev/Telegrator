@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Telegrator;
-using Telegrator.Filters.Components;
+﻿using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
 {

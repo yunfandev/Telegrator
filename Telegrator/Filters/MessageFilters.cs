@@ -18,7 +18,7 @@ namespace Telegrator.Filters
         /// <inheritdoc/>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
-            MessageRepliedFilter? repliedFilter = context.CompletedFilters.Get<MessageRepliedFilter>().SingleOrDefault();
+            FromReplyChainFilter? repliedFilter = context.CompletedFilters.Get<FromReplyChainFilter>().SingleOrDefault();
             Target = repliedFilter?.Reply ?? context.Input;
             return CanPassNext(context);
         }

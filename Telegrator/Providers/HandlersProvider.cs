@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -79,16 +80,23 @@ namespace Telegrator.Providers
         /// <returns>A collection of described handler information for the update</returns>
         public virtual IEnumerable<DescribedHandlerInfo> GetHandlers(IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
+            LeveledDebug.ProviderWriteLine("Requested handlers for UpdateType.{0}", update.Type);
             if (!HandlersDictionary.TryGetValue(update.Type, out HandlerDescriptorList? descriptors))
             {
-                if (!HandlersDictionary.TryGetValue(UpdateType.Unknown, out descriptors))
-                    return [];
+                LeveledDebug.ProviderWriteLine("No registered, providing Any");
+                HandlersDictionary.TryGetValue(UpdateType.Unknown, out descriptors);
             }
 
-            if (descriptors == null || !descriptors.Any())
+            if (descriptors == null || descriptors.Count == 0)
+            {
+                LeveledDebug.ProviderWriteLine("No handlers provided");
                 return [];
+            }
 
-            return DescribeDescriptors(descriptors, updateRouter, client, update, cancellationToken);
+            IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(descriptors, updateRouter, client, update, cancellationToken);
+            LeveledDebug.ProviderWriteLine("Described total of {0} handlers for Update ({1})", described.Count(), update.Id);
+            LeveledDebug.ProviderWriteLine("Described handlers : {0}", string.Join(", ", described));
+            return described;
         }
 
         /// <summary>
@@ -103,16 +111,24 @@ namespace Telegrator.Providers
         /// <returns>A collection of described handler information</returns>
         public virtual IEnumerable<DescribedHandlerInfo> DescribeDescriptors(HandlerDescriptorList descriptors, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            foreach (HandlerDescriptor descriptor in descriptors.Reverse())
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                DescribedHandlerInfo? describedHandler = DescribeHandler(descriptor, updateRouter, client, update, cancellationToken);
-                if (describedHandler == null)
-                    continue;
+                LeveledDebug.ProviderWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+                foreach (HandlerDescriptor descriptor in descriptors.Reverse())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    DescribedHandlerInfo? describedHandler = DescribeHandler(descriptor, updateRouter, client, update, cancellationToken);
+                    if (describedHandler == null)
+                        continue;
 
-                yield return describedHandler;
-                if (Options.ExecuteOnlyFirstFoundHanlder)
-                    break;
+                    yield return describedHandler;
+                    if (Options.ExecuteOnlyFirstFoundHanlder)
+                        break;
+                }
+            }
+            finally
+            {
+                LeveledDebug.ProviderWriteLine("Describing for Update ({0}) finished", update.Id);
             }
         }
 
@@ -129,7 +145,12 @@ namespace Telegrator.Providers
         public virtual DescribedHandlerInfo? DescribeHandler(HandlerDescriptor descriptor, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(BotInfo, update, update);
+            Dictionary<string, object> data = new Dictionary<string, object>()
+            {
+                { "handler_name", descriptor.ToString() }
+            };
+
+            FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(BotInfo, update, update, data, []);
             if (!descriptor.Filters.Validate(filterContext))
                 return null;
 
