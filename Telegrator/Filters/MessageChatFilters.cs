@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
@@ -54,13 +55,49 @@ namespace Telegrator.Filters
     /// <summary>
     /// Filters messages whose chat type matches the specified value.
     /// </summary>
-    public class MessageChatTypeFilter(ChatType type) : MessageChatFilter
+    public class MessageChatTypeFilter : MessageChatFilter
     {
-        private readonly ChatType Type = type;
+        private readonly ChatType? Type;
+        private readonly ChatTypeFlags? Flags;
+
+        /// <summary>
+        /// Initialize new instance of <see cref="MessageChatTypeFilter"/>
+        /// </summary>
+        /// <param name="type"></param>
+        public MessageChatTypeFilter(ChatType type)
+            => Type = type;
+
+        /// <summary>
+        /// Initialize new instance of <see cref="MessageChatTypeFilter"/> with <see cref="ChatTypeFlags"/>
+        /// </summary>
+        /// <param name="type"></param>
+        public MessageChatTypeFilter(ChatTypeFlags type)
+            => Flags = type;
 
         /// <inheritdoc/>
         protected override bool CanPassNext(FilterExecutionContext<Chat> _)
-            => Chat.Type == Type;
+        {
+            if (Type.HasValue)
+                return Chat.Type == Type.Value;
+
+            if (Flags != null)
+            {
+                ChatTypeFlags? asFlag = ToFlag(Chat.Type);
+                return asFlag.HasValue && Flags.Value.HasFlag(asFlag.Value);
+            }
+
+            return false;
+        }
+
+        private static ChatTypeFlags? ToFlag(ChatType type) => type switch
+        {
+            ChatType.Channel => ChatTypeFlags.Channel,
+            ChatType.Group => ChatTypeFlags.Group,
+            ChatType.Supergroup => ChatTypeFlags.Supergroup,
+            ChatType.Sender => ChatTypeFlags.Sender,
+            ChatType.Private => ChatTypeFlags.Private,
+            _ => null
+        };
     }
 
     /// <summary>

@@ -18,7 +18,6 @@ namespace Telegrator.Hosting.Polling
         /// </summary>
         protected readonly ILogger<HostUpdateRouter> Logger;
 
-        // Ehat a mess :/
         /// <inheritdoc/>
         public HostUpdateRouter(
             IHandlersProvider handlersProvider,
@@ -28,7 +27,7 @@ namespace Telegrator.Hosting.Polling
             ILogger<HostUpdateRouter> logger) : base(handlersProvider, awaitingProvider, options.Value, handlersPool)
         {
             Logger = logger;
-            ExceptionHandler = new HostExceptionHandler(logger);
+            ExceptionHandler = new DefaultRouterExceptionHandler(HandleException);
         }
 
         /// <inheritdoc/>
@@ -41,21 +40,21 @@ namespace Telegrator.Hosting.Polling
         /// <summary>
         /// Default exception handler of this router
         /// </summary>
-        /// <param name="logger"></param>
-        private class HostExceptionHandler(ILogger<HostUpdateRouter> logger) : IRouterExceptionHandler
+        /// <param name="botClient"></param>
+        /// <param name="exception"></param>
+        /// <param name="source"></param>
+        /// <param name="cancellationToken"></param>
+        public void HandleException(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
         {
-            public void HandleException(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
+            if (exception is HandlerFaultedException handlerFaultedException)
             {
-                if (exception is HandlerFaultedException handlerFaultedException)
-                {
-                    logger.LogError("\"{handler}\" handler's execution was faulted :\n{exception}",
-                        handlerFaultedException.HandlerInfo.ToString(),
-                        handlerFaultedException.InnerException?.ToString() ?? "No inner exception");
-                    return;
-                }
-
-                logger.LogError("Exception was thrown during update routing faulted :\n{exception}", exception.ToString());
+                Logger.LogError("\"{handler}\" handler's execution was faulted :\n{exception}",
+                    handlerFaultedException.HandlerInfo.ToString(),
+                    handlerFaultedException.InnerException?.ToString() ?? "No inner exception");
+                return;
             }
+
+            Logger.LogError("Exception was thrown during update routing faulted :\n{exception}", exception.ToString());
         }
     }
 }

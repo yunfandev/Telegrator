@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Telegram.Bot.Types.Enums;
-using Telegrator;
 using Telegrator.Annotations;
 using Telegrator.Attributes;
 using Telegrator.Configuration;
@@ -60,25 +59,6 @@ namespace Telegrator.Providers
             get => InnerDictionary[updateType];
         }
 
-        /// <inheritdoc/>
-        /// <summary>
-        /// Collects all handlers from the entry assembly domain-wide.
-        /// Scans for types that implement handlers and adds them to the collection.
-        /// </summary>
-        /// <returns>This collection instance for method chaining.</returns>
-        /// <exception cref="Exception">Thrown when the entry assembly cannot be found.</exception>
-        public virtual IHandlersCollection CollectHandlersDomainWide()
-        {
-            Assembly? entryAssembly = Assembly.GetEntryAssembly() ?? throw new Exception();
-            entryAssembly.GetExportedTypes()
-                .Where(type => type.GetCustomAttribute<DontCollectAttribute>() == null)
-                .Where(type => type.IsHandlerRealization())
-                .ForEach(type => AddHandler(type));
-
-            return this;
-        }
-
-        /// <inheritdoc/>
         /// <summary>
         /// Adds a handler descriptor to the collection.
         /// </summary>
@@ -100,7 +80,6 @@ namespace Telegrator.Providers
             return this;
         }
 
-        /// <inheritdoc/>
         /// <summary>
         /// Adds a handler type to the collection.
         /// </summary>
@@ -112,7 +91,6 @@ namespace Telegrator.Providers
             return this;
         }
 
-        /// <inheritdoc/>
         /// <summary>
         /// Adds a handler type to the collection.
         /// </summary>
@@ -138,7 +116,6 @@ namespace Telegrator.Providers
             return this;
         }
 
-        /// <inheritdoc/>
         /// <summary>
         /// Gets or creates a descriptor list for the specified update type.
         /// </summary>
@@ -155,7 +132,6 @@ namespace Telegrator.Providers
             return list;
         }
 
-        /// <inheritdoc/>
         /// <summary>
         /// Checks for intersecting command aliases and handles them according to configuration.
         /// </summary>

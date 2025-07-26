@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
@@ -166,8 +165,46 @@ namespace Telegrator
     /// Extension methods for handlers collections.
     /// Provides convenient methods for creating implicit handlers.
     /// </summary>
-    public static class HandlersCollectionExtensions
+    public static partial class HandlersCollectionExtensions
     {
+        private static readonly string[] skippingAssemblies = ["System", "Microsoft", "Telegrator"];
+
+        /// <summary>
+        /// Collects all handlers from the current app domain.
+        /// Scans for types that implement handlers and adds them to the collection.
+        /// </summary>
+        /// <returns>This collection instance for method chaining.</returns>
+        /// <exception cref="Exception">Thrown when the entry assembly cannot be found.</exception>
+        public static IHandlersCollection CollectHandlersDomainWide(this IHandlersCollection handlers)
+        {
+            AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where(ass => skippingAssemblies.All(skip => !ass.FullName.Contains(skip)))
+                .SelectMany(ass => ass.GetExportedTypes())
+                .Where(type => type.GetCustomAttribute<DontCollectAttribute>() == null)
+                .Where(type => type.IsHandlerRealization())
+                .ForEach(type => handlers.AddHandler(type));
+
+            return handlers;
+        }
+
+        /// <summary>
+        /// Collects all handlers from the calling this function assembly.
+        /// Scans for types that implement handlers and adds them to the collection.
+        /// </summary>
+        /// <returns>This collection instance for method chaining.</returns>
+        /// <exception cref="Exception">Thrown when the entry assembly cannot be found.</exception>
+        public static IHandlersCollection CollectHandlersAssemblyWide(this IHandlersCollection handlers)
+        {
+            Assembly.GetCallingAssembly()
+                .GetExportedTypes()
+                .Where(type => type.GetCustomAttribute<DontCollectAttribute>() == null)
+                .Where(type => type.IsHandlerRealization())
+                .ForEach(type => handlers.AddHandler(type));
+
+            return handlers;
+        }
+
         /// <summary>
         /// Creates a handler builder for a specific update type.
         /// </summary>

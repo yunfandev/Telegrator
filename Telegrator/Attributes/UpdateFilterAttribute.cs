@@ -20,7 +20,17 @@ namespace Telegrator.Attributes
         /// <summary>
         /// Gets the compiled filter logic for the update target.
         /// </summary>
-        public Filter<T> UpdateFilter { get; private set; }
+        public Filter<T> UpdateFilter { get; protected set; }
+
+        /// <summary>
+        /// Empty constructor for internal using
+        /// </summary>
+        internal UpdateFilterAttribute()
+        {
+            AnonymousFilter = null!;
+            UpdateFilter = null!;
+            _ = 0xBAD + 0xC0DE;
+        }
 
         /// <summary>
         /// Initializes the attribute with one or more filters for the update target.

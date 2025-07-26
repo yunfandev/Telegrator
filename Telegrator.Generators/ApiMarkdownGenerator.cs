@@ -1,10 +1,7 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace Telegrator.Generators
@@ -71,7 +68,7 @@ namespace Telegrator.Generators
                     if (!string.IsNullOrWhiteSpace(typeSummary))
                         sourceBuilder.AppendFormat("> {0}\n\n", typeSummary);
 
-                    // Writing members
+                    // Writing fields
                     if (type.TypeKind == TypeKind.Enum)
                     {
                         WriteEnumValues(sourceBuilder, type);
@@ -105,7 +102,7 @@ namespace Telegrator.Generators
             sourceBuilder.AppendLine("**Constructors:**");
             foreach (IMethodSymbol ctor in ctors)
             {
-                // Формируем строку вида ClassName<Type1, T>(Param1, Param2) с generic-аргументами
+                // Formatting constructor signature
                 string genericArgs = type.FormatGenericTypes();
                 string parameters = string.Join(", ", ctor.Parameters.Select(p => p.Type.GetShortName()));
                 string signature = string.Format("{0}{1}({2})", type.Name, genericArgs, parameters);
@@ -114,7 +111,9 @@ namespace Telegrator.Generators
                 // Writing summary
                 string? propSummary = ctor.ExtractSummary();
                 if (!string.IsNullOrWhiteSpace(propSummary))
-                    sourceBuilder.Append("   > ").Append(propSummary).AppendLine();
+                    sourceBuilder.Append("   > ").Append(propSummary);
+
+                sourceBuilder.AppendLine();
             }
 
             sourceBuilder.AppendLine();
@@ -122,19 +121,32 @@ namespace Telegrator.Generators
 
         private static void WriteEnumValues(StringBuilder sourceBuilder, INamedTypeSymbol type)
         {
-            var members = type.GetMembers().OfType<IFieldSymbol>().Where(f => f.HasConstantValue && f.DeclaredAccessibility == Accessibility.Public).ToList();
-            if (members.Count == 0)
+            // Getting enum values
+            List<IFieldSymbol> fields = type
+                .GetMembers()
+                .OfType<IFieldSymbol>()
+                .Where(f => f.HasConstantValue && f.DeclaredAccessibility == Accessibility.Public)
+                .ToList();
+
+            // Checking for any
+            if (fields.Count == 0)
                 return;
 
+            // Writing
             sourceBuilder.AppendLine("**Values:**");
-            foreach (IFieldSymbol field in members)
+            foreach (IFieldSymbol field in fields)
             {
+                // Writing value
                 sourceBuilder.Append("- `").Append(field.Name).Append("`");
+
+                // Writing summary
                 string? summary = field.ExtractSummary();
                 if (!string.IsNullOrWhiteSpace(summary))
                     sourceBuilder.Append(" — ").Append(summary);
+                
                 sourceBuilder.AppendLine();
             }
+
             sourceBuilder.AppendLine();
         }
 
@@ -187,9 +199,9 @@ namespace Telegrator.Generators
             sourceBuilder.AppendLine("**Methods:**");
             foreach (IMethodSymbol method in methods)
             {
-                // Формируем generic-параметры для метода
+                // Formating method signature
                 string genericArgs = method.FormatGenericTypes();
-                string parameters = string.Join(", ", method.Parameters.Select(p => p.Type.GetShortName()));
+                string parameters = string.Join(", ", method.Parameters.Select(p => p.Type.GetShortName()).Where(p => !string.IsNullOrEmpty(p)));
                 sourceBuilder.AppendFormat(" - `{0}{1}({2})`\n", method.Name, genericArgs, parameters);
 
                 // Writing summary
@@ -215,17 +227,20 @@ namespace Telegrator.Generators
             try
             {
                 XDocument doc = XDocument.Parse(xmlDoc);
-                XElement? summary = doc.Root?.Element("summary");
+                XElement? xSummary = doc.Root?.Element("summary");
 
-                if (summary == null)
+                if (xSummary == null)
                     return null;
 
                 // Убираем лишние пробелы и переносы строк
-                return summary.Value.Trim().Replace("\n", " ").Replace("  ", " ");
+                string summary = xSummary.Value.Trim().Replace("\n", " ");
+                while (summary.Contains("  "))
+                    summary = summary.Replace("  ", " ");
+
+                return summary;
             }
             catch
             {
-                // Игнорируем ошибки парсинга XML
                 return null;
             }
         }

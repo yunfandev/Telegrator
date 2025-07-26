@@ -21,10 +21,22 @@ namespace Telegrator.Annotations
     /// <summary>
     /// Attribute for filtering messages sent in chats of a specific type.
     /// </summary>
-    /// <param name="type">The chat type to match</param>
-    public class ChatTypeAttribute(ChatType type)
-        : MessageFilterAttribute(new MessageChatTypeFilter(type))
-    { }
+    public class ChatTypeAttribute : MessageFilterAttribute
+    {
+        /// <summary>
+        /// Initialize new instance of <see cref="ChatTypeAttribute"/> to filter messages from chat from specific chats
+        /// </summary>
+        /// <param name="type"></param>
+        public ChatTypeAttribute(ChatType type)
+            : base(new MessageChatTypeFilter(type)) { }
+
+        /// <summary>
+        /// Initialize new instance of <see cref="ChatTypeAttribute"/> to filter messages from chat from specific chats (with flags)
+        /// </summary>
+        /// <param name="flags"></param>
+        public ChatTypeAttribute(ChatTypeFlags flags)
+            : base(new MessageChatTypeFilter(flags)) { }
+    }
 
     /// <summary>
     /// Attribute for filtering messages based on the chat title.

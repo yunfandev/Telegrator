@@ -32,11 +32,13 @@ namespace Telegrator.MadiatorCore
         /// <returns>The handler descriptor list for the given update type.</returns>
         public HandlerDescriptorList this[UpdateType updateType] { get; }
 
+        /*
         /// <summary>
         /// Collects all handlers domain-wide and returns a new <see cref="IHandlersCollection"/>.
         /// </summary>
         /// <returns>A new <see cref="IHandlersCollection"/> with all handlers collected.</returns>
         public IHandlersCollection CollectHandlersDomainWide();
+        */
 
         /// <summary>
         /// Adds a <see cref="HandlerDescriptor"/> to the collection and returns the updated collection.

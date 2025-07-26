@@ -43,7 +43,7 @@ namespace Telegrator.Hosting
         /// <returns></returns>
         public static IServiceCollection AddTelegramBotHostDefaults(this IServiceCollection services)
         {
-            services.AddLogging(builder => builder.AddConsole());
+            services.AddLogging(builder => builder.AddConsole().AddDebug());
             services.AddSingleton<IUpdateHandlersPool, HostUpdateHandlersPool>();
             services.AddSingleton<IAwaitingProvider, HostAwaitingProvider>();
             services.AddSingleton<IHandlersProvider, HostHandlersProvider>();

@@ -57,6 +57,12 @@ namespace Telegrator.Filters
         /// <param name="context">The filter execution context.</param>
         /// <returns>True if the filter passes; otherwise, false.</returns>
         public abstract bool CanPass(FilterExecutionContext<T> context);
+
+        /// <summary>
+        /// Implicitly creates <see cref="IFilter{T}"/> from function
+        /// </summary>
+        /// <param name="filter"></param>
+        public static implicit operator Filter<T>(Func<FilterExecutionContext<T>, bool> filter) => Filter<T>.If(filter);
     }
 
     /// <summary>

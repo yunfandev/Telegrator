@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegrator
 {
@@ -90,32 +91,5 @@ namespace Telegrator
             if (Debug.IndentLevel.HasFlag(DebugLevel.HandlersPool))
                 Debug.WriteLine(message, args);
         }
-    }
-
-    /// <summary>
-    /// Levels of debug writing
-    /// </summary>
-    [Flags]
-    public enum DebugLevel
-    {
-        /// <summary>
-        /// Write debug messages from filters execution
-        /// </summary>
-        Filters = 0x1,
-
-        /// <summary>
-        /// Write debug messages from handlers providers execution
-        /// </summary>
-        Providers = 0x2,
-
-        /// <summary>
-        /// Write debug messages from update router's execution
-        /// </summary>
-        Router = 0x4,
-
-        /// <summary>
-        /// Write debug messages from handlers pool execution
-        /// </summary>
-        HandlersPool = 0x8
     }
 }
