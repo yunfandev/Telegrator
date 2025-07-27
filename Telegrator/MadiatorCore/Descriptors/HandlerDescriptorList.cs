@@ -77,15 +77,7 @@ namespace Telegrator.MadiatorCore.Descriptors
                 if (_handlingType != UpdateType.Unknown && descriptor.UpdateType != _handlingType)
                     throw new InvalidOperationException();
 
-                while (_innerCollection.TryGetValue(descriptor.Indexer, out HandlerDescriptor? conflictDescriptor))
-                {
-                    int newIndex = count++;
-                    if (_options?.DescendDescriptorIndex ?? false)
-                        newIndex += -1;
-
-                    descriptor.Indexer = descriptor.Indexer.UpdateIndex(count);
-                }
-
+                descriptor.Indexer = descriptor.Indexer.UpdateIndex(count++);
                 _innerCollection.Add(descriptor.Indexer, descriptor);
             }
         }

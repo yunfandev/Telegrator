@@ -49,6 +49,8 @@ namespace Telegrator.Hosting
             _settings = settings ?? new TelegramBotHostBuilderSettings();
             _handlers = new HostHandlersCollection(Services, _settings);
 
+            _innerBuilder.Logging.ClearProviders();
+
             Services.Configure<TelegramBotOptions>(Configuration.GetSection(nameof(TelegramBotOptions)));
             Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
             Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());

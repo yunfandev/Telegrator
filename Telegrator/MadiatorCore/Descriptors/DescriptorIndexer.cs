@@ -82,7 +82,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <returns>A string in the format (C:importance, P:priority).</returns>
         public override string ToString()
         {
-            return string.Format("(I:{0}, C:{1}, P:{2})", RouterIndex, Importance, Priority);
+            return string.Format("(Ix: {0,2}, Im: {1,2}, Pr: {2,2})", RouterIndex, Importance, Priority);
         }
     }
 }

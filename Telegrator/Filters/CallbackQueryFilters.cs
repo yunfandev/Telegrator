@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
+using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
@@ -47,5 +48,26 @@ namespace Telegrator.Filters
         {
             return context.Input.InlineMessageId == _inlineMessageId;
         }
+    }
+
+    /// <summary>
+    /// Filters callback queries by matching their data with a regular expression.
+    /// </summary>
+    public class CallbackRegexFilter : RegexFilterBase<CallbackQuery>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CallbackRegexFilter"/> class with a pattern and options.
+        /// </summary>
+        /// <param name="pattern">The regex pattern.</param>
+        /// <param name="regexOptions">The regex options.</param>
+        public CallbackRegexFilter(string pattern, RegexOptions regexOptions = default)
+            : base(clb => clb.Data, pattern, regexOptions) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CallbackRegexFilter"/> class with a regex object.
+        /// </summary>
+        /// <param name="regex">The regex object.</param>
+        public CallbackRegexFilter(Regex regex)
+            : base(clb => clb.Data, regex) { }
     }
 }

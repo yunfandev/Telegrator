@@ -67,14 +67,14 @@ namespace Telegrator.Providers
                     {
                         return descriptor.SingletonInstance ??= (descriptor.InstanceFactory != null
                             ? descriptor.SingletonInstance = descriptor.InstanceFactory.Invoke()
-                            : descriptor.SingletonInstance = (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType, [descriptor.UpdateType]));
+                            : descriptor.SingletonInstance = (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType));
                     }
 
                 case DescriptorType.Keyed:
                 case DescriptorType.General:
                     {
                         return descriptor.InstanceFactory == null
-                            ? (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType, [descriptor.UpdateType])
+                            ? (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType)
                             : descriptor.InstanceFactory.Invoke();
                     }
 

@@ -194,7 +194,7 @@ namespace Telegrator
     /// </summary>
     public static partial class HandlersCollectionExtensions
     {
-        private static readonly string[] skippingAssemblies = ["System", "Microsoft", "Telegrator"];
+        private static readonly string[] skippingAssemblies = ["System.", "Microsoft."];
 
         /// <summary>
         /// Collects all handlers from the current app domain.
@@ -206,7 +206,8 @@ namespace Telegrator
         {
             AppDomain.CurrentDomain
                 .GetAssemblies()
-                .Where(ass => skippingAssemblies.All(skip => !ass.FullName.Contains(skip)))
+                .Where(ass => ass.GetName().Name != "Telegrator")
+                .Where(ass => skippingAssemblies.All(skip => !ass.FullName.StartsWith(skip)))
                 .SelectMany(ass => ass.GetExportedTypes())
                 .Where(type => type.GetCustomAttribute<DontCollectAttribute>() == null)
                 .Where(type => type.IsHandlerRealization())

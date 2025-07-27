@@ -45,8 +45,8 @@ namespace Telegrator.Filters
                 return false;
 
             string userName = Mention ?? context.BotInfo.User.Username ?? throw new ArgumentNullException(nameof(context), "MentionedFilter requires BotInfo to be initialized");
-            MessageHasEntityFilter entityFilter = context.CompletedFilters.Get<MessageHasEntityFilter>(0);
-            return entityFilter.FoundEntities.Any(ent => Target.Text.Substring(ent.Offset + 1, ent.Length - 1) == userName);
+            IEnumerable<MessageHasEntityFilter> entityFilter = context.CompletedFilters.Get<MessageHasEntityFilter>();
+            return entityFilter.Any(fltr => fltr.FoundEntities.Any(ent => Target.Text.Substring(ent.Offset + 1, ent.Length - 1) == userName));
         }
     }
 }

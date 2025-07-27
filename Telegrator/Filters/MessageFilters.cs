@@ -16,10 +16,23 @@ namespace Telegrator.Filters
         protected Message Target { get; private set; } = null!;
 
         /// <inheritdoc/>
-        public override bool CanPass(FilterExecutionContext<Message> context)
+        protected virtual bool CanPassBase(FilterExecutionContext<Message> context)
         {
             FromReplyChainFilter? repliedFilter = context.CompletedFilters.Get<FromReplyChainFilter>().SingleOrDefault();
             Target = repliedFilter?.Reply ?? context.Input;
+
+            if (Target is not { Id: > 0 })
+                return false;
+
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public override bool CanPass(FilterExecutionContext<Message> context)
+        {
+            if (!CanPassBase(context))
+                return false;
+
             return CanPassNext(context);
         }
 

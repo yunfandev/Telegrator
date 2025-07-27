@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
@@ -15,7 +13,7 @@ namespace Telegrator.Filters
         /// Gets the current message being processed by the filter.
         /// </summary>
         public Message Message { get; private set; } = null!;
-        
+
         /// <summary>
         /// Gets the extracted text content from the current message.
         /// </summary>
@@ -29,14 +27,13 @@ namespace Telegrator.Filters
         /// <returns>True if the message is valid and can be processed further; otherwise, false.</returns>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
-            if (!base.CanPass(context))
+            if (!base.CanPassBase(context))
                 return false;
 
-            Message = context.Input!;
-            if (Message is not { Id: > 0 })
+            if (Target is not { Id: > 0, Text.Length: > 0 })
                 return false;
 
-            Text = Message.Text ?? string.Empty;
+            Text = Target.Text;
             return CanPassNext(context);
         }
     }

@@ -22,7 +22,7 @@ namespace Telegrator.Filters
         /// <returns>True if the message has a valid sender; otherwise, false.</returns>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
-            if (!base.CanPass(context))
+            if (!base.CanPassBase(context))
                 return false;
 
             User = Target.From!;

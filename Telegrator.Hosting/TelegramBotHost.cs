@@ -127,12 +127,13 @@ namespace Telegrator.Hosting
             foreach (UpdateType updateType in handlers.Keys)
             {
                 HandlerDescriptorList descriptors = handlers[updateType];
-                logBuilder.AppendLine("\n\tUpdateType." + updateType + " :");
+                logBuilder.Append("\n\tUpdateType." + updateType + " :");
 
                 foreach (HandlerDescriptor descriptor in descriptors.Reverse())
                 {
-                    string indexerString = descriptor.Indexer.ToString();
-                    logBuilder.AppendLine("* " + indexerString + " " + (descriptor.DisplayString ?? descriptor.HandlerType.Name));
+                    logBuilder.AppendFormat("\n\t* {0} - {1}",
+                        descriptor.Indexer.ToString(),
+                        descriptor.ToString());
                 }
             }
 
