@@ -44,14 +44,6 @@ namespace Telegrator.Handlers.Components
             : base(handlingUpdateType) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BranchingUpdateHandler{TUpdate}"/> class with a specific branch method.
-        /// </summary>
-        /// <param name="handlingUpdateType">The type of update this handler processes.</param>
-        /// <param name="branch">The specific branch method to execute.</param>
-        protected BranchingUpdateHandler(UpdateType handlingUpdateType, MethodInfo branch)
-            : base(handlingUpdateType) => branchMethodInfo = branch;
-
-        /// <summary>
         /// Describes all handler branches in this class.
         /// </summary>
         /// <returns>A collection of handler descriptors for each branch method.</returns>
@@ -92,7 +84,7 @@ namespace Telegrator.Handlers.Components
             {
                 handlerAttribute = HandlerInspector.GetHandlerAttribute(branch);
             }
-            finally
+            catch
             {
                 _ = 0xBAD + 0xC0DE;
             }
@@ -105,7 +97,7 @@ namespace Telegrator.Handlers.Components
                 HandlerInspector.GetStateKeeperAttribute(branch),
                 branchFiltersList.ToArray());
 
-            return new HandlerBranchDescriptor(branch, HandlingUpdateType, handlerAttribute.GetIndexer(), filtersSet);
+            return new HandlerBranchDescriptor(thisType, branch, HandlingUpdateType, handlerAttribute.GetIndexer(), filtersSet);
         }
 
         /// <summary>
@@ -160,15 +152,15 @@ namespace Telegrator.Handlers.Components
 
         private class HandlerBranchDescriptor : HandlerDescriptor
         {
-            public HandlerBranchDescriptor(MethodInfo method, UpdateType updateType, DescriptorIndexer indexer, DescriptorFiltersSet filters)
-                : base(DescriptorType.General, method.DeclaringType, updateType, indexer, filters)
+            public HandlerBranchDescriptor(Type decalringType, MethodInfo method, UpdateType updateType, DescriptorIndexer indexer, DescriptorFiltersSet filters) : base(DescriptorType.General, decalringType, updateType, indexer, filters)
             {
-                DisplayString = string.Format("{0}+{1}", method.DeclaringType.Name, method.Name);
-                InstanceFactory = () =>
+                DisplayString = HandlerInspector.GetDisplayName(method) ?? string.Format("{0}+{1}", method.DeclaringType.Name, method.Name);
+                LazyInitialization = handler =>
                 {
-                    BranchingUpdateHandler<TUpdate> handler = (BranchingUpdateHandler<TUpdate>)Activator.CreateInstance(method.DeclaringType);
-                    handler.branchMethodInfo = method;
-                    return handler;
+                    if (handler is not BranchingUpdateHandler<TUpdate> brancher)
+                        throw new InvalidDataException();
+
+                    brancher.branchMethodInfo = method;
                 };
             }
         }

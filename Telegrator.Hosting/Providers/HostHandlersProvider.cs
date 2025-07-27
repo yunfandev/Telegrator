@@ -49,6 +49,7 @@ namespace Telegrator.Hosting.Providers
             if (handlerInstance is not UpdateHandlerBase updateHandler)
                 throw new InvalidOperationException("Failed to resolve " + descriptor.HandlerType + " as UpdateHandlerBase");
 
+            descriptor.LazyInitialization?.Invoke(updateHandler);
             updateHandler.LifetimeToken.OnLifetimeEnded += _ => scope.Dispose();
             return updateHandler;
         }

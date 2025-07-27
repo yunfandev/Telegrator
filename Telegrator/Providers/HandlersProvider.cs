@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
@@ -60,28 +61,31 @@ namespace Telegrator.Providers
         public virtual UpdateHandlerBase GetHandlerInstance(HandlerDescriptor descriptor, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            switch (descriptor.Type)
-            {
-                case DescriptorType.Implicit:
-                case DescriptorType.Singleton:
-                    {
-                        return descriptor.SingletonInstance ??= (descriptor.InstanceFactory != null
-                            ? descriptor.SingletonInstance = descriptor.InstanceFactory.Invoke()
-                            : descriptor.SingletonInstance = (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType));
-                    }
+            bool useSingleton = UseSingleton(descriptor);
 
-                case DescriptorType.Keyed:
-                case DescriptorType.General:
-                    {
-                        return descriptor.InstanceFactory == null
-                            ? (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType)
-                            : descriptor.InstanceFactory.Invoke();
-                    }
+            if (useSingleton && descriptor.SingletonInstance != null)
+                return descriptor.SingletonInstance;
 
-                default:
-                    throw new Exception();
-            }
+            UpdateHandlerBase instance = GetHandlerInstanceInternal(descriptor);
+            descriptor.SingletonInstance = useSingleton ? instance : null;
+            descriptor.LazyInitialization?.Invoke(instance);
+            return instance;
         }
+
+        private static UpdateHandlerBase GetHandlerInstanceInternal(HandlerDescriptor descriptor)
+        {
+            if (descriptor.InstanceFactory != null)
+                return descriptor.InstanceFactory.Invoke();
+
+            return (UpdateHandlerBase)Activator.CreateInstance(descriptor.HandlerType);
+        }
+
+        private static bool UseSingleton(HandlerDescriptor descriptor) => descriptor.Type switch
+        {
+            DescriptorType.General or DescriptorType.Keyed => false,
+            DescriptorType.Implicit or DescriptorType.Singleton => true,
+            _ => throw new Exception()
+        };
 
         /// <inheritdoc/>
         public virtual bool TryGetDescriptorList(UpdateType updateType, out HandlerDescriptorList? list)

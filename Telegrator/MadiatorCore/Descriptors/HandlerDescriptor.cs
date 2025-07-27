@@ -97,7 +97,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public Func<UpdateHandlerBase>? InstanceFactory
         {
             get;
-            set;
+            private set;
         }
 
         /// <summary>
@@ -113,6 +113,15 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// Display string for the handler (for debugging or logging).
         /// </summary>
         public string? DisplayString
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a function for 'lazy' handlers initialization
+        /// </summary>
+        public Action<UpdateHandlerBase>? LazyInitialization
         {
             get;
             set;
