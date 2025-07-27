@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegrator;
 using Telegrator.Configuration;
 using Telegrator.MadiatorCore;
 using Telegrator.Polling;
@@ -24,7 +23,8 @@ namespace Telegrator.Hosting.Polling
             IAwaitingProvider awaitingProvider,
             IOptions<TelegramBotOptions> options,
             IUpdateHandlersPool handlersPool,
-            ILogger<HostUpdateRouter> logger) : base(handlersProvider, awaitingProvider, options.Value, handlersPool)
+            ITelegramBotInfo botInfo,
+            ILogger<HostUpdateRouter> logger) : base(handlersProvider, awaitingProvider, options.Value, handlersPool, botInfo)
         {
             Logger = logger;
             ExceptionHandler = new DefaultRouterExceptionHandler(HandleException);

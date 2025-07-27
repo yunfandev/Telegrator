@@ -4,6 +4,7 @@ using System.Reflection;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
+using Telegrator.Annotations;
 using Telegrator.Annotations.StateKeeping;
 using Telegrator.Attributes;
 using Telegrator.Filters.Components;
@@ -11,6 +12,7 @@ using Telegrator.Handlers.Building;
 using Telegrator.Handlers.Building.Components;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
+using Telegrator.MadiatorCore.Descriptors;
 using Telegrator.Providers;
 using Telegrator.StateKeeping;
 using Telegrator.StateKeeping.Components;
@@ -87,7 +89,7 @@ namespace Telegrator
         /// <param name="_">The handler container (unused).</param>
         /// <returns>The state keeper instance.</returns>
         public static TKeeper GetStateKeeper<TKey, TState, TKeeper>(this IHandlerContainer _) where TKey : notnull where TState : IEquatable<TState> where TKeeper : StateKeeperBase<TKey, TState>, new()
-            => StateKeeperAttribute<TKey, TState, TKeeper>.StateKeeper;
+            => StateKeeperAttribute<TKey, TState, TKeeper>.Shared;
     }
 
     /// <summary>
@@ -159,6 +161,31 @@ namespace Telegrator
         /// <returns>An awaiter builder for callback query updates.</returns>
         public static IAwaiterHandlerBuilder<CallbackQuery> AwaitCallbackQuery(this IAwaitingProvider awaitingProvider, Update handlingUpdate)
             => awaitingProvider.CreateAbstract<CallbackQuery>(UpdateType.CallbackQuery, handlingUpdate);
+    }
+
+    /// <summary>
+    /// Extesions method for handlers providers
+    /// </summary>
+    public static class HandlersProviderExtensions
+    {
+        /// <summary>
+        /// Gets the list of bot commands supported by the provider.
+        /// </summary>
+        /// <returns>An enumerable of bot commands.</returns>
+        public static IEnumerable<BotCommand> GetBotCommands(this IHandlersProvider provider, CancellationToken cancellationToken = default)
+        {
+            if (!provider.TryGetDescriptorList(UpdateType.Message, out HandlerDescriptorList? list))
+                yield break;
+
+            foreach (BotCommand botCommand in list
+                .Select(descriptor => descriptor.HandlerType)
+                .SelectMany(handlerType => handlerType.GetCustomAttributes<CommandAlliasAttribute>()
+                .SelectMany(attribute => attribute.Alliases.Select(alias => new BotCommand(alias, attribute.Description)))))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return botCommand;
+            }
+        }
     }
 
     /// <summary>
@@ -849,6 +876,41 @@ namespace Telegrator
             { RemovedChatBoost: { } removedChatBoost } => removedChatBoost,
             _ => update
         };
+
+        /// <summary>
+        /// Selecting corresponding <see cref="UpdateType"/>s for <see cref="Update"/>'s sub-type
+        /// </summary>
+        /// <returns></returns>
+        public static UpdateType[] GetAllowedUpdateTypes(this Type type) => type.FullName switch
+        {
+            "Telegram.Bot.Types.Message" => UpdateTypeExtensions.MessageTypes,
+            "Telegram.Bot.Types.ChatMemberUpdated" => [UpdateType.MyChatMember, UpdateType.ChatMember],
+            "Telegram.Bot.Types.InlineQuery" => [UpdateType.InlineQuery],
+            "Telegram.Bot.Types.ChosenInlineResult" => [UpdateType.ChosenInlineResult],
+            "Telegram.Bot.Types.CallbackQuery" => [UpdateType.CallbackQuery],
+            "Telegram.Bot.Types.ShippingQuery" => [UpdateType.ShippingQuery],
+            "Telegram.Bot.Types.PreCheckoutQuery" => [UpdateType.PreCheckoutQuery],
+            "Telegram.Bot.Types.Poll" => [UpdateType.Poll],
+            "Telegram.Bot.Types.PollAnswer" => [UpdateType.PollAnswer],
+            "Telegram.Bot.Types.ChatJoinRequest" => [UpdateType.ChatJoinRequest],
+            "Telegram.Bot.Types.MessageReactionUpdated" => [UpdateType.MessageReaction],
+            "Telegram.Bot.TypesMessageReactionCountUpdated" => [UpdateType.MessageReactionCount],
+            "Telegram.Bot.Types.ChatBoostUpdated" => [UpdateType.ChatBoost],
+            "Telegram.Bot.Types.ChatBoostRemoved" => [UpdateType.RemovedChatBoost],
+            "Telegram.Bot.Types.BusinessConnection" => [UpdateType.BusinessConnection],
+            "Telegram.Bot.Types.BusinessMessagesDeleted" => [UpdateType.DeletedBusinessMessages],
+            "Telegram.Bot.Types.PaidMediaPurchased" => [UpdateType.PurchasedPaidMedia],
+            "Telegram.Bot.Types.Update" => Update.AllTypes,
+            _ => []
+        };
+
+        /// <summary>
+        /// Selecting corresponding <see cref="UpdateType"/>s for <see cref="Update"/>'s sub-type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static UpdateType[] GetAllowedUpdateTypes<T>() where T : class
+            => GetAllowedUpdateTypes(typeof(T));
 
         /// <summary>
         /// Selects from <see cref="Update"/> an <typeparamref name="T"/> that contains information about the update

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegrator.Configuration;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
@@ -21,14 +19,14 @@ namespace Telegrator.Hosting.Providers
         public HostHandlersProvider(
             IHandlersCollection handlers,
             IOptions<TelegramBotOptions> options,
-            ITelegramBotInfo botInfo,
             IServiceProvider serviceProvider,
-            ILogger<HostHandlersProvider> logger) : base(handlers, options.Value, botInfo)
+            ILogger<HostHandlersProvider> logger) : base(handlers, options.Value)
         {
             Services = serviceProvider;
             Logger = logger;
         }
 
+        /*
         /// <inheritdoc/>
         public override IEnumerable<DescribedHandlerInfo> GetHandlers(IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
@@ -36,18 +34,20 @@ namespace Telegrator.Hosting.Providers
             Logger.LogInformation("Described handlers : {handlers}", string.Join(", ", handlers.Select(hndlr => hndlr.DisplayString ?? hndlr.HandlerInstance.GetType().Name)));
             return handlers;
         }
+        */
 
         /// <inheritdoc/>
         public override UpdateHandlerBase GetHandlerInstance(HandlerDescriptor descriptor, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             IServiceScope scope = Services.CreateScope();
+
             object handlerInstance = descriptor.ServiceKey == null
                 ? scope.ServiceProvider.GetRequiredService(descriptor.HandlerType)
                 : scope.ServiceProvider.GetRequiredKeyedService(descriptor.HandlerType, descriptor.ServiceKey);
 
             if (handlerInstance is not UpdateHandlerBase updateHandler)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Failed to resolve " + descriptor.HandlerType + " as UpdateHandlerBase");
 
             updateHandler.LifetimeToken.OnLifetimeEnded += _ => scope.Dispose();
             return updateHandler;

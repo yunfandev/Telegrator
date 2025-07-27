@@ -63,10 +63,10 @@ namespace Telegrator
             if (Options.GlobalCancellationToken == CancellationToken.None)
                 Options.GlobalCancellationToken = cancellationToken;
 
-            HandlersProvider handlerProvider = new HandlersProvider(Handlers, Options, BotInfo);
-            AwaitingProvider awaitingProvider = new AwaitingProvider(Options, BotInfo);
+            HandlersProvider handlerProvider = new HandlersProvider(Handlers, Options);
+            AwaitingProvider awaitingProvider = new AwaitingProvider(Options);
 
-            updateRouter = new UpdateRouter(handlerProvider, awaitingProvider, Options);
+            updateRouter = new UpdateRouter(handlerProvider, awaitingProvider, Options, BotInfo);
             StartReceivingInternal(receiverOptions, cancellationToken);
         }
 

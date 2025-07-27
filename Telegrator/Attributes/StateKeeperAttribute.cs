@@ -15,10 +15,20 @@ namespace Telegrator.Attributes
     /// <typeparam name="TKeeper">The type of the state keeper implementation.</typeparam>
     public abstract class StateKeeperAttribute<TKey, TState, TKeeper> : StateKeeperAttributeBase where TKey : notnull where TState : notnull where TKeeper : StateKeeperBase<TKey, TState>, new()
     {
+        /*
+        private static readonly TKeeper _shared = new TKeeper();
+        private static readonly Dictionary<TKey, TKeeper> _keyed = [];
+        */
+
         /// <summary>
         /// Gets or sets the singleton instance of the state keeper for this attribute type.
         /// </summary>
-        public static TKeeper StateKeeper { get; internal set; } = null!;
+        public static TKeeper Shared { get; } = new TKeeper();
+
+        /// <summary>
+        /// Gets the default state value of this statekeeper.
+        /// </summary>
+        public static TState DefaultState => Shared.DefaultState;
 
         /// <summary>
         /// Gets the state value associated with this attribute instance.
@@ -37,8 +47,7 @@ namespace Telegrator.Attributes
         /// <param name="keyResolver">The key resolver for state keeping</param>
         protected StateKeeperAttribute(TState myState, IStateKeyResolver<TKey> keyResolver) : base(typeof(TKeeper))
         {
-            StateKeeper ??= new TKeeper();
-            StateKeeper.KeyResolver = keyResolver;
+            Shared.KeyResolver = keyResolver;
             MyState = myState;
             SpecialState = SpecialState.None;
         }
@@ -50,12 +59,12 @@ namespace Telegrator.Attributes
         /// <param name="keyResolver">The key resolver for state keeping</param>
         protected StateKeeperAttribute(SpecialState specialState, IStateKeyResolver<TKey> keyResolver) : base(typeof(TKeeper))
         {
-            StateKeeper ??= new TKeeper();
-            StateKeeper.KeyResolver = keyResolver;
-            MyState = StateKeeper.DefaultState;
+            Shared.KeyResolver = keyResolver;
+            MyState = Shared.DefaultState;
             SpecialState = specialState;
         }
 
+        /*
         /// <summary>
         /// Initializes the attribute with a custom state keeper, a specific state, and a custom key resolver.
         /// </summary>
@@ -83,6 +92,7 @@ namespace Telegrator.Attributes
             MyState = StateKeeper.DefaultState;
             SpecialState = specialState;
         }
+        */
 
         /// <summary>
         /// Determines whether the current update context passes the state filter.
@@ -94,7 +104,7 @@ namespace Telegrator.Attributes
             if (SpecialState == SpecialState.AnyState)
                 return true;
 
-            if (!StateKeeper.TryGetState(context.Input, out TState? state))
+            if (!Shared.TryGetState(context.Input, out TState? state))
                 return SpecialState == SpecialState.NoState;
 
             if (state == null)

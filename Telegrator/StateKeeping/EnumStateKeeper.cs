@@ -30,7 +30,7 @@ namespace Telegrator.StateKeeping
         /// <param name="_">The handler container (unused parameter for extension method syntax).</param>
         /// <returns>The enum state keeper instance.</returns>
         public static EnumStateKeeper<TEnum> EnumStateKeeper<TEnum>(this IHandlerContainer _) where TEnum : Enum
-            => EnumStateAttribute<TEnum>.StateKeeper;
+            => EnumStateAttribute<TEnum>.Shared;
 
         /// <summary>
         /// Creates a new enum state for the current update.
@@ -55,7 +55,7 @@ namespace Telegrator.StateKeeping
         /// <param name="container">The handler container.</param>
         /// <param name="newState">The new state value. If null, uses the default state.</param>
         public static void SetEnumState<TEnum>(this IHandlerContainer container, TEnum? newState) where TEnum : Enum
-            => container.EnumStateKeeper<TEnum>().SetState(container.HandlingUpdate, newState ?? EnumStateAttribute<TEnum>.StateKeeper.DefaultState);
+            => container.EnumStateKeeper<TEnum>().SetState(container.HandlingUpdate, newState ?? EnumStateAttribute<TEnum>.DefaultState);
 
         /// <summary>
         /// Moves the enum state forward to the next value in the enum sequence.

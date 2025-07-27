@@ -50,7 +50,7 @@ namespace Telegrator.StateKeeping
         /// <param name="_">The handler container instance</param>
         /// <returns>The <see cref="NumericStateKeeper"/> instance</returns>
         public static NumericStateKeeper NumericStateKeeper(this IHandlerContainer _)
-            => NumericStateAttribute.StateKeeper;
+            => NumericStateAttribute.Shared;
 
         /// <summary>
         /// Creates a new numeric state for the current update being handled.
@@ -73,7 +73,7 @@ namespace Telegrator.StateKeeping
         /// <param name="container">The handler container instance</param>
         /// <param name="newState">The new numeric state to set, or null to use default</param>
         public static void SetNumericState(this IHandlerContainer container, int? newState)
-            => container.NumericStateKeeper().SetState(container.HandlingUpdate, newState ?? NumericStateAttribute.StateKeeper.DefaultState);
+            => container.NumericStateKeeper().SetState(container.HandlingUpdate, newState ?? NumericStateAttribute.DefaultState);
 
         /// <summary>
         /// Moves the numeric state forward by incrementing the current value.

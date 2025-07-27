@@ -1,6 +1,5 @@
 ﻿using Telegrator.Annotations.StateKeeping;
 using Telegrator.Handlers.Components;
-using Telegrator.StateKeeping;
 
 namespace Telegrator.StateKeeping
 {
@@ -34,7 +33,7 @@ namespace Telegrator.StateKeeping
         /// <param name="_">The handler container instance</param>
         /// <returns>The <see cref="StringStateKeeper"/> instance</returns>
         public static StringStateKeeper StringStateKeeper(this IHandlerContainer _)
-            => StringStateAttribute.StateKeeper;
+            => StringStateAttribute.Shared;
 
         /// <summary>
         /// Creates a new string state for the current update being handled.
@@ -57,7 +56,7 @@ namespace Telegrator.StateKeeping
         /// <param name="container">The handler container instance</param>
         /// <param name="newState">The new string state to set, or null to use default</param>
         public static void SetStringState(this IHandlerContainer container, string? newState)
-            => container.StringStateKeeper().SetState(container.HandlingUpdate, newState ?? StringStateAttribute.StateKeeper.DefaultState);
+            => container.StringStateKeeper().SetState(container.HandlingUpdate, newState ?? StringStateAttribute.DefaultState);
 
         /// <summary>
         /// Moves the string state forward to the next state in the sequence.

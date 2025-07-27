@@ -103,10 +103,13 @@ namespace Telegrator.Generators
 
         private static void ParseClassDeclaration(StringBuilder sourceBuilder, ClassDeclarationSyntax classDeclaration, Dictionary<string, string> targeters)
         {
+            string className = classDeclaration.Identifier.ToString();
+            if (className == "FilterAnnotation")
+                return;
+
             IEnumerable<MethodDeclarationSyntax> methods = classDeclaration.Members.OfType<MethodDeclarationSyntax>();
             MethodDeclarationSyntax? targeterMethod = methods.FirstOrDefault(method => method.Identifier.ToString() == "GetFilterringTarget");
 
-            string className = classDeclaration.Identifier.ToString();
             string filterName = className.Replace("Attribute", string.Empty);
             string classTargetterMethodName = filterName + "_GetFilterringTarget";
 

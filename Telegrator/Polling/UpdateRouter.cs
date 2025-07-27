@@ -1,10 +1,10 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
+using Telegrator.Filters.Components;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
@@ -17,25 +17,11 @@ namespace Telegrator.Polling
     /// </summary>
     public class UpdateRouter : IUpdateRouter
     {
-        /// <summary>
-        /// The bot configuration options.
-        /// </summary>
         private readonly TelegramBotOptions _options;
-        
-        /// <summary>
-        /// The provider for regular handlers.
-        /// </summary>
         private readonly IHandlersProvider _handlersProvider;
-        
-        /// <summary>
-        /// The provider for awaiting handlers.
-        /// </summary>
         private readonly IAwaitingProvider _awaitingProvider;
-        
-        /// <summary>
-        /// The pool for managing handler execution.
-        /// </summary>
         private readonly IUpdateHandlersPool _HandlersPool;
+        private readonly ITelegramBotInfo _botInfo;
 
         /// <inheritdoc/>
         public IHandlersProvider HandlersProvider => _handlersProvider;
@@ -61,12 +47,14 @@ namespace Telegrator.Polling
         /// <param name="handlersProvider">The provider for regular handlers.</param>
         /// <param name="awaitingProvider">The provider for awaiting handlers.</param>
         /// <param name="options">The bot configuration options.</param>
-        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options)
+        /// <param name="botInfo"></param>
+        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options, ITelegramBotInfo botInfo)
         {
             _options = options;
             _handlersProvider = handlersProvider;
             _awaitingProvider = awaitingProvider;
             _HandlersPool = new UpdateHandlersPool(_options, _options.GlobalCancellationToken);
+            _botInfo = botInfo;
         }
 
         /// <summary>
@@ -76,12 +64,14 @@ namespace Telegrator.Polling
         /// <param name="awaitingProvider">The provider for awaiting handlers.</param>
         /// <param name="options">The bot configuration options.</param>
         /// <param name="handlersPool">The custom handlers pool to use.</param>
-        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options, IUpdateHandlersPool handlersPool)
+        /// <param name="botInfo"></param>
+        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options, IUpdateHandlersPool handlersPool, ITelegramBotInfo botInfo)
         {
             _options = options;
             _handlersProvider = handlersProvider;
             _awaitingProvider = awaitingProvider;
             _HandlersPool = handlersPool;
+            _botInfo = botInfo;
         }
 
         /// <summary>
@@ -112,38 +102,139 @@ namespace Telegrator.Polling
             LeveledDebug.RouterWriteLine("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
             LogUpdate(update);
 
-            // Queuing handlers for execution
-            foreach (DescribedHandlerInfo handler in GetHandlers(botClient, update, cancellationToken))
-                HandlersPool.Enqueue(handler);
-
-            LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
-            return Task.CompletedTask;
-        }
-
-        private IEnumerable<DescribedHandlerInfo> GetHandlers(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
             try
             {
                 // Getting handlers in update awaiting pool
-                IEnumerable<DescribedHandlerInfo> handlers = AwaitingProvider.GetHandlers(this, botClient, update, cancellationToken);
-                if (handlers.Any() && Options.ExclusiveAwaitingHandlerRouting)
-                    return handlers;
+                IEnumerable<DescribedHandlerInfo> handlers = GetHandlers(AwaitingProvider, this, botClient, update, cancellationToken);
+                if (handlers.Any())
+                {
+                    // Enqueuing found awiting handlers
+                    HandlersPool.Enqueue(handlers);
 
-                return handlers.Concat(HandlersProvider.GetHandlers(this, botClient, update, cancellationToken));
+                    // Chicking if awaiting handlers has exclusive routing
+                    if (Options.ExclusiveAwaitingHandlerRouting)
+                    {
+                        LeveledDebug.RouterWriteLine("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
+                        return Task.CompletedTask;
+                    }
+                }
+
+                // Queuing reagular handlers for execution
+                HandlersPool.Enqueue(GetHandlers(HandlersProvider, this, botClient, update, cancellationToken));
+                LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
+                return Task.CompletedTask;
             }
             catch (OperationCanceledException)
             {
-                _ = 0xBAD + 0xC0DE;
-                return [];
+                LeveledDebug.RouterWriteLine("Receiving Update ({0}) cancelled", update.Id);
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
+                LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished with exception {1}", update.Id, ex.Message);
                 ExceptionHandler?.HandleException(botClient, ex, HandleErrorSource.PollingError, cancellationToken);
-                return [];
+                return Task.CompletedTask;
             }
         }
 
-        private static void LogUpdate(Update update)
+        /// <summary>
+        /// Gets the handlers that match the specified update, using the provided router and client.
+        /// Searches for handlers by update type, falling back to Unknown type if no specific handlers are found.
+        /// </summary>
+        /// <param name="provider">The privode used to get handlers instance</param>
+        /// <param name="updateRouter">The update router for handler execution</param>
+        /// <param name="client">The Telegram bot client instance</param>
+        /// <param name="update">The incoming Telegram update to process</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>A collection of described handler information for the update</returns>
+        protected virtual IEnumerable<DescribedHandlerInfo> GetHandlers(IHandlersProvider provider, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
+        {
+            LeveledDebug.ProviderWriteLine("Requested handlers for UpdateType.{0}", update.Type);
+            if (!provider.TryGetDescriptorList(update.Type, out HandlerDescriptorList? descriptors))
+            {
+                LeveledDebug.ProviderWriteLine("No registered, providing Any");
+                provider.TryGetDescriptorList(UpdateType.Unknown, out descriptors);
+            }
+
+            if (descriptors == null || descriptors.Count == 0)
+            {
+                LeveledDebug.ProviderWriteLine("No handlers provided");
+                return [];
+            }
+
+            IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
+            LeveledDebug.ProviderWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
+            LeveledDebug.ProviderWriteLine("Described handlers : {0}", string.Join(", ", described));
+            return described;
+        }
+
+        /// <summary>
+        /// Describes all handler descriptors for a given update context.
+        /// Processes descriptors in reverse order and respects the ExecuteOnlyFirstFoundHanlder option.
+        /// </summary>
+        /// <param name="provider">The privode used to get handlers instance</param>
+        /// <param name="descriptors">The list of handler descriptors to process</param>
+        /// <param name="updateRouter">The update router for handler execution</param>
+        /// <param name="client">The Telegram bot client instance</param>
+        /// <param name="update">The incoming Telegram update to process</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>A collection of described handler information</returns>
+        protected virtual IEnumerable<DescribedHandlerInfo> DescribeDescriptors(IHandlersProvider provider, HandlerDescriptorList descriptors, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                LeveledDebug.ProviderWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+                foreach (HandlerDescriptor descriptor in descriptors.Reverse())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    DescribedHandlerInfo? describedHandler = DescribeHandler(provider, descriptor, updateRouter, client, update, cancellationToken);
+                    if (describedHandler == null)
+                        continue;
+
+                    yield return describedHandler;
+                    if (Options.ExecuteOnlyFirstFoundHanlder)
+                        break;
+                }
+            }
+            finally
+            {
+                LeveledDebug.ProviderWriteLine("Describing for Update ({0}) finished", update.Id);
+            }
+        }
+
+        /// <summary>
+        /// Describes a single handler descriptor for a given update context.
+        /// Validates the handler's filters against the update and creates a handler instance if validation passes.
+        /// </summary>
+        /// <param name="provider">The privode used to get handlers instance</param>
+        /// <param name="descriptor">The handler descriptor to process</param>
+        /// <param name="updateRouter">The update router for handler execution</param>
+        /// <param name="client">The Telegram bot client instance</param>
+        /// <param name="update">The incoming Telegram update to process</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>The described handler info if validation passes; otherwise, null</returns>
+        public virtual DescribedHandlerInfo? DescribeHandler(IHandlersProvider provider, HandlerDescriptor descriptor, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Dictionary<string, object> data = new Dictionary<string, object>()
+            {
+                { "handler_name", descriptor.ToString() }
+            };
+
+            FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(_botInfo, update, update, data, []);
+            if (!descriptor.Filters.Validate(filterContext))
+                return null;
+
+            UpdateHandlerBase handlerInstance = provider.GetHandlerInstance(descriptor, cancellationToken);
+            return new DescribedHandlerInfo(updateRouter, client, handlerInstance, filterContext, descriptor.DisplayString);
+        }
+
+        /// <summary>
+        /// Methos used to log received <see cref="Update"/> object
+        /// </summary>
+        /// <param name="update"></param>
+        /// <exception cref="NullReferenceException"></exception>
+        protected static void LogUpdate(Update update)
         {
             switch (update.Type)
             {
