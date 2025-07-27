@@ -88,6 +88,15 @@ namespace Telegrator.Handlers.Components
             if (!AllowedBranchReturnTypes.Any(branch.ReturnType.Equals))
                 throw new Exception();
 
+            try
+            {
+                handlerAttribute = HandlerInspector.GetHandlerAttribute(branch);
+            }
+            finally
+            {
+                _ = 0xBAD + 0xC0DE;
+            }
+
             List<IFilter<Update>> branchFiltersList = HandlerInspector.GetFilterAttributes(branch, HandlingUpdateType).ToList();
             branchFiltersList.AddRange(handlerFilters);
 

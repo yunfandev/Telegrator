@@ -13,7 +13,7 @@ namespace Telegrator.Annotations
         /// Initializes a new instance of the MentionedAttribute that matches any mention.
         /// </summary>
         public MentionedAttribute()
-            : base(new MessageHasEntityFilter(MessageEntityType.Mention, 0, null), new MentionedFilter()) { }
+            : base(new MessageHasEntityFilter(MessageEntityType.Mention, null, null), new MentionedFilter()) { }
 
         /// <summary>
         /// Initializes a new instance of the MentionedAttribute that matches mentions at a specific offset.

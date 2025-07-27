@@ -202,7 +202,7 @@ namespace Telegrator.Filters
         /// <param name="type">The entity type to filter by.</param>
         /// <param name="offset">The offset to filter by.</param>
         /// <param name="length">The length to filter by.</param>
-        public MessageHasEntityFilter(MessageEntityType type, int offset, int? length)
+        public MessageHasEntityFilter(MessageEntityType type, int? offset, int? length)
         {
             EntityType = type;
             Offset = offset;
@@ -215,7 +215,7 @@ namespace Telegrator.Filters
         /// <param name="type">The entity type to filter by.</param>
         /// <param name="content">The content to filter by.</param>
         /// <param name="stringComparison">The string comparison to use.</param>
-        public MessageHasEntityFilter(MessageEntityType type, string content, StringComparison stringComparison = StringComparison.CurrentCulture)
+        public MessageHasEntityFilter(MessageEntityType type, string? content, StringComparison stringComparison = StringComparison.CurrentCulture)
         {
             EntityType = type;
             Content = content;
@@ -230,7 +230,7 @@ namespace Telegrator.Filters
         /// <param name="length">The length to filter by.</param>
         /// <param name="content">The content to filter by.</param>
         /// <param name="stringComparison">The string comparison to use.</param>
-        public MessageHasEntityFilter(MessageEntityType type, int offset, int? length, string content, StringComparison stringComparison = StringComparison.CurrentCulture)
+        public MessageHasEntityFilter(MessageEntityType type, int? offset, int? length, string? content, StringComparison stringComparison = StringComparison.CurrentCulture)
         {
             EntityType = type;
             Offset = offset;

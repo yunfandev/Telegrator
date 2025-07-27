@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegrator.Filters.Components;
 
 namespace Telegrator.Filters
@@ -45,8 +46,19 @@ namespace Telegrator.Filters
                 return false;
 
             string userName = Mention ?? context.BotInfo.User.Username ?? throw new ArgumentNullException(nameof(context), "MentionedFilter requires BotInfo to be initialized");
-            IEnumerable<MessageHasEntityFilter> entityFilter = context.CompletedFilters.Get<MessageHasEntityFilter>();
-            return entityFilter.Any(fltr => fltr.FoundEntities.Any(ent => Target.Text.Substring(ent.Offset + 1, ent.Length - 1) == userName));
+            IEnumerable<MessageEntity> entities = context.CompletedFilters
+                .Get<MessageHasEntityFilter>()
+                .SelectMany(ent => ent.FoundEntities)
+                .Where(ent => ent.Type == MessageEntityType.Mention);
+
+            foreach (MessageEntity ent in entities)
+            {
+                string mention = Target.Text.Substring(ent.Offset + 1, ent.Length - 1);
+                if (mention == userName)
+                    return true;
+            }
+
+            return false;
         }
     }
 }
