@@ -64,36 +64,6 @@ namespace Telegrator.Attributes
             SpecialState = specialState;
         }
 
-        /*
-        /// <summary>
-        /// Initializes the attribute with a custom state keeper, a specific state, and a custom key resolver.
-        /// </summary>
-        /// <param name="keeper">The state keeper instance</param>
-        /// <param name="myState">The state value to associate</param>
-        /// <param name="keyResolver">The key resolver for state keeping</param>
-        protected StateKeeperAttribute(TKeeper keeper, TState myState, IStateKeyResolver<TKey> keyResolver) : base(typeof(TKeeper))
-        {
-            StateKeeper ??= keeper;
-            StateKeeper.KeyResolver = keyResolver;
-            MyState = myState;
-            SpecialState = SpecialState.None;
-        }
-
-        /// <summary>
-        /// Initializes the attribute with a custom state keeper, a special state, and a custom key resolver.
-        /// </summary>
-        /// <param name="keeper">The state keeper instance</param>
-        /// <param name="specialState">The special state mode</param>
-        /// <param name="keyResolver">The key resolver for state keeping</param>
-        protected StateKeeperAttribute(TKeeper keeper, SpecialState specialState, IStateKeyResolver<TKey> keyResolver) : base(typeof(TKeeper))
-        {
-            StateKeeper ??= keeper;
-            StateKeeper.KeyResolver = keyResolver;
-            MyState = StateKeeper.DefaultState;
-            SpecialState = specialState;
-        }
-        */
-
         /// <summary>
         /// Determines whether the current update context passes the state filter.
         /// </summary>

@@ -6,7 +6,7 @@ namespace Telegrator.Hosting.Configuration
     /// Internal proxy class for configuring Telegram bot client options from configuration.
     /// Extends ConfigureOptionsProxy to provide specific configuration for Telegram bot client options.
     /// </summary>
-    internal class TelegramBotClientOptionsProxy : ConfigureOptionsProxy<TelegramBotClientOptions>
+    public class TelegramBotClientOptionsProxy : ConfigureOptionsProxy<TelegramBotClientOptions>
     {
         /// <summary>
         /// Gets or sets the bot token.

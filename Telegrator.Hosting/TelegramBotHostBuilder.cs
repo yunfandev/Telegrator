@@ -4,10 +4,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Telegrator.Hosting.Configuration;
-using Telegrator.Configuration;
 using Telegrator.Hosting;
 using Telegrator.Hosting.Components;
+using Telegrator.Hosting.Configuration;
 using Telegrator.Hosting.Providers;
 using Telegrator.MadiatorCore;
 
@@ -51,7 +50,7 @@ namespace Telegrator.Hosting
 
             _innerBuilder.Logging.ClearProviders();
 
-            Services.Configure<TelegramBotOptions>(Configuration.GetSection(nameof(TelegramBotOptions)));
+            Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
             Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
             Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
         }

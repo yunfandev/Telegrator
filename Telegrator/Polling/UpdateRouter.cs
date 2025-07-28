@@ -17,7 +17,7 @@ namespace Telegrator.Polling
     /// </summary>
     public class UpdateRouter : IUpdateRouter
     {
-        private readonly TelegramBotOptions _options;
+        private readonly TelegratorOptions _options;
         private readonly IHandlersProvider _handlersProvider;
         private readonly IAwaitingProvider _awaitingProvider;
         private readonly IUpdateHandlersPool _HandlersPool;
@@ -30,7 +30,7 @@ namespace Telegrator.Polling
         public IAwaitingProvider AwaitingProvider => _awaitingProvider;
 
         /// <inheritdoc/>
-        public TelegramBotOptions Options => _options;
+        public TelegratorOptions Options => _options;
 
         /// <inheritdoc/>
         public IUpdateHandlersPool HandlersPool => _HandlersPool;
@@ -48,7 +48,7 @@ namespace Telegrator.Polling
         /// <param name="awaitingProvider">The provider for awaiting handlers.</param>
         /// <param name="options">The bot configuration options.</param>
         /// <param name="botInfo"></param>
-        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options, ITelegramBotInfo botInfo)
+        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegratorOptions options, ITelegramBotInfo botInfo)
         {
             _options = options;
             _handlersProvider = handlersProvider;
@@ -65,7 +65,7 @@ namespace Telegrator.Polling
         /// <param name="options">The bot configuration options.</param>
         /// <param name="handlersPool">The custom handlers pool to use.</param>
         /// <param name="botInfo"></param>
-        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegramBotOptions options, IUpdateHandlersPool handlersPool, ITelegramBotInfo botInfo)
+        public UpdateRouter(IHandlersProvider handlersProvider, IAwaitingProvider awaitingProvider, TelegratorOptions options, IUpdateHandlersPool handlersPool, ITelegramBotInfo botInfo)
         {
             _options = options;
             _handlersProvider = handlersProvider;
@@ -149,22 +149,22 @@ namespace Telegrator.Polling
         /// <returns>A collection of described handler information for the update</returns>
         protected virtual IEnumerable<DescribedHandlerInfo> GetHandlers(IHandlersProvider provider, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            LeveledDebug.ProviderWriteLine("Requested handlers for UpdateType.{0}", update.Type);
+            LeveledDebug.RouterWriteLine("Requested handlers for UpdateType.{0}", update.Type);
             if (!provider.TryGetDescriptorList(update.Type, out HandlerDescriptorList? descriptors))
             {
-                LeveledDebug.ProviderWriteLine("No registered, providing Any");
+                LeveledDebug.RouterWriteLine("No registered, providing Any");
                 provider.TryGetDescriptorList(UpdateType.Unknown, out descriptors);
             }
 
             if (descriptors == null || descriptors.Count == 0)
             {
-                LeveledDebug.ProviderWriteLine("No handlers provided");
+                LeveledDebug.RouterWriteLine("No handlers provided");
                 return [];
             }
 
             IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
-            LeveledDebug.ProviderWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
-            LeveledDebug.ProviderWriteLine("Described handlers : {0}", string.Join(", ", described));
+            LeveledDebug.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
+            LeveledDebug.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
             return described;
         }
 
@@ -183,7 +183,7 @@ namespace Telegrator.Polling
         {
             try
             {
-                LeveledDebug.ProviderWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+                LeveledDebug.RouterWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
                 foreach (HandlerDescriptor descriptor in descriptors.Reverse())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -198,7 +198,7 @@ namespace Telegrator.Polling
             }
             finally
             {
-                LeveledDebug.ProviderWriteLine("Describing for Update ({0}) finished", update.Id);
+                LeveledDebug.RouterWriteLine("Describing for Update ({0}) finished", update.Id);
             }
         }
 
@@ -247,7 +247,25 @@ namespace Telegrator.Polling
                             sb.AppendFormat(" from {0} ({1})", msg.From.Username, msg.From.Id);
 
                         if (msg.Text != null)
-                            sb.AppendFormat("'{0}'", msg.Text);
+                            sb.AppendFormat(" with text '{0}'", msg.Text);
+
+                        if (msg.Sticker != null)
+                            sb.AppendFormat(" with sticker '{0}'", msg.Sticker.Emoji);
+
+                        LeveledDebug.RouterWriteLine(sb.ToString());
+                        break;
+                    }
+
+                case UpdateType.CallbackQuery:
+                    {
+                        CallbackQuery cq = update.CallbackQuery ?? throw new NullReferenceException();
+                        StringBuilder sb = new StringBuilder("Update.CallbackQuery");
+
+                        if (cq.From != null)
+                            sb.AppendFormat(" from {0} ({1})", cq.From.Username, cq.From.Id);
+
+                        if (cq.From != null)
+                            sb.AppendFormat(" with data '{0}'", cq.Data);
 
                         LeveledDebug.RouterWriteLine(sb.ToString());
                         break;

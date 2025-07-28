@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Xml.Linq;
 
+#pragma warning disable CS0162
 namespace Telegrator.Generators
 {
     /// <summary>
@@ -14,6 +15,11 @@ namespace Telegrator.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
+#if RELEASE
+            // DEBUG ONLY GENERATOR
+            return;
+#endif
+
             IncrementalValueProvider<ImmutableArray<BaseTypeDeclarationSyntax>> typeDeclarations = context.SyntaxProvider
                 .CreateSyntaxProvider(
                     predicate: (node, _) => node is ClassDeclarationSyntax || node is InterfaceDeclarationSyntax || node is StructDeclarationSyntax || node is EnumDeclarationSyntax,

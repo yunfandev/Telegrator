@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.Analyzers", "Tel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.ConsoleHost", "..\Telegram.Reactive.TestApps\Telegrator.ConsoleHost\Telegrator.ConsoleHost.csproj", "{78691EF7-6009-3BB1-C90D-1D1D95442041}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.Hosting.Web", "Telegrator.Hosting.Web\Telegrator.Hosting.Web.csproj", "{98AB490F-6A36-CCFF-F6E6-B029D1665965}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.ConsoleHost.Web", "Telegrator.ConsoleHost.Web\Telegrator.ConsoleHost.Web.csproj", "{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		AnalyzersDebug|Any CPU = AnalyzersDebug|Any CPU
@@ -63,6 +67,18 @@ Global
 		{78691EF7-6009-3BB1-C90D-1D1D95442041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78691EF7-6009-3BB1-C90D-1D1D95442041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78691EF7-6009-3BB1-C90D-1D1D95442041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.AnalyzersDebug|Any CPU.ActiveCfg = Release|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.AnalyzersDebug|Any CPU.Build.0 = Release|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98AB490F-6A36-CCFF-F6E6-B029D1665965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.AnalyzersDebug|Any CPU.ActiveCfg = Release|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.AnalyzersDebug|Any CPU.Build.0 = Release|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C18E1844-64A7-4FF8-BDB9-24F8FBFC5CF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

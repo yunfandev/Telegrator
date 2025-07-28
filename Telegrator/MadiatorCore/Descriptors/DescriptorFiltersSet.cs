@@ -47,7 +47,7 @@ namespace Telegrator.MadiatorCore.Descriptors
             {
                 if (!UpdateValidator.CanPass(filterContext))
                 {
-                    LeveledDebug.FilterWriteLine("(E) UpdateValidator filter of {0} for Update ({2}) didnt pass!", filterContext.Data["handler_name"]);
+                    LeveledDebug.FilterWriteLine("(E) UpdateValidator filter of {0} for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
                     return false;
                 }
 
@@ -59,7 +59,7 @@ namespace Telegrator.MadiatorCore.Descriptors
             {
                 if (!StateKeeperValidator.CanPass(filterContext))
                 {
-                    LeveledDebug.FilterWriteLine("(E) StateKeeperValidator filter of {0} for Update ({2}) didnt pass!", filterContext.Data["handler_name"]);
+                    LeveledDebug.FilterWriteLine("(E) StateKeeperValidator filter of {0} for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
                     return false;
                 }
 
@@ -74,7 +74,7 @@ namespace Telegrator.MadiatorCore.Descriptors
                     if (!filter.CanPass(filterContext))
                     {
                         if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                            LeveledDebug.FilterWriteLine("(E) {0} filter of {1} didnt pass!", filter.GetType().Name, filterContext.Data["handler_name"]);
+                            LeveledDebug.FilterWriteLine("(E) {0} filter of {1} for Update ({2}) didnt pass!", filter.GetType().Name, filterContext.Data["handler_name"], filterContext.Update.Id);
 
                         return false;
                     }

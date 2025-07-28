@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Telegrator.Configuration;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
@@ -18,7 +17,7 @@ namespace Telegrator.Hosting.Providers
         /// <inheritdoc/>
         public HostHandlersProvider(
             IHandlersCollection handlers,
-            IOptions<TelegramBotOptions> options,
+            IOptions<TelegratorOptions> options,
             IServiceProvider serviceProvider,
             ILogger<HostHandlersProvider> logger) : base(handlers, options.Value)
         {

@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot.Types.Enums;
-using Telegrator.Configuration;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -10,7 +9,7 @@ namespace Telegrator.Providers
     /// Extends HandlersProvider to provide functionality for creating and managing awaiter handlers.
     /// </summary>
     /// <param name="options">The bot configuration options.</param>
-    public class AwaitingProvider(TelegramBotOptions options) : HandlersProvider([], options), IAwaitingProvider
+    public class AwaitingProvider(TelegratorOptions options) : HandlersProvider([], options), IAwaitingProvider
     {
         /// <summary>
         /// List of handler descriptors for awaiting handlers.

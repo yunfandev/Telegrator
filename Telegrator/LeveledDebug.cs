@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Telegram.Bot.Types.Enums;
 
 namespace Telegrator
 {
@@ -9,12 +8,17 @@ namespace Telegrator
     public static class LeveledDebug
     {
         /// <summary>
+        /// Gets or sets flags of what debug messages to write
+        /// </summary>
+        public static DebugLevel IndentFlags { get; set; } = DebugLevel.None;
+
+        /// <summary>
         /// Writes debug message if Indent level has Router flag
         /// </summary>
         /// <param name="message"></param>
         public static void RouterWriteLine(string message)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Router))
+            if (IndentFlags.HasFlag(DebugLevel.Router))
                 Debug.WriteLine(message);
         }
 
@@ -25,7 +29,7 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void RouterWriteLine(string message, params object[] args)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Router))
+            if (IndentFlags.HasFlag(DebugLevel.Router))
                 Debug.WriteLine(message, args);
         }
 
@@ -35,7 +39,7 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void ProviderWriteLine(string message)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Providers))
+            if (IndentFlags.HasFlag(DebugLevel.Providers))
                 Debug.WriteLine(message);
         }
 
@@ -46,7 +50,7 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void ProviderWriteLine(string message, params object[] args)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Providers))
+            if (IndentFlags.HasFlag(DebugLevel.Providers))
                 Debug.WriteLine(message, args);
         }
 
@@ -56,7 +60,7 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void FilterWriteLine(string message)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Filters))
+            if (IndentFlags.HasFlag(DebugLevel.Filters))
                 Debug.WriteLine(message);
         }
 
@@ -67,7 +71,7 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void FilterWriteLine(string message, params object[] args)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.Filters))
+            if (IndentFlags.HasFlag(DebugLevel.Filters))
                 Debug.WriteLine(message, args);
         }
 
@@ -77,7 +81,7 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void PoolWriteLine(string message)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.HandlersPool))
+            if (IndentFlags.HasFlag(DebugLevel.HandlersPool))
                 Debug.WriteLine(message);
         }
 
@@ -88,7 +92,7 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void PoolWriteLine(string message, params object[] args)
         {
-            if (Debug.IndentLevel.HasFlag(DebugLevel.HandlersPool))
+            if (IndentFlags.HasFlag(DebugLevel.HandlersPool))
                 Debug.WriteLine(message, args);
         }
     }

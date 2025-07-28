@@ -10,6 +10,6 @@
         /// Executes the pre-building routine on the specified host builder.
         /// </summary>
         /// <param name="hostBuilder">The host builder to configure.</param>
-        public static abstract void PreBuildingRoutine(TelegramBotHostBuilder hostBuilder);
+        public static abstract void PreBuildingRoutine(ITelegramBotHostBuilder hostBuilder);
     }
 }

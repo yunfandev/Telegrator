@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegrator.Configuration;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
@@ -28,7 +27,7 @@ namespace Telegrator.Providers
         /// <summary>
         /// Configuration options for the bot and handler execution behavior.
         /// </summary>
-        protected readonly TelegramBotOptions Options;
+        protected readonly TelegratorOptions Options;
 
         /// <summary>
         /// Initializes a new instance of <see cref="HandlersProvider"/> with the specified handler collections and configuration.
@@ -36,11 +35,12 @@ namespace Telegrator.Providers
         /// <param name="handlers">Collection of handler descriptor lists organized by update type</param>
         /// <param name="options">Configuration options for the bot and handler execution</param>
         /// <exception cref="ArgumentNullException">Thrown when options or botInfo is null</exception>
-        public HandlersProvider(IHandlersCollection handlers, TelegramBotOptions options)
+        public HandlersProvider(IHandlersCollection handlers, TelegratorOptions options)
         {
             AllowedTypes = handlers.AllowedTypes;
             HandlersDictionary = handlers.Values.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
+            LeveledDebug.ProviderWriteLine("{0} created!", GetType().Name);
         }
 
         /// <summary>
@@ -49,27 +49,36 @@ namespace Telegrator.Providers
         /// <param name="handlers">Collection of handler descriptor lists organized by update type</param>
         /// <param name="options">Configuration options for the bot and handler execution</param>
         /// <exception cref="ArgumentNullException">Thrown when options or botInfo is null</exception>
-        public HandlersProvider(IEnumerable<HandlerDescriptorList> handlers, TelegramBotOptions options)
+        public HandlersProvider(IEnumerable<HandlerDescriptorList> handlers, TelegratorOptions options)
         {
             AllowedTypes = Update.AllTypes;
             HandlersDictionary = handlers.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
+            LeveledDebug.ProviderWriteLine("{0} created!", GetType().Name);
         }
 
         /// <inheritdoc/>
         /// <exception cref="Exception">Thrown when the descriptor type is not recognized</exception>
         public virtual UpdateHandlerBase GetHandlerInstance(HandlerDescriptor descriptor, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            bool useSingleton = UseSingleton(descriptor);
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                bool useSingleton = UseSingleton(descriptor);
 
-            if (useSingleton && descriptor.SingletonInstance != null)
-                return descriptor.SingletonInstance;
+                if (useSingleton && descriptor.SingletonInstance != null)
+                    return descriptor.SingletonInstance;
 
-            UpdateHandlerBase instance = GetHandlerInstanceInternal(descriptor);
-            descriptor.SingletonInstance = useSingleton ? instance : null;
-            descriptor.LazyInitialization?.Invoke(instance);
-            return instance;
+                UpdateHandlerBase instance = GetHandlerInstanceInternal(descriptor);
+                descriptor.SingletonInstance = useSingleton ? instance : null;
+                descriptor.LazyInitialization?.Invoke(instance);
+                return instance;
+            }
+            catch
+            {
+                LeveledDebug.ProviderWriteLine("Failed to create instance of {0}", descriptor.ToString());
+                throw;
+            }
         }
 
         private static UpdateHandlerBase GetHandlerInstanceInternal(HandlerDescriptor descriptor)
@@ -84,7 +93,7 @@ namespace Telegrator.Providers
         {
             DescriptorType.General or DescriptorType.Keyed => false,
             DescriptorType.Implicit or DescriptorType.Singleton => true,
-            _ => throw new Exception()
+            _ => throw new Exception("Unknown decriptor type")
         };
 
         /// <inheritdoc/>

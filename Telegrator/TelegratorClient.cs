@@ -19,7 +19,7 @@ namespace Telegrator
         private IUpdateRouter? updateRouter = null;
 
         /// <inheritdoc/>
-        public TelegramBotOptions Options { get; private set; }
+        public TelegratorOptions Options { get; private set; }
 
         /// <inheritdoc/>
         public IHandlersCollection Handlers { get; private set; }
@@ -47,7 +47,7 @@ namespace Telegrator
         /// <param name="cancellationToken">The cancellation token.</param>
         public TelegratorClient(TelegramBotClientOptions options, HttpClient? httpClient = null, CancellationToken cancellationToken = default) : base(options, httpClient, cancellationToken)
         {
-            Options = new TelegramBotOptions();
+            Options = new TelegratorOptions();
             Handlers = new HandlersCollection(default);
             BotInfo = new TelegramBotInfo(this.GetMe(cancellationToken).Result);
         }

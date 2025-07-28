@@ -114,6 +114,8 @@ namespace Telegrator.Hosting
             if (_disposed)
                 return;
 
+            _innerHost.Dispose();
+
             GC.SuppressFinalize(this);
             _disposed = true;
         }

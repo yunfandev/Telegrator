@@ -1,10 +1,10 @@
 ﻿namespace Telegrator.Configuration
 {
     /// <summary>
-    /// Configuration options for Telegram bot behavior and execution settings.
-    /// Controls various aspects of bot operation including concurrency, routing, and execution policies.
+    /// Interface for configuring Telegram bot behavior and execution settings.
+    /// Controls various aspects of bot operation including concurrency, routing, collecting, and execution policies.
     /// </summary>
-    public class TelegramBotOptions
+    public interface ITelegratorOptions
     {
         /// <summary>
         /// Gets or sets a value indicating whether only the first found handler should be executed for each update.
@@ -25,5 +25,15 @@
         /// Gets or sets the global cancellation token for all bot operations.
         /// </summary>
         public CancellationToken GlobalCancellationToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to descend the indexr of handler's index on register. ('false' by default)
+        /// </summary>
+        public bool DescendDescriptorIndex { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to exclude intersecting command aliases.
+        /// </summary>
+        public bool ExceptIntersectingCommandAliases { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace Telegrator.Providers
     /// Provides functionality for collecting, adding, and organizing handlers.
     /// </summary>
     /// <param name="options">Optional configuration options for handler collecting.</param>
-    public class HandlersCollection(IHandlersCollectingOptions? options) : IHandlersCollection
+    public class HandlersCollection(ITelegratorOptions? options) : IHandlersCollection
     {
         private readonly List<UpdateType> _allowedTypes = [];
 
@@ -26,7 +26,7 @@ namespace Telegrator.Providers
         /// <summary>
         /// Configuration options for handler collecting.
         /// </summary>
-        protected readonly IHandlersCollectingOptions? Options = options;
+        protected readonly ITelegratorOptions? Options = options;
         
         /// <summary>
         /// Gets whether handlers must have a parameterless constructor.

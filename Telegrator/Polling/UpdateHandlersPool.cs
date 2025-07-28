@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Telegrator.Configuration;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -39,7 +38,7 @@ namespace Telegrator.Polling
         /// <summary>
         /// The bot configuration options.
         /// </summary>
-        protected readonly TelegramBotOptions Options;
+        protected readonly TelegratorOptions Options;
 
         /// <summary>
         /// The global cancellation token for stopping all operations.
@@ -62,7 +61,7 @@ namespace Telegrator.Polling
         /// </summary>
         /// <param name="options">The bot configuration options.</param>
         /// <param name="globalCancellationToken">The global cancellation token.</param>
-        public UpdateHandlersPool(TelegramBotOptions options, CancellationToken globalCancellationToken)
+        public UpdateHandlersPool(TelegratorOptions options, CancellationToken globalCancellationToken)
         {
             Options = options;
             GlobalCancellationToken = globalCancellationToken;

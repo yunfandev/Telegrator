@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot.Polling;
-using Telegrator.Configuration;
 using Telegrator.Handlers.Components;
 
 namespace Telegrator.MadiatorCore
@@ -11,9 +10,9 @@ namespace Telegrator.MadiatorCore
     public interface IUpdateRouter : IUpdateHandler, IPollingProvider
     {   
         /// <summary>
-        /// Gets the <see cref="TelegramBotOptions"/> for the router.
+        /// Gets the <see cref="TelegratorOptions"/> for the router.
         /// </summary>
-        public TelegramBotOptions Options { get; }
+        public TelegratorOptions Options { get; }
         
         /// <summary>
         /// Gets the <see cref="IUpdateHandlersPool"/> that manages handler execution.

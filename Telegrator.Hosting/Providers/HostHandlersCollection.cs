@@ -12,10 +12,10 @@ namespace Telegrator.Hosting.Providers
     /// Pre host building task
     /// </summary>
     /// <param name="builder"></param>
-    public delegate void PreBuildingRoutine(TelegramBotHostBuilder builder);
+    public delegate void PreBuildingRoutine(ITelegramBotHostBuilder builder);
 
     /// <inheritdoc/>
-    public class HostHandlersCollection(IServiceCollection hostServiceColletion, IHandlersCollectingOptions options) : HandlersCollection(options)
+    public class HostHandlersCollection(IServiceCollection hostServiceColletion, ITelegratorOptions options) : HandlersCollection(options)
     {
         private readonly IServiceCollection Services = hostServiceColletion;
 

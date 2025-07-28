@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Telegrator.Configuration;
 
 namespace Telegrator.Hosting
 {
     /// <summary>
     /// Settings os hosted Telegram bot
     /// </summary>
-    public class TelegramBotHostBuilderSettings() : IHandlersCollectingOptions
+    public class TelegramBotHostBuilderSettings() : TelegratorOptions
     {
         /// <inheritdoc cref="HostApplicationBuilderSettings.DisableDefaults"/>
         public bool DisableDefaults { get; set; }
@@ -27,12 +26,6 @@ namespace Telegrator.Hosting
         /// <inheritdoc cref="HostApplicationBuilderSettings.ContentRootPath"/>
         public string? ContentRootPath { get; set; }
 
-        /// <inheritdoc/>
-        public bool DescendDescriptorIndex { get; set; } = true;
-
-        /// <inheritdoc/>
-        public bool ExceptIntersectingCommandAliases { get; set; } = true;
-        
         internal HostApplicationBuilderSettings ToApplicationBuilderSettings() => new HostApplicationBuilderSettings()
         {
             DisableDefaults = DisableDefaults,

@@ -77,6 +77,11 @@
     public enum DebugLevel
     {
         /// <summary>
+        /// None to write
+        /// </summary>
+        None = 0x0,
+
+        /// <summary>
         /// Write debug messages from filters execution
         /// </summary>
         Filters = 0x1,

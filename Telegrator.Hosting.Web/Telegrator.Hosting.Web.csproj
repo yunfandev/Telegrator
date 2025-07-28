@@ -4,6 +4,18 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <PackageProjectUrl></PackageProjectUrl>
+	  <Title>Telegrator : Telegram.Bot mediator framework</Title>
+	  <PackageIcon>telegrator_nuget.png</PackageIcon>
+	  <RepositoryUrl>https://github.com/Rikitav/Telegrator</RepositoryUrl>
+	  <PackageTags>telegram;bot;mediator;attributes;aspect;hosting;host;framework;easy;simple;handlers</PackageTags>
+	  <EnableNETAnalyzers>True</EnableNETAnalyzers>
+	  <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Version>1.0.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +23,25 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.3.0" />
+	<None Include="..\LICENSE">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	</None>
+	<None Include="..\resources\telegrator_nuget.png">
+	  <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+	</None>
+	<None Update="README.md">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Telegram.Bot.AspNetCore" Version="22.5.0" />
   </ItemGroup>
 </Project>

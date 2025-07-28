@@ -12,7 +12,7 @@ namespace Telegrator.MadiatorCore.Descriptors
     {
         private readonly object _lock = new object();
         private readonly SortedList<DescriptorIndexer, HandlerDescriptor> _innerCollection;
-        private readonly IHandlersCollectingOptions? _options;
+        private readonly ITelegratorOptions? _options;
         private readonly UpdateType _handlingType;
 
         private int count;
@@ -54,7 +54,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// </summary>
         /// <param name="updateType">The update type for the handlers.</param>
         /// <param name="options">The collecting options.</param>
-        public HandlerDescriptorList(UpdateType updateType, IHandlersCollectingOptions? options)
+        public HandlerDescriptorList(UpdateType updateType, ITelegratorOptions? options)
         {
             _innerCollection = [];
             _handlingType = updateType;
