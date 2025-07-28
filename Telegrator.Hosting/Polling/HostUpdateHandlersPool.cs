@@ -14,7 +14,7 @@ namespace Telegrator.Hosting.Polling
         /// <inheritdoc/>
         protected override async Task ExecuteHandlerWrapper(DescribedHandlerInfo enqueuedHandler)
         {
-            _logger.LogInformation("Handler \"{0}\" has entered execution pool", enqueuedHandler.DisplayString);
+            //_logger.LogInformation("Handler \"{0}\" has entered execution pool", enqueuedHandler.DisplayString);
             await base.ExecuteHandlerWrapper(enqueuedHandler);
         }
     }

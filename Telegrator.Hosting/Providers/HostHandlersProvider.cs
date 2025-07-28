@@ -26,16 +26,6 @@ namespace Telegrator.Hosting.Providers
             Logger = logger;
         }
 
-        /*
-        /// <inheritdoc/>
-        public override IEnumerable<DescribedHandlerInfo> GetHandlers(IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
-        {
-            IEnumerable<DescribedHandlerInfo> handlers = base.GetHandlers(updateRouter, client, update, cancellationToken).ToArray();
-            Logger.LogInformation("Described handlers : {handlers}", string.Join(", ", handlers.Select(hndlr => hndlr.DisplayString ?? hndlr.HandlerInstance.GetType().Name)));
-            return handlers;
-        }
-        */
-
         /// <inheritdoc/>
         public override UpdateHandlerBase GetHandlerInstance(HandlerDescriptor descriptor, CancellationToken cancellationToken = default)
         {
