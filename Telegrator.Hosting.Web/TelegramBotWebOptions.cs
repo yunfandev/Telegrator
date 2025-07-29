@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Telegrator.Hosting.Web
 {
@@ -11,6 +12,7 @@ namespace Telegrator.Hosting.Web
         /// <summary>
         /// Gets or sets HTTPS URL to send updates to. Use an empty string to remove webhook integration
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Uri)]
         public required string WebhookUri { get; set; }
 
         /// <summary>
