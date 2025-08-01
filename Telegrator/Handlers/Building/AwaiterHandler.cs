@@ -51,10 +51,10 @@ namespace Telegrator.Handlers.Building
         /// <param name="container">The handler container (unused).</param>
         /// <param name="cancellation">The cancellation token (unused).</param>
         /// <returns>A completed task.</returns>
-        protected override Task ExecuteInternal(IHandlerContainer container, CancellationToken cancellation)
+        protected override Task<Result> ExecuteInternal(IHandlerContainer container, CancellationToken cancellation)
         {
             ResetEvent.Set();
-            return Task.CompletedTask;
+            return Task.FromResult(Result.Ok());
         }
 
         /// <summary>

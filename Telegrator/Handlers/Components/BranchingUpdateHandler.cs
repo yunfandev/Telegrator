@@ -118,13 +118,13 @@ namespace Telegrator.Handlers.Components
         /// <param name="container">The handler container.</param>
         /// <param name="cancellation">The cancellation token.</param>
         /// <exception cref="Exception">Thrown when no branch method is set.</exception>
-        public override async Task Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation)
+        public override async Task<Result> Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation)
         {
             if (branchMethodInfo is null)
                 throw new Exception();
 
             Cancellation = cancellation;
-            await BranchExecuteWrapper(container, branchMethodInfo);
+            return await BranchExecuteWrapper(container, branchMethodInfo);
         }
 
         /// <summary>
@@ -132,21 +132,20 @@ namespace Telegrator.Handlers.Components
         /// </summary>
         /// <param name="container">The handler container.</param>
         /// <param name="methodInfo">The method to execute.</param>
-        protected virtual async Task BranchExecuteWrapper(IAbstractHandlerContainer<TUpdate> container, MethodInfo methodInfo)
+        protected virtual async Task<Result> BranchExecuteWrapper(IAbstractHandlerContainer<TUpdate> container, MethodInfo methodInfo)
         {
             if (methodInfo.ReturnType == typeof(void))
             {
                 methodInfo.Invoke(this, []);
-                return;
+                return Result.Ok();
             }
             else
             {
                 object branchReturn = methodInfo.Invoke(this, []);
-                if (branchReturn == null)
-                    return;
-
-                if (branchReturn is Task branchTask)
-                    await branchTask;
+                if (branchReturn is not Task<Result> branchTask)
+                    throw new InvalidOperationException();
+                
+                return await branchTask;
             }
         }
 

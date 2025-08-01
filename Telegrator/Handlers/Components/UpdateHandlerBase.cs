@@ -24,10 +24,16 @@ namespace Telegrator.Handlers.Components
         /// <param name="container">The <see cref="IHandlerContainer"/> for the update.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task Execute(IHandlerContainer container, CancellationToken cancellationToken = default)
+        public async Task<Result> Execute(IHandlerContainer container, CancellationToken cancellationToken = default)
         {
-            await ExecuteInternal(container, cancellationToken);
-            LifetimeToken.LifetimeEnded();
+            try
+            {
+                return await ExecuteInternal(container, cancellationToken);
+            }
+            finally
+            {
+                LifetimeToken.LifetimeEnded();
+            }
         }
 
         /// <summary>
@@ -36,6 +42,6 @@ namespace Telegrator.Handlers.Components
         /// <param name="container">The <see cref="IHandlerContainer"/> for the update.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected abstract Task ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken);
+        protected abstract Task<Result> ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken);
     }
 }

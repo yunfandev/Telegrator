@@ -8,8 +8,13 @@ namespace Telegrator
     /// </summary>
     public class TelegratorOptions : ITelegratorOptions
     {
+        /*
         /// <inheritdoc/>
         public bool ExecuteOnlyFirstFoundHanlder { get; set; }
+
+        /// <inheritdoc/>
+        public bool DescendDescriptorIndex { get; set; } = true;
+        */
 
         /// <inheritdoc/>
         public int? MaximumParallelWorkingHandlers { get; set; }
@@ -18,13 +23,9 @@ namespace Telegrator
         public bool ExclusiveAwaitingHandlerRouting { get; set; }
 
         /// <inheritdoc/>
-        public CancellationToken GlobalCancellationToken { get; set; }
-
-        /// <inheritdoc/>
-        public bool DescendDescriptorIndex { get; set; } = true;
-
-        /// <inheritdoc/>
         public bool ExceptIntersectingCommandAliases { get; set; } = true;
 
+        /// <inheritdoc/>
+        public CancellationToken GlobalCancellationToken { get; set; }
     }
 }

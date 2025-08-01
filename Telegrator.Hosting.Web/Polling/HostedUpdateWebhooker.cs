@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -22,7 +21,7 @@ namespace Telegrator.Hosting.Web.Polling
         private readonly ITelegramBotWebHost _botHost;
         private readonly ITelegramBotClient _botClient;
         private readonly IUpdateRouter _updateRouter;
-        private readonly TelegramBotWebOptions _options;
+        private readonly TelegratorWebOptions _options;
 
         /// <summary>
         /// Initiallizes new instance of <see cref="HostedUpdateWebhooker"/>
@@ -32,7 +31,7 @@ namespace Telegrator.Hosting.Web.Polling
         /// <param name="updateRouter"></param>
         /// <param name="options"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public HostedUpdateWebhooker(ITelegramBotWebHost botHost, ITelegramBotClient botClient, IUpdateRouter updateRouter, IOptions<TelegramBotWebOptions> options)
+        public HostedUpdateWebhooker(ITelegramBotWebHost botHost, ITelegramBotClient botClient, IUpdateRouter updateRouter, IOptions<TelegratorWebOptions> options)
         {
             if (string.IsNullOrEmpty(options.Value.WebhookUri))
                 throw new ArgumentNullException(nameof(options), "Option \"WebhookUrl\" must be set to subscribe for update recieving");

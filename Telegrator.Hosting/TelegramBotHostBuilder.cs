@@ -77,6 +77,7 @@ namespace Telegrator.Hosting
             }
 
             Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
+            Services.AddSingleton<IConfigurationManager>(Configuration);
             return new TelegramBotHost(_innerBuilder, _handlers);
         }
     }

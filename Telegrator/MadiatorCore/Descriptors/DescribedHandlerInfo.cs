@@ -2,6 +2,7 @@
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
+using Telegrator.Handlers;
 using Telegrator.Handlers.Components;
 
 namespace Telegrator.MadiatorCore.Descriptors
@@ -81,34 +82,41 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         /// <exception cref="Exception">Thrown if the handler lifetime has ended or the handler is not a container factory.</exception>
-        public async Task Execute(CancellationToken cancellationToken)
+        public async Task<Result> Execute(CancellationToken cancellationToken)
         {
             if (HandlerLifetime.IsEnded)
                 throw new Exception();
 
-            IHandlerContainerFactory? containerFactory = HandlerInstance is IHandlerContainerFactory handlerDefainedContainerFactory
-                ? handlerDefainedContainerFactory
-                : UpdateRouter.DefaultContainerFactory is not null
-                    ? UpdateRouter.DefaultContainerFactory
-                    : throw new Exception();
-
             try
             {
-                HandlerContainer = containerFactory.CreateContainer(UpdateRouter.AwaitingProvider,  this);
-                await HandlerInstance.Execute(HandlerContainer, cancellationToken);
+                HandlerContainer = GetContainer(UpdateRouter.AwaitingProvider, this);
+                return await HandlerInstance.Execute(HandlerContainer, cancellationToken);
             }
             catch (OperationCanceledException)
             {
                 // Cancelled
                 _ = 0xBAD + 0xC0DE;
-                return;
+                return Result.Ok();
             }
             catch (Exception exception)
             {
                 await UpdateRouter
                     .HandleErrorAsync(Client, exception, HandleErrorSource.HandleUpdateError, cancellationToken)
                     .ConfigureAwait(false);
+
+                return Result.Fault();
             }
+        }
+
+        private IHandlerContainer GetContainer(IAwaitingProvider awaitingProvider, DescribedHandlerInfo handlerInfo)
+        {
+            if (HandlerInstance is IHandlerContainerFactory handlerDefainedContainerFactory)
+                return handlerDefainedContainerFactory.CreateContainer(awaitingProvider, handlerInfo);
+
+            if (UpdateRouter.DefaultContainerFactory is not null)
+                return UpdateRouter.DefaultContainerFactory.CreateContainer(awaitingProvider, handlerInfo);
+            
+            throw new Exception();
         }
 
         /// <inheritdoc/>
