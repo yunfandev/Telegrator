@@ -55,9 +55,10 @@ using Telegrator.Annotations;
 [MessageHandler]
 public class HelloHandler : MessageHandler
 {
-    public override async Task Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
+    public override async Task<Result> Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
     {
         await Reply("Hello, world!", cancellationToken: cancellation);
+        return Result.Ok();
     }
 }
 
@@ -77,9 +78,10 @@ using Telegrator.Annotations;
 [CommandHandler, CommandAllias("start", "hello"), ChatType(ChatType.Private)]
 public class StartCommandHandler : CommandHandler
 {
-    public override async Task Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
+    public override async Task<Result> Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
     {
         await Responce("Welcome!", cancellationToken: cancellation);
+        return Result.Ok();
     }
 }
 
@@ -96,11 +98,12 @@ using Telegrator.Annotations;
 [CommandHandler, CommandAllias("first"), NumericState(SpecialState.NoState)]
 public class StateKeepFirst : CommandHandler
 {
-    public override async Task Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
+    public override async Task<Result> Execute(IAbstractHandlerContainer<Message> container, CancellationToken cancellation)
     {
         container.CreateNumericState();
         container.ForwardNumericState();
         await Reply("first state moved (1)", cancellationToken: cancellation);
+        return Result.Ok();
     }
 }
 

@@ -40,7 +40,6 @@ using Telegrator.Hosting.Web;
 TelegramBotWebHostBuilder builder = TelegramBotWebHost.CreateBuilder(new TelegramBotWebOptions()
 {
     Args = args,
-    WebhookUri = "https://you-public-host.ru/bot"
     ExceptIntersectingCommandAliases = true
 });
 
@@ -65,6 +64,11 @@ telegramBot.Run();
 {
   "TelegramBotClientOptions": {
     "Token": "YOUR_BOT_TOKEN"
+  }
+
+  "TelegratorWebOptions": {
+    "WebhookUri" = "https://you-public-host.ru/bot",
+    "DropPendingUpdates": true
   }
 }
 ```

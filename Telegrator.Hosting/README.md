@@ -38,7 +38,6 @@ using Telegrator.Hosting;
 TelegramBotHostBuilder builder = TelegramBotHost.CreateBuilder(new TelegramBotHostBuilderSettings()
 {
     Args = args,
-    DescendDescriptorIndex = false,
     ExceptIntersectingCommandAliases = true
 });
 
