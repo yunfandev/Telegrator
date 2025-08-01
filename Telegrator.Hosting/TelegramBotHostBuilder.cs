@@ -47,7 +47,6 @@ namespace Telegrator.Hosting
         {
             _innerBuilder = hostApplicationBuilder;
             _settings = settings ?? new TelegramBotHostBuilderSettings();
-
             _handlers = new HostHandlersCollection(Services, _settings);
 
             _innerBuilder.Logging.ClearProviders();
@@ -78,6 +77,7 @@ namespace Telegrator.Hosting
             }
 
             Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
+            Services.AddSingleton<IConfigurationManager>(Configuration);
             return new TelegramBotHost(_innerBuilder, _handlers);
         }
     }

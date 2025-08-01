@@ -15,6 +15,8 @@ namespace Telegrator.MadiatorCore.Descriptors
     /// <typeparam name="TUpdate"></typeparam>
     public class MethodHandlerDescriptor<TUpdate> : HandlerDescriptor where TUpdate : class
     {
+        private readonly MethodInfo Method;
+
         /// <summary>
         /// Initializes new instance of <see cref="MethodHandlerDescriptor{TUpdate}"/>
         /// </summary>
@@ -28,13 +30,21 @@ namespace Telegrator.MadiatorCore.Descriptors
             UpdateType = handlerAttribute.Type;
             Indexer = handlerAttribute.GetIndexer();
             Filters = new DescriptorFiltersSet(handlerAttribute, stateKeeperAttribute, filters);
-            DisplayString = HandlerInspector.GetDisplayName(action.Method);
-            InstanceFactory = () => new MethodHandler(action.Method, UpdateType);
+            DisplayString = HandlerInspector.GetDisplayName(action.Method) ?? action.Method.Name;
+            Method = action.Method;
+            InstanceFactory = () => new MethodHandler(UpdateType);
+            LazyInitialization = handler =>
+            {
+                if (handler is not MethodHandler methodHandler)
+                    throw new InvalidDataException();
+
+                methodHandler.Method = Method;
+            };
         }
 
-        private class MethodHandler(MethodInfo method, UpdateType updateType) : AbstractUpdateHandler<TUpdate>(updateType)
+        private class MethodHandler(UpdateType updateType) : AbstractUpdateHandler<TUpdate>(updateType)
         {
-            private readonly MethodInfo Method = method;
+            internal MethodInfo Method = null!;
 
             public override async Task<Result> Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation)
             {

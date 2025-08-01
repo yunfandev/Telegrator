@@ -70,6 +70,7 @@ namespace Telegrator.Hosting.Web
                 Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
             }
 
+            Services.AddSingleton<IConfigurationManager>(Configuration);
             Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
             return new TelegramBotWebHost(_innerBuilder, _handlers);
         }
