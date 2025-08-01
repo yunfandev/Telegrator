@@ -57,8 +57,8 @@ namespace Telegrator.Handlers
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
             CancellationToken cancellationToken = default)
-            => await Client.SendMessage(
-                Input.Chat, text, parseMode, Input,
+            => await Container.Reply(
+                text, parseMode,
                 replyMarkup, linkPreviewOptions,
                 messageThreadId, entities,
                 disableNotification, protectContent,
@@ -96,8 +96,8 @@ namespace Telegrator.Handlers
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
             CancellationToken cancellationToken = default)
-            => await Client.SendMessage(
-                Input.Chat, text, parseMode, replyParameters,
+            => await Container.Responce(
+                text, parseMode, replyParameters,
                 replyMarkup, linkPreviewOptions,
                 messageThreadId, entities,
                 disableNotification, protectContent,
@@ -140,8 +140,8 @@ namespace Telegrator.Handlers
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
             CancellationToken cancellationToken = default)
-            => await Client.SendMessage(
-                Input.Chat, text, parseMode, Input,
+            => await Container.Reply(
+                text, parseMode,
                 replyMarkup, linkPreviewOptions,
                 messageThreadId, entities,
                 disableNotification, protectContent,
@@ -179,8 +179,8 @@ namespace Telegrator.Handlers
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
             CancellationToken cancellationToken = default)
-            => await Client.SendMessage(
-                Input.Chat, text, parseMode, replyParameters,
+            => await Container.Responce(
+                text, parseMode, replyParameters,
                 replyMarkup, linkPreviewOptions,
                 messageThreadId, entities,
                 disableNotification, protectContent,
