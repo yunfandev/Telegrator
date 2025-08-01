@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Telegrator.Handlers;
+﻿using Telegrator.Handlers;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -16,32 +15,9 @@ namespace Telegrator.Polling
         /// </summary>
         protected object SyncObj = new object();
 
-        /*
-        /// <summary>
-        /// Event that signals when awaiting handlers are queued.
-        /// </summary>
-        protected ManualResetEventSlim AwaitingHandlersQueuedEvent = null!;
-
         /// <summary>
         /// Semaphore for controlling the number of concurrently executing handlers.
         /// </summary>
-        protected SemaphoreSlim ExecutingHandlersSemaphore = null!;
-
-        /// <summary>
-        /// Queue for storing awaiting handlers.
-        /// </summary>
-        protected readonly ConcurrentQueue<DescribedHandlerInfo> AwaitingHandlersQueue = [];
-
-        /// <summary>
-        /// Dictionary for tracking currently executing handlers.
-        /// </summary>
-        protected readonly ConcurrentDictionary<HandlerLifetimeToken, Task> ExecutingHandlersPool = [];
-        */
-
-        //protected readonly ConcurrentDictionary<Type, LimitedQueue<DescribedHandlerInfo>> AwaitingHandlersQueue;
-
-        //protected readonly LimitedDictionary<HandlerLifetimeToken, Task> ExecutingHandlersPool;
-
         protected SemaphoreSlim ExecutingHandlersSemaphore = null!;
 
         /// <summary>
@@ -74,26 +50,16 @@ namespace Telegrator.Polling
         {
             Options = options;
             GlobalCancellationToken = globalCancellationToken;
-            //AwaitingHandlersQueue = new ConcurrentDictionary<Type, LimitedQueue<DescribedHandlerInfo>>();
-            //ExecutingHandlersPool = new LimitedDictionary<HandlerLifetimeToken, Task>(options.MaximumParallelWorkingHandlers);
 
             if (options.MaximumParallelWorkingHandlers != null)
             {
                 ExecutingHandlersSemaphore = new SemaphoreSlim(options.MaximumParallelWorkingHandlers.Value);
-                //AwaitingHandlersQueuedEvent = new ManualResetEventSlim(false);
             }
-
-            /*
-            if (Options.MaximumParallelWorkingHandlers != null)
-                HandlersCheckpoint();
-            */
         }
 
         /// <inheritdoc/>
         public async Task Enqueue(IEnumerable<DescribedHandlerInfo> handlers)
         {
-            //handlers.ForEach(Enqueue);
-
             Result? lastResult = null;
             foreach (DescribedHandlerInfo handlerInfo in handlers)
             {
@@ -123,137 +89,6 @@ namespace Telegrator.Polling
                     break;
             }
         }
-        
-        /*
-        /// <inheritdoc/>
-        public void Enqueue(DescribedHandlerInfo handlerInfo)
-        {
-            throw new NotImplementedException();
-
-            if (Options.MaximumParallelWorkingHandlers == null)
-            {
-                Task.Run(async () => await ExecuteHandlerWrapper(handlerInfo));
-                return;
-            }
-
-            lock (SyncObj)
-            {
-                AwaitingHandlersQueue.Enqueue(handlerInfo);
-                HandlerEnqueued?.Invoke(handlerInfo);
-                AwaitingHandlersQueuedEvent.Set();
-            }
-        }
-
-        /// <inheritdoc/>
-        public void Dequeue(HandlerLifetimeToken token)
-        {
-            if (Options.MaximumParallelWorkingHandlers == null)
-                return;
-
-            lock (SyncObj)
-            {
-                ExecutingHandlersPool.TryRemove(token, out _);
-                ExecutingHandlersSemaphore.Release(1);
-            }
-        }
-        */
-
-        /*
-        /// <summary>
-        /// Main checkpoint method that manages handler execution in a loop.
-        /// Continuously processes queued handlers while respecting concurrency limits.
-        /// </summary>
-        protected virtual async void HandlersCheckpoint()
-        {
-            await Task.Yield();
-            while (!GlobalCancellationToken.IsCancellationRequested)
-            {
-                if (!CanEnqueueHandler())
-                {
-                    await ExecutingHandlersSemaphore.WaitAsync(GlobalCancellationToken);
-                    if (!CanEnqueueHandler())
-                        continue;
-                }
-
-                if (!TryDequeueHandler(out DescribedHandlerInfo? enqueuedHandler))
-                {
-                    AwaitingHandlersQueuedEvent.Reset();
-                    AwaitingHandlersQueuedEvent.Wait(GlobalCancellationToken);
-
-                    if (!TryDequeueHandler(out enqueuedHandler))
-                        continue;
-                }
-
-                if (enqueuedHandler == null)
-                    continue;
-
-                ExecuteHandler(enqueuedHandler);
-            }
-        }
-
-        /// <summary>
-        /// Executes a handler by creating a lifetime token and tracking the execution.
-        /// </summary>
-        /// <param name="enqueuedHandler">The handler to execute.</param>
-        protected virtual void ExecuteHandler(DescribedHandlerInfo enqueuedHandler)
-        {
-            HandlerLifetimeToken lifetimeToken = enqueuedHandler.HandlerLifetime;
-            lifetimeToken.OnLifetimeEnded += Dequeue;
-
-            Task executingHandler = ExecuteHandlerWrapper(enqueuedHandler);
-            lock (SyncObj)
-                ExecutingHandlersPool.TryAdd(lifetimeToken, executingHandler);
-
-            HandlerExecuting?.Invoke(enqueuedHandler);
-        }
-
-        /// <summary>
-        /// Wrapper method that executes a handler and handles exceptions.
-        /// </summary>
-        /// <param name="enqueuedHandler">The handler to execute.</param>
-        /// <returns>A task representing the asynchronous execution.</returns>
-        /// <exception cref="HandlerFaultedException">Thrown when the handler execution fails.</exception>
-        protected virtual async Task ExecuteHandlerWrapper(DescribedHandlerInfo enqueuedHandler)
-        {
-            try
-            {
-                await enqueuedHandler.Execute(GlobalCancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            catch (Exception ex)
-            {
-                throw new HandlerFaultedException(enqueuedHandler, ex);
-            }
-        }
-
-        /// <summary>
-        /// Checks if a new handler can be enqueued based on the current execution count.
-        /// </summary>
-        /// <returns>True if a new handler can be enqueued; otherwise, false.</returns>
-        protected virtual bool CanEnqueueHandler()
-        {
-            lock (SyncObj)
-            {
-                return ExecutingHandlersPool.Count < Options.MaximumParallelWorkingHandlers;
-            }
-        }
-
-        /// <summary>
-        /// Attempts to dequeue a handler from the awaiting queue.
-        /// </summary>
-        /// <param name="enqueuedHandler">The dequeued handler, if successful.</param>
-        /// <returns>True if a handler was successfully dequeued; otherwise, false.</returns>
-        protected virtual bool TryDequeueHandler(out DescribedHandlerInfo? enqueuedHandler)
-        {
-            lock (SyncObj)
-            {
-                return AwaitingHandlersQueue.TryDequeue(out enqueuedHandler);
-            }
-        }
-        */
 
         /// <summary>
         /// Disposes of the handlers pool and releases all resources.

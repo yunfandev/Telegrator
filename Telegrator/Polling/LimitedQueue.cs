@@ -2,6 +2,7 @@
 
 namespace Telegrator.Polling
 {
+    /*
     public class LimitedQueue<T>
     {
         private readonly int? _maximum;
@@ -39,4 +40,5 @@ namespace Telegrator.Polling
             return false;
         }
     }
+    */
 }
