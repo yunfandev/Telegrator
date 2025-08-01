@@ -61,7 +61,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public UpdateType UpdateType
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public DescriptorFiltersSet Filters
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public object? ServiceKey
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public Func<UpdateHandlerBase>? InstanceFactory
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public UpdateHandlerBase? SingletonInstance
         {
             get;
-            set;
+            protected set;
         }
 
         /// <summary>
@@ -125,6 +125,13 @@ namespace Telegrator.MadiatorCore.Descriptors
         {
             get;
             set;
+        }
+
+        internal HandlerDescriptor(DescriptorType descriptorType)
+        {
+            Type = descriptorType;
+            HandlerType = null!;
+            Filters = new DescriptorFiltersSet(null, null, null);
         }
 
         /// <summary>
@@ -411,6 +418,14 @@ namespace Telegrator.MadiatorCore.Descriptors
             Filters = new DescriptorFiltersSet(validateFilter, stateKeepFilter, filters);
             ServiceKey = serviceKey ?? throw new ArgumentNullException(nameof(serviceKey));
             InstanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
+        }
+
+        public void SetInstance(UpdateHandlerBase instance)
+        {
+            if (SingletonInstance != null)
+                throw new Exception();
+
+            SingletonInstance = instance;
         }
 
         /// <inheritdoc/>

@@ -356,12 +356,19 @@ namespace Telegrator
         public static HandlerBuilder<CallbackQuery> CreateCallbackQuery(this IHandlersCollection handlers)
             => handlers.CreateHandler<CallbackQuery>(UpdateType.CallbackQuery);
 
-        /*
-        public static IHandlersCollection AddMethod<TUpdate>(this IHandlersCollection handlers, Func<IAbstractHandlerContainer<TUpdate>, CancellationToken, Task> method)
+        /// <summary>
+        /// Creates implicit handler from method
+        /// </summary>
+        /// <typeparam name="TUpdate"></typeparam>
+        /// <param name="handlers"></param>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        public static IHandlersCollection AddMethod<TUpdate>(this IHandlersCollection handlers, AbstractHandlerAction<TUpdate> method) where TUpdate : class
         {
-
+            MethodHandlerDescriptor<TUpdate> descriptor = new MethodHandlerDescriptor<TUpdate>(method);
+            handlers.AddDescriptor(descriptor);
+            return handlers;
         }
-        */
     }
 
     /// <summary>
