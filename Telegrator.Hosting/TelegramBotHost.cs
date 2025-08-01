@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using Telegram.Bot.Types.Enums;
+using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Providers;
 using Telegrator.MadiatorCore;
@@ -39,12 +40,20 @@ namespace Telegrator.Hosting
         /// <param name="handlers"></param>
         internal TelegramBotHost(HostApplicationBuilder hostApplicationBuilder, HostHandlersCollection handlers)
         {
+            // Registering this host in services for easy access
             RegisterHostServices(hostApplicationBuilder, handlers);
+
+            // Building proxy hoster
             _innerHost = hostApplicationBuilder.Build();
 
+            // Initializing bot info, as it requires to make a request via tg bot
+            Services.GetRequiredService<ITelegramBotInfo>();
+
+            // Reruesting services for this host
             _updateRouter = Services.GetRequiredService<IUpdateRouter>();
             _logger = Services.GetRequiredService<ILogger<TelegramBotHost>>();
 
+            // Logging registering handlers in DEBUG purposes
             LogHandlers(handlers);
         }
 

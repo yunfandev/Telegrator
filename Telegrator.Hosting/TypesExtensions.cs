@@ -47,8 +47,9 @@ namespace Telegrator.Hosting
             services.AddSingleton<IAwaitingProvider, HostAwaitingProvider>();
             services.AddSingleton<IHandlersProvider, HostHandlersProvider>();
             services.AddSingleton<IUpdateRouter, HostUpdateRouter>();
-            services.AddSingleton<ITelegramBotInfo, TelegramBotInfo>(services => new TelegramBotInfo(services.GetRequiredService<ITelegramBotClient>().GetMe().Result));
-            
+            //services.AddSingleton<ITelegramBotInfo, TelegramBotInfo>(services => new TelegramBotInfo(services.GetRequiredService<ITelegramBotClient>().GetMe().Result));
+            services.AddSingleton<ITelegramBotInfo, HostedTelegramBotInfo>();
+
             return services;
         }
 

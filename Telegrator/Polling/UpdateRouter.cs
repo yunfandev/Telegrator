@@ -84,7 +84,7 @@ namespace Telegrator.Polling
         /// <returns>A task representing the asynchronous error handling operation.</returns>
         public virtual Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
         {
-            LeveledDebug.RouterWriteLine("Handling exception {0}", exception.GetType().Name);
+            Alligator.RouterWriteLine("Handling exception {0}", exception.GetType().Name);
             ExceptionHandler?.HandleException(botClient, exception, source, cancellationToken);
             return Task.CompletedTask;
         }
@@ -99,7 +99,7 @@ namespace Telegrator.Polling
         public virtual Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             // Logging
-            LeveledDebug.RouterWriteLine("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
+            Alligator.RouterWriteLine("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
             LogUpdate(update);
 
             try
@@ -114,24 +114,24 @@ namespace Telegrator.Polling
                     // Chicking if awaiting handlers has exclusive routing
                     if (Options.ExclusiveAwaitingHandlerRouting)
                     {
-                        LeveledDebug.RouterWriteLine("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
+                        Alligator.RouterWriteLine("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
                         return Task.CompletedTask;
                     }
                 }
 
                 // Queuing reagular handlers for execution
                 HandlersPool.Enqueue(GetHandlers(HandlersProvider, this, botClient, update, cancellationToken));
-                LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
+                Alligator.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
                 return Task.CompletedTask;
             }
             catch (OperationCanceledException)
             {
-                LeveledDebug.RouterWriteLine("Receiving Update ({0}) cancelled", update.Id);
+                Alligator.RouterWriteLine("Receiving Update ({0}) cancelled", update.Id);
                 return Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                LeveledDebug.RouterWriteLine("Receiving Update ({0}) finished with exception {1}", update.Id, ex.Message);
+                Alligator.RouterWriteLine("Receiving Update ({0}) finished with exception {1}", update.Id, ex.Message);
                 ExceptionHandler?.HandleException(botClient, ex, HandleErrorSource.PollingError, cancellationToken);
                 return Task.CompletedTask;
             }
@@ -149,22 +149,22 @@ namespace Telegrator.Polling
         /// <returns>A collection of described handler information for the update</returns>
         protected virtual IEnumerable<DescribedHandlerInfo> GetHandlers(IHandlersProvider provider, IUpdateRouter updateRouter, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            LeveledDebug.RouterWriteLine("Requested handlers for UpdateType.{0}", update.Type);
+            Alligator.RouterWriteLine("Requested handlers for UpdateType.{0}", update.Type);
             if (!provider.TryGetDescriptorList(update.Type, out HandlerDescriptorList? descriptors))
             {
-                LeveledDebug.RouterWriteLine("No registered, providing Any");
+                Alligator.RouterWriteLine("No registered, providing Any");
                 provider.TryGetDescriptorList(UpdateType.Unknown, out descriptors);
             }
 
             if (descriptors == null || descriptors.Count == 0)
             {
-                LeveledDebug.RouterWriteLine("No handlers provided");
+                Alligator.RouterWriteLine("No handlers provided");
                 return [];
             }
 
             IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
-            LeveledDebug.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
-            LeveledDebug.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
+            Alligator.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
+            Alligator.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
             return described;
         }
 
@@ -183,7 +183,7 @@ namespace Telegrator.Polling
         {
             try
             {
-                LeveledDebug.RouterWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+                Alligator.RouterWriteLine("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
                 foreach (HandlerDescriptor descriptor in descriptors.Reverse())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -198,7 +198,7 @@ namespace Telegrator.Polling
             }
             finally
             {
-                LeveledDebug.RouterWriteLine("Describing for Update ({0}) finished", update.Id);
+                Alligator.RouterWriteLine("Describing for Update ({0}) finished", update.Id);
             }
         }
 
@@ -252,7 +252,7 @@ namespace Telegrator.Polling
                         if (msg.Sticker != null)
                             sb.AppendFormat(" with sticker '{0}'", msg.Sticker.Emoji);
 
-                        LeveledDebug.RouterWriteLine(sb.ToString());
+                        Alligator.RouterWriteLine(sb.ToString());
                         break;
                     }
 
@@ -267,7 +267,7 @@ namespace Telegrator.Polling
                         if (cq.From != null)
                             sb.AppendFormat(" with data '{0}'", cq.Data);
 
-                        LeveledDebug.RouterWriteLine(sb.ToString());
+                        Alligator.RouterWriteLine(sb.ToString());
                         break;
                     }
             }

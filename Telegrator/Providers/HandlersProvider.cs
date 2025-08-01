@@ -40,7 +40,7 @@ namespace Telegrator.Providers
             AllowedTypes = handlers.AllowedTypes;
             HandlersDictionary = handlers.Values.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            LeveledDebug.ProviderWriteLine("{0} created!", GetType().Name);
+            Alligator.ProviderWriteLine("{0} created!", GetType().Name);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Telegrator.Providers
             AllowedTypes = Update.AllTypes;
             HandlersDictionary = handlers.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            LeveledDebug.ProviderWriteLine("{0} created!", GetType().Name);
+            Alligator.ProviderWriteLine("{0} created!", GetType().Name);
         }
 
         /// <inheritdoc/>
@@ -76,7 +76,7 @@ namespace Telegrator.Providers
             }
             catch
             {
-                LeveledDebug.ProviderWriteLine("Failed to create instance of {0}", descriptor.ToString());
+                Alligator.ProviderWriteLine("Failed to create instance of {0}", descriptor.ToString());
                 throw;
             }
         }

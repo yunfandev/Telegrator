@@ -3,14 +3,14 @@
 namespace Telegrator
 {
     /// <summary>
-    /// Telegrator's Debug logger helper
+    /// Telegrator's FUNNY debug logger helper
     /// </summary>
-    public static class LeveledDebug
+    public static class Alligator
     {
         /// <summary>
         /// Gets or sets flags of what debug messages to write
         /// </summary>
-        public static DebugLevel IndentFlags { get; set; } = DebugLevel.None;
+        public static DebugLevel Allowed { get; set; } = DebugLevel.None;
 
         /// <summary>
         /// Writes debug message if Indent level has Router flag
@@ -18,8 +18,8 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void RouterWriteLine(string message)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Router))
-                Debug.WriteLine(message);
+            if (Allowed.HasFlag(DebugLevel.Router))
+                Trace.WriteLine(message);
         }
 
         /// <summary>
@@ -29,8 +29,8 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void RouterWriteLine(string message, params object[] args)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Router))
-                Debug.WriteLine(message, args);
+            if (Allowed.HasFlag(DebugLevel.Router))
+                Trace.WriteLine(string.Format(message, args));
         }
 
         /// <summary>
@@ -39,8 +39,8 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void ProviderWriteLine(string message)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Providers))
-                Debug.WriteLine(message);
+            if (Allowed.HasFlag(DebugLevel.Providers))
+                Trace.WriteLine(message);
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void ProviderWriteLine(string message, params object[] args)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Providers))
-                Debug.WriteLine(message, args);
+            if (Allowed.HasFlag(DebugLevel.Providers))
+                Trace.WriteLine(string.Format(message, args));
         }
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void FilterWriteLine(string message)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Filters))
-                Debug.WriteLine(message);
+            if (Allowed.HasFlag(DebugLevel.Filters))
+                Trace.WriteLine(message);
         }
 
         /// <summary>
@@ -71,8 +71,8 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void FilterWriteLine(string message, params object[] args)
         {
-            if (IndentFlags.HasFlag(DebugLevel.Filters))
-                Debug.WriteLine(message, args);
+            if (Allowed.HasFlag(DebugLevel.Filters))
+                Trace.WriteLine(string.Format(message, args));
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Telegrator
         /// <param name="message"></param>
         public static void PoolWriteLine(string message)
         {
-            if (IndentFlags.HasFlag(DebugLevel.HandlersPool))
-                Debug.WriteLine(message);
+            if (Allowed.HasFlag(DebugLevel.HandlersPool))
+                Trace.WriteLine(message);
         }
 
         /// <summary>
@@ -92,8 +92,20 @@ namespace Telegrator
         /// <param name="args"></param>
         public static void PoolWriteLine(string message, params object[] args)
         {
-            if (IndentFlags.HasFlag(DebugLevel.HandlersPool))
-                Debug.WriteLine(message, args);
+            if (Allowed.HasFlag(DebugLevel.HandlersPool))
+                Trace.WriteLine(string.Format(message, args));
+        }
+
+        public static void WriteLine(DebugLevel level, string message)
+        {
+            if (Allowed.HasFlag(level))
+                Trace.WriteLine(message);
+        }
+
+        public static void WriteLine(DebugLevel level, string message, params object[] args)
+        {
+            if (Allowed.HasFlag(level))
+                Trace.WriteLine(string.Format(message, args));
         }
     }
 }
