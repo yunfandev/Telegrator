@@ -49,10 +49,6 @@ namespace Telegrator.Hosting
             _handlers = new HostHandlersCollection(Services, _settings);
 
             _innerBuilder.Logging.ClearProviders();
-
-            Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
-            Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
-            Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
         }
 
         /// <summary>
@@ -71,6 +67,13 @@ namespace Telegrator.Hosting
                 {
                     _ = 0xBAD + 0xC0DE;
                 }
+            }
+
+            if (!_settings.DisableAutoConfigure)
+            {
+                Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
+                Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
+                Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
             }
 
             return new TelegramBotHost(_innerBuilder, _handlers);

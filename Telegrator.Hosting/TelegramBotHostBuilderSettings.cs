@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Telegrator.Hosting
 {
@@ -8,6 +9,11 @@ namespace Telegrator.Hosting
     /// </summary>
     public class TelegramBotHostBuilderSettings() : TelegratorOptions
     {
+        /// <summary>
+        /// Disables automatic configuration for all of required <see cref="IOptions{TOptions}"/> instances
+        /// </summary>
+        public bool DisableAutoConfigure { get; set; }
+
         /// <inheritdoc cref="HostApplicationBuilderSettings.DisableDefaults"/>
         public bool DisableDefaults { get; set; }
 
