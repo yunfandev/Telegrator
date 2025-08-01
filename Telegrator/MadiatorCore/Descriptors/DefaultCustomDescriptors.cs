@@ -19,7 +19,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// Initializes new instance of <see cref="MethodHandlerDescriptor{TUpdate}"/>
         /// </summary>
         /// <param name="action"></param>
-        public MethodHandlerDescriptor(AbstractHandlerAction<TUpdate> action) : base(DescriptorType.General)
+        public MethodHandlerDescriptor(AbstractHandlerAction<TUpdate> action) : base(DescriptorType.General, typeof(MethodHandler), true)
         {
             UpdateHandlerAttributeBase handlerAttribute = HandlerInspector.GetHandlerAttribute(action.Method);
             StateKeeperAttributeBase? stateKeeperAttribute = HandlerInspector.GetStateKeeperAttribute(action.Method);

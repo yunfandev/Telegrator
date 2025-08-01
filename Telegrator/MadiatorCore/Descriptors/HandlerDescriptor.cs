@@ -127,22 +127,23 @@ namespace Telegrator.MadiatorCore.Descriptors
             set;
         }
 
-        internal HandlerDescriptor(DescriptorType descriptorType)
-        {
-            Type = descriptorType;
-            HandlerType = null!;
-            Filters = new DescriptorFiltersSet(null, null, null);
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="HandlerDescriptor"/> class with the specified descriptor type and handler type.
         /// Automatically inspects the handler type to extract attributes, filters, and configuration.
         /// </summary>
         /// <param name="descriptorType">The type of the descriptor</param>
         /// <param name="handlerType">The type of the handler to describe</param>
+        /// <param name="dontInspect"></param>
         /// <exception cref="ArgumentException">Thrown when the handler type is not compatible with the expected handler type</exception>
-        public HandlerDescriptor(DescriptorType descriptorType, Type handlerType)
+        public HandlerDescriptor(DescriptorType descriptorType, Type handlerType, bool dontInspect = false)
         {
+            Type = descriptorType;
+            HandlerType = handlerType;
+            Filters = new DescriptorFiltersSet(null, null, null);
+
+            if (dontInspect)
+                return;
+
             UpdateHandlerAttributeBase handlerAttribute = HandlerInspector.GetHandlerAttribute(handlerType);
             if (handlerAttribute.ExpectingHandlerType != null && !handlerAttribute.ExpectingHandlerType.Contains(handlerType.BaseType))
                 throw new ArgumentException(string.Format("This handler attribute cannot be attached to this class. Attribute can be attached on next handlers : {0}", string.Join(", ", handlerAttribute.ExpectingHandlerType.AsEnumerable())));
@@ -150,8 +151,6 @@ namespace Telegrator.MadiatorCore.Descriptors
             StateKeeperAttributeBase? stateKeeperAttribute = HandlerInspector.GetStateKeeperAttribute(handlerType);
             IFilter<Update>[] filters = HandlerInspector.GetFilterAttributes(handlerType, handlerAttribute.Type).ToArray();
 
-            Type = descriptorType;
-            HandlerType = handlerType;
             UpdateType = handlerAttribute.Type;
             Indexer = handlerAttribute.GetIndexer();
             Filters = new DescriptorFiltersSet(handlerAttribute, stateKeeperAttribute, filters);
