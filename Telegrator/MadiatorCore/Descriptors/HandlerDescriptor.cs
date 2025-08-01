@@ -420,12 +420,32 @@ namespace Telegrator.MadiatorCore.Descriptors
             InstanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
         }
 
+        /// <summary>
+        /// Sets singleton instance of this descriptor
+        /// Throws exception if instance already set
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <exception cref="Exception"></exception>
         public void SetInstance(UpdateHandlerBase instance)
         {
             if (SingletonInstance != null)
                 throw new Exception();
 
             SingletonInstance = instance;
+        }
+
+        /// <summary>
+        /// Tries to set singleton instance of this descriptor
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        public bool TrySetInstance(UpdateHandlerBase instance)
+        {
+            if (SingletonInstance != null)
+                return false;
+
+            SingletonInstance = instance;
+            return true;
         }
 
         /// <inheritdoc/>

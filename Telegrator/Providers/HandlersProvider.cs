@@ -70,7 +70,9 @@ namespace Telegrator.Providers
                     return descriptor.SingletonInstance;
 
                 UpdateHandlerBase instance = GetHandlerInstanceInternal(descriptor);
-                descriptor.SingletonInstance = useSingleton ? instance : null;
+                if (useSingleton)
+                    descriptor.TrySetInstance(instance);
+
                 descriptor.LazyInitialization?.Invoke(instance);
                 return instance;
             }

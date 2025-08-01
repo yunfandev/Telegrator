@@ -9,8 +9,16 @@ using Telegrator.Handlers.Components;
 
 namespace Telegrator.MadiatorCore.Descriptors
 {
+    /// <summary>
+    /// Descriptor for creating handlers from methods
+    /// </summary>
+    /// <typeparam name="TUpdate"></typeparam>
     public class MethodHandlerDescriptor<TUpdate> : HandlerDescriptor where TUpdate : class
     {
+        /// <summary>
+        /// Initializes new instance of <see cref="MethodHandlerDescriptor{TUpdate}"/>
+        /// </summary>
+        /// <param name="action"></param>
         public MethodHandlerDescriptor(AbstractHandlerAction<TUpdate> action) : base(DescriptorType.General)
         {
             UpdateHandlerAttributeBase handlerAttribute = HandlerInspector.GetHandlerAttribute(action.Method);

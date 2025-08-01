@@ -8,12 +8,12 @@ namespace Telegrator
     public static class Alligator
     {
         /// <summary>
-        /// Gets or sets flags of what debug messages to write
+        /// Gets or sets flags of what trace messages to write
         /// </summary>
         public static DebugLevel Allowed { get; set; } = DebugLevel.None;
 
         /// <summary>
-        /// Writes debug message if Indent level has Router flag
+        /// Writes trace message if Indent level has Router flag
         /// </summary>
         /// <param name="message"></param>
         public static void RouterWriteLine(string message)
@@ -34,7 +34,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Providers flag
+        /// Writes trace message if Indent level has Providers flag
         /// </summary>
         /// <param name="message"></param>
         public static void ProviderWriteLine(string message)
@@ -44,7 +44,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Providers flag
+        /// Writes trace message if Indent level has Providers flag
         /// </summary>
         /// <param name="message"></param>
         /// <param name="args"></param>
@@ -55,7 +55,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Filters flag
+        /// Writes trace message if Indent level has Filters flag
         /// </summary>
         /// <param name="message"></param>
         public static void FilterWriteLine(string message)
@@ -65,7 +65,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Filters flag
+        /// Writes trace message if Indent level has Filters flag
         /// </summary>
         /// <param name="message"></param>
         /// <param name="args"></param>
@@ -76,7 +76,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Pool flag
+        /// Writes trace message if Indent level has Pool flag
         /// </summary>
         /// <param name="message"></param>
         public static void PoolWriteLine(string message)
@@ -86,7 +86,7 @@ namespace Telegrator
         }
 
         /// <summary>
-        /// Writes debug message if Indent level has Pool flag
+        /// Writes trace message if Indent level has Pool flag
         /// </summary>
         /// <param name="message"></param>
         /// <param name="args"></param>
@@ -95,13 +95,24 @@ namespace Telegrator
             if (Allowed.HasFlag(DebugLevel.HandlersPool))
                 Trace.WriteLine(string.Format(message, args));
         }
-
+        
+        /// <summary>
+        /// Writes trace message if flag was set
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="message"></param>
         public static void WriteLine(DebugLevel level, string message)
         {
             if (Allowed.HasFlag(level))
                 Trace.WriteLine(message);
         }
 
+        /// <summary>
+        /// Writes trace message if flag was set
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
         public static void WriteLine(DebugLevel level, string message, params object[] args)
         {
             if (Allowed.HasFlag(level))
