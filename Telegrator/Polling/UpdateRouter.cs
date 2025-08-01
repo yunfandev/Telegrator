@@ -96,7 +96,7 @@ namespace Telegrator.Polling
         /// <param name="update">The update to handle.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous update handling operation.</returns>
-        public virtual Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public virtual async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             // Logging
             Alligator.RouterWriteLine("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
@@ -109,31 +109,28 @@ namespace Telegrator.Polling
                 if (handlers.Any())
                 {
                     // Enqueuing found awiting handlers
-                    HandlersPool.Enqueue(handlers);
+                    await HandlersPool.Enqueue(handlers);
 
                     // Chicking if awaiting handlers has exclusive routing
                     if (Options.ExclusiveAwaitingHandlerRouting)
                     {
                         Alligator.RouterWriteLine("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
-                        return Task.CompletedTask;
+                        return;
                     }
                 }
 
                 // Queuing reagular handlers for execution
-                HandlersPool.Enqueue(GetHandlers(HandlersProvider, this, botClient, update, cancellationToken));
+                await HandlersPool.Enqueue(GetHandlers(HandlersProvider, this, botClient, update, cancellationToken));
                 Alligator.RouterWriteLine("Receiving Update ({0}) finished", update.Id);
-                return Task.CompletedTask;
             }
             catch (OperationCanceledException)
             {
                 Alligator.RouterWriteLine("Receiving Update ({0}) cancelled", update.Id);
-                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
                 Alligator.RouterWriteLine("Receiving Update ({0}) finished with exception {1}", update.Id, ex.Message);
                 ExceptionHandler?.HandleException(botClient, ex, HandleErrorSource.PollingError, cancellationToken);
-                return Task.CompletedTask;
             }
         }
 
@@ -162,10 +159,11 @@ namespace Telegrator.Polling
                 return [];
             }
 
-            IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
-            Alligator.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
-            Alligator.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
-            return described;
+            //IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
+            //Alligator.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
+            //Alligator.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
+
+            return DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
         }
 
         /// <summary>
@@ -192,8 +190,11 @@ namespace Telegrator.Polling
                         continue;
 
                     yield return describedHandler;
+
+                    /*
                     if (Options.ExecuteOnlyFirstFoundHanlder)
                         break;
+                    */
                 }
             }
             finally

@@ -43,10 +43,6 @@ namespace Telegrator.Hosting.Web
             _innerBuilder = webApplicationBuilder;
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _handlers = new HostHandlersCollection(Services, _settings);
-
-            Services.AddSingleton<IOptions<TelegramBotWebOptions>>(Options.Create(settings));
-            Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
-            Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
         }
 
         /// <summary>
@@ -67,6 +63,14 @@ namespace Telegrator.Hosting.Web
                 }
             }
 
+            if (!_settings.DisableAutoConfigure)
+            {
+                Services.Configure<TelegratorWebOptions>(Configuration.GetSection(nameof(TelegratorWebOptions)));
+                Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
+                Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
+            }
+
+            Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
             return new TelegramBotWebHost(_innerBuilder, _handlers);
         }
     }

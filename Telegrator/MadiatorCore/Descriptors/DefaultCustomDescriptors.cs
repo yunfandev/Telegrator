@@ -36,7 +36,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         {
             private readonly MethodInfo Method = method;
 
-            public override async Task Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation)
+            public override async Task<Result> Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation)
             {
                 if (Method is null)
                     throw new Exception();
@@ -44,16 +44,15 @@ namespace Telegrator.MadiatorCore.Descriptors
                 if (Method.ReturnType == typeof(void))
                 {
                     Method.Invoke(this, [container, cancellation]);
-                    return;
+                    return Result.Ok();
                 }
                 else
                 {
                     object branchReturn = Method.Invoke(this, [container, cancellation]);
-                    if (branchReturn == null)
-                        return;
+                    if (branchReturn is not Task<Result> branchTask)
+                        throw new InvalidOperationException();
 
-                    if (branchReturn is Task branchTask)
-                        await branchTask;
+                    return await branchTask;
                 }
             }
         }

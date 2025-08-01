@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Telegrator.Handlers;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -15,6 +16,7 @@ namespace Telegrator.Polling
         /// </summary>
         protected object SyncObj = new object();
 
+        /*
         /// <summary>
         /// Event that signals when awaiting handlers are queued.
         /// </summary>
@@ -34,6 +36,13 @@ namespace Telegrator.Polling
         /// Dictionary for tracking currently executing handlers.
         /// </summary>
         protected readonly ConcurrentDictionary<HandlerLifetimeToken, Task> ExecutingHandlersPool = [];
+        */
+
+        //protected readonly ConcurrentDictionary<Type, LimitedQueue<DescribedHandlerInfo>> AwaitingHandlersQueue;
+
+        //protected readonly LimitedDictionary<HandlerLifetimeToken, Task> ExecutingHandlersPool;
+
+        protected SemaphoreSlim ExecutingHandlersSemaphore = null!;
 
         /// <summary>
         /// The bot configuration options.
@@ -65,26 +74,62 @@ namespace Telegrator.Polling
         {
             Options = options;
             GlobalCancellationToken = globalCancellationToken;
+            //AwaitingHandlersQueue = new ConcurrentDictionary<Type, LimitedQueue<DescribedHandlerInfo>>();
+            //ExecutingHandlersPool = new LimitedDictionary<HandlerLifetimeToken, Task>(options.MaximumParallelWorkingHandlers);
 
             if (options.MaximumParallelWorkingHandlers != null)
             {
-                ExecutingHandlersSemaphore = new SemaphoreSlim(options.MaximumParallelWorkingHandlers ?? 0);
-                AwaitingHandlersQueuedEvent = new ManualResetEventSlim(false);
+                ExecutingHandlersSemaphore = new SemaphoreSlim(options.MaximumParallelWorkingHandlers.Value);
+                //AwaitingHandlersQueuedEvent = new ManualResetEventSlim(false);
             }
 
+            /*
             if (Options.MaximumParallelWorkingHandlers != null)
                 HandlersCheckpoint();
+            */
         }
 
         /// <inheritdoc/>
-        public void Enqueue(IEnumerable<DescribedHandlerInfo> handlers)
+        public async Task Enqueue(IEnumerable<DescribedHandlerInfo> handlers)
         {
-            handlers.ForEach(Enqueue);
-        }
+            //handlers.ForEach(Enqueue);
 
+            Result? lastResult = null;
+            foreach (DescribedHandlerInfo handlerInfo in handlers)
+            {
+                if (lastResult?.NextType != null)
+                {
+                    if (lastResult.NextType != handlerInfo.HandlerInstance.GetType())
+                        continue;
+                }
+
+                if (ExecutingHandlersSemaphore != null)
+                {
+                    await ExecutingHandlersSemaphore.WaitAsync();
+                }
+
+                try
+                {
+                    HandlerExecuting?.Invoke(handlerInfo);
+                    lastResult = await handlerInfo.Execute(GlobalCancellationToken);
+                    ExecutingHandlersSemaphore?.Release(1);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                if (!lastResult.RouteNext)
+                    break;
+            }
+        }
+        
+        /*
         /// <inheritdoc/>
         public void Enqueue(DescribedHandlerInfo handlerInfo)
         {
+            throw new NotImplementedException();
+
             if (Options.MaximumParallelWorkingHandlers == null)
             {
                 Task.Run(async () => await ExecuteHandlerWrapper(handlerInfo));
@@ -111,7 +156,9 @@ namespace Telegrator.Polling
                 ExecutingHandlersSemaphore.Release(1);
             }
         }
+        */
 
+        /*
         /// <summary>
         /// Main checkpoint method that manages handler execution in a loop.
         /// Continuously processes queued handlers while respecting concurrency limits.
@@ -206,6 +253,7 @@ namespace Telegrator.Polling
                 return AwaitingHandlersQueue.TryDequeue(out enqueuedHandler);
             }
         }
+        */
 
         /// <summary>
         /// Disposes of the handlers pool and releases all resources.
@@ -221,11 +269,13 @@ namespace Telegrator.Polling
                 ExecutingHandlersSemaphore = null!;
             }
 
+            /*
             if (AwaitingHandlersQueuedEvent != null)
             {
                 AwaitingHandlersQueuedEvent.Dispose();
                 AwaitingHandlersQueuedEvent = null!;
             }
+            */
 
             if (SyncObj != null)
                 SyncObj = null!;

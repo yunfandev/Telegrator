@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text;
 using Telegram.Bot.Types.Enums;
+using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Providers;
 using Telegrator.Hosting.Web.Components;
@@ -22,7 +24,7 @@ namespace Telegrator.Hosting.Web
     {
         private readonly WebApplication _innerApp;
         private readonly IUpdateRouter _updateRouter;
-        private readonly ILogger<TelegramBotHost> _logger;
+        private readonly ILogger<TelegramBotWebHost> _logger;
 
         private bool _disposed;
 
@@ -43,7 +45,7 @@ namespace Telegrator.Hosting.Web
         /// <summary>
         /// This application's logger
         /// </summary>
-        public ILogger<TelegramBotHost> Logger => _logger;
+        public ILogger<TelegramBotWebHost> Logger => _logger;
 
         // Private interface fields
         IServiceProvider IEndpointRouteBuilder.ServiceProvider => Services;
@@ -53,12 +55,20 @@ namespace Telegrator.Hosting.Web
 
         internal TelegramBotWebHost(WebApplicationBuilder webApplicationBuilder, HostHandlersCollection handlers)
         {
+            // Registering this host in services for easy access
             RegisterHostServices(webApplicationBuilder, handlers);
+
+            // Building proxy application
             _innerApp = webApplicationBuilder.Build();
 
-            _updateRouter = Services.GetRequiredService<IUpdateRouter>();
-            _logger = Services.GetRequiredService<ILogger<TelegramBotHost>>();
+            // Initializing bot info, as it requires to make a request via tg bot
+            Services.GetRequiredService<ITelegramBotInfo>();
 
+            // Reruesting services for this host
+            _updateRouter = Services.GetRequiredService<IUpdateRouter>();
+            _logger = Services.GetRequiredService<ILogger<TelegramBotWebHost>>();
+
+            // Logging registering handlers in DEBUG purposes
             LogHandlers(handlers);
         }
 

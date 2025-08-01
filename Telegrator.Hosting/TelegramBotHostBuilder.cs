@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegrator.Hosting;
@@ -46,6 +47,7 @@ namespace Telegrator.Hosting
         {
             _innerBuilder = hostApplicationBuilder;
             _settings = settings ?? new TelegramBotHostBuilderSettings();
+
             _handlers = new HostHandlersCollection(Services, _settings);
 
             _innerBuilder.Logging.ClearProviders();
@@ -71,11 +73,11 @@ namespace Telegrator.Hosting
 
             if (!_settings.DisableAutoConfigure)
             {
-                Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
                 Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
                 Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
             }
 
+            Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
             return new TelegramBotHost(_innerBuilder, _handlers);
         }
     }

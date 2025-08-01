@@ -74,10 +74,10 @@ namespace Telegrator.Handlers.Components
         /// <param name="container">The handler container.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        protected override sealed async Task ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken)
+        protected override sealed async Task<Result> ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken)
         {
             Container = (IAbstractHandlerContainer<TUpdate>)container;
-            await Execute(Container, cancellationToken);
+            return await Execute(Container, cancellationToken);
         }
 
         /// <summary>
@@ -86,6 +86,6 @@ namespace Telegrator.Handlers.Components
         /// <param name="container">The handler container.</param>
         /// <param name="cancellation">Cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public abstract Task Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation);
+        public abstract Task<Result> Execute(IAbstractHandlerContainer<TUpdate> container, CancellationToken cancellation);
     }
 }
