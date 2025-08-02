@@ -76,7 +76,13 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <summary>
         /// The set of filters associated with this handler.
         /// </summary>
-        public DescriptorFiltersSet Filters
+        public DescriptorFiltersSet? Filters
+        {
+            get;
+            protected set;
+        }
+
+        public DescriptorAspectsSet? Aspects
         {
             get;
             protected set;
@@ -154,6 +160,7 @@ namespace Telegrator.MadiatorCore.Descriptors
             UpdateType = handlerAttribute.Type;
             Indexer = handlerAttribute.GetIndexer();
             Filters = new DescriptorFiltersSet(handlerAttribute, stateKeeperAttribute, filters);
+            Aspects = HandlerInspector.GetAspects(handlerType);
             DisplayString = HandlerInspector.GetDisplayName(handlerType);
         }
 

@@ -13,6 +13,11 @@ namespace Telegrator.MadiatorCore.Descriptors
     public class DescribedHandlerInfo
     {
         /// <summary>
+        /// descriptor from that handler was described from
+        /// </summary>
+        public readonly HandlerDescriptor From;
+
+        /// <summary>
         /// The update router associated with this handler.
         /// </summary>
         public readonly IUpdateRouter UpdateRouter;
@@ -60,13 +65,15 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// <summary>
         /// Initializes a new instance of the <see cref="DescribedHandlerInfo"/> class.
         /// </summary>
+        /// <param name="fromDescriptor">descriptor from that handler was described from</param>
         /// <param name="updateRouter">The update router.</param>
         /// <param name="client">The Telegram bot client.</param>
         /// <param name="handlerInstance">The handler instance.</param>
         /// <param name="filterContext">The filter execution context.</param>
         /// <param name="displayString">Optional display string.</param>
-        public DescribedHandlerInfo(IUpdateRouter updateRouter, ITelegramBotClient client, UpdateHandlerBase handlerInstance, FilterExecutionContext<Update> filterContext, string? displayString)
+        public DescribedHandlerInfo(HandlerDescriptor fromDescriptor, IUpdateRouter updateRouter, ITelegramBotClient client, UpdateHandlerBase handlerInstance, FilterExecutionContext<Update> filterContext, string? displayString)
         {
+            From = fromDescriptor;
             UpdateRouter = updateRouter;
             Client = client;
             HandlerInstance = handlerInstance;
@@ -90,7 +97,26 @@ namespace Telegrator.MadiatorCore.Descriptors
             try
             {
                 HandlerContainer = GetContainer(UpdateRouter.AwaitingProvider, this);
-                return await HandlerInstance.Execute(HandlerContainer, cancellationToken);
+
+                if (From.Aspects != null)
+                {
+                    Result preResult = await From.Aspects.ExecutePre(HandlerInstance, HandlerContainer);
+                    if (!preResult.Positive)
+                        return preResult;
+                }
+
+                Result execResult = await HandlerInstance.Execute(HandlerContainer, cancellationToken);
+                if (!execResult.Positive)
+                    return execResult;
+
+                if (From.Aspects != null)
+                {
+                    Result postResult = await From.Aspects.ExecutePost(HandlerInstance, HandlerContainer);
+                    if (!postResult.Positive)
+                        return postResult;
+                }
+
+                return Result.Ok();
             }
             catch (OperationCanceledException)
             {

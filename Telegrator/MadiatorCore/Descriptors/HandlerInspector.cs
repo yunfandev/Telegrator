@@ -2,6 +2,7 @@
 using System.Reflection;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegrator.Aspects;
 using Telegrator.Attributes.Components;
 using Telegrator.Filters.Components;
 
@@ -79,6 +80,30 @@ namespace Telegrator.MadiatorCore.Descriptors
                     continue;
                 }
             }
+        }
+
+        public static DescriptorAspectsSet GetAspects(Type handlerType)
+        {
+            bool selfPre = handlerType.GetInterface(nameof(IPreProcessor)) != null;
+            bool selfPost = handlerType.GetInterface(nameof(IPostProcessor)) != null;
+            Type? typedPre = null;
+            Type? typedPost = null;
+
+            if (!selfPre)
+            {
+                Attribute? preAttr = handlerType.GetCustomAttribute(typeof(BeforeExecutionAttribute<>));
+                if (preAttr != null)
+                    typedPre = preAttr.GetType().GetGenericArguments()[0];
+            }
+
+            if (!selfPost)
+            {
+                Attribute? postAttr = handlerType.GetCustomAttribute(typeof(AfterExecutionAttribute<>));
+                if (postAttr != null)
+                    typedPre = postAttr.GetType().GetGenericArguments()[0];
+            }
+
+            return new DescriptorAspectsSet(selfPre, typedPre, selfPost, typedPost);
         }
     }
 }

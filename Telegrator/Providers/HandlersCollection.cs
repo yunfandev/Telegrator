@@ -68,7 +68,7 @@ namespace Telegrator.Providers
         public virtual IHandlersCollection AddDescriptor(HandlerDescriptor descriptor)
         {
             if (MustHaveParameterlessCtor && !descriptor.HandlerType.HasParameterlessCtor())
-                throw new Exception();
+                throw new Exception("This handler (" + descriptor.HandlerType.FullName + "), must contain constructor without parameters.");
 
             _allowedTypes.Union(descriptor.UpdateType);
             MightAwaitAttribute[] mightAwaits = descriptor.HandlerType.GetCustomAttributes<MightAwaitAttribute>().ToArray();

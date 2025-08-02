@@ -223,11 +223,11 @@ namespace Telegrator.Polling
             };
 
             FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(_botInfo, update, update, data, []);
-            if (!descriptor.Filters.Validate(filterContext))
+            if (descriptor.Filters != null && !descriptor.Filters.Validate(filterContext))
                 return null;
 
             UpdateHandlerBase handlerInstance = provider.GetHandlerInstance(descriptor, cancellationToken);
-            return new DescribedHandlerInfo(updateRouter, client, handlerInstance, filterContext, descriptor.DisplayString);
+            return new DescribedHandlerInfo(descriptor, updateRouter, client, handlerInstance, filterContext, descriptor.DisplayString);
         }
 
         /// <summary>

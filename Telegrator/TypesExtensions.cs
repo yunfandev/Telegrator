@@ -886,6 +886,7 @@ namespace Telegrator
         public static bool HasParameterlessCtor(this Type type)
             => type.GetConstructors().Any(ctor => ctor.GetParameters().Length == 0);
 
+        /*
         /// <summary>
         /// Invokes a "<paramref name="methodName"/>" method of an object
         /// </summary>
@@ -948,6 +949,7 @@ namespace Telegrator
         /// <returns></returns>
         public static T? InvokeGenericMethod<T>(this object obj, string methodName, Type[] genericParameters, params object[]? parameters)
             => (T?)obj.GetType().GetMethod(methodName).InvokeGenericMethod(obj, genericParameters, parameters);
+        */
 
         /// <summary>
         /// Checks is <paramref name="obj"/> has public properties
