@@ -12,6 +12,8 @@ using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Providers;
 using Telegrator.Hosting.Web.Components;
+using Telegrator.Hosting.Logging;
+using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 

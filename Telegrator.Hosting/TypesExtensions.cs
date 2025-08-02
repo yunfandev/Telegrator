@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
@@ -9,8 +10,10 @@ using Telegram.Bot.Types;
 using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Configuration;
+using Telegrator.Hosting.Logging;
 using Telegrator.Hosting.Polling;
 using Telegrator.Hosting.Providers;
+using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 
 namespace Telegrator.Hosting
@@ -91,6 +94,18 @@ namespace Telegrator.Hosting
             IEnumerable<BotCommand> aliases = botHost.UpdateRouter.HandlersProvider.GetBotCommands();
             client.SetMyCommands(aliases).Wait();
             return botHost;
+        }
+
+        /// <summary>
+        /// Adds a Microsoft.Extensions.Logging adapter to Alligator using a logger factory.
+        /// </summary>
+        /// <param name="host"></param>
+        public static void AddLoggingAdapter(this ITelegramBotHost host)
+        {
+            ILoggerFactory loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
+            ILogger logger = loggerFactory.CreateLogger("Telegrator");
+            MicrosoftLoggingAdapter adapter = new MicrosoftLoggingAdapter(logger);
+            Alligator.AddAdapter(adapter);
         }
     }
 

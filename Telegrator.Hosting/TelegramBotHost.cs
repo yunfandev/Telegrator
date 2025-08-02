@@ -5,6 +5,8 @@ using System.Text;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
+using Telegrator.Hosting.Logging;
+using Telegrator.Logging;
 using Telegrator.Hosting.Providers;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;

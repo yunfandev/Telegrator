@@ -16,7 +16,7 @@
 	  <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <Version>1.0.9</Version>
+	  <Version>1.0.10</Version>
   </PropertyGroup>
 
   <ItemGroup>

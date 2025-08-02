@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegrator.Configuration;
+using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.Polling;
 using Telegrator.Providers;
@@ -37,7 +38,7 @@ namespace Telegrator
         /// <param name="httpClient">Optional HTTP client for making requests.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         public TelegratorClient(string token, HttpClient? httpClient = null, CancellationToken cancellationToken = default)
-            : this(new TelegramBotClientOptions(token), httpClient, cancellationToken) { }
+            : this(new TelegramBotClientOptions(token), null, httpClient, cancellationToken) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TelegratorClient"/> class with bot options.
@@ -45,9 +46,19 @@ namespace Telegrator
         /// <param name="options">The Telegram bot client options.</param>
         /// <param name="httpClient">Optional HTTP client for making requests.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public TelegratorClient(TelegramBotClientOptions options, HttpClient? httpClient = null, CancellationToken cancellationToken = default) : base(options, httpClient, cancellationToken)
+        public TelegratorClient(TelegramBotClientOptions options, HttpClient? httpClient = null, CancellationToken cancellationToken = default) 
+            : this(options, null, httpClient, cancellationToken) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TelegratorClient"/> class with bot options and Telegrator options.
+        /// </summary>
+        /// <param name="options">The Telegram bot client options.</param>
+        /// <param name="telegratorOptions">The Telegrator options.</param>
+        /// <param name="httpClient">Optional HTTP client for making requests.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        public TelegratorClient(TelegramBotClientOptions options, TelegratorOptions? telegratorOptions, HttpClient? httpClient = null, CancellationToken cancellationToken = default) : base(options, httpClient, cancellationToken)
         {
-            Options = new TelegratorOptions();
+            Options = telegratorOptions ?? new TelegratorOptions();
             Handlers = new HandlersCollection(default);
             BotInfo = new TelegramBotInfo(this.GetMe(cancellationToken).Result);
         }
@@ -67,6 +78,10 @@ namespace Telegrator
             AwaitingProvider awaitingProvider = new AwaitingProvider(Options);
 
             updateRouter = new UpdateRouter(handlerProvider, awaitingProvider, Options, BotInfo);
+            
+            // Log startup
+            Alligator.LogInformation($"Telegrator bot starting up - BotId: {BotInfo.Id}, Username: {BotInfo.Username}, MaxParallelHandlers: {Options.MaximumParallelWorkingHandlers ?? -1}");
+
             StartReceivingInternal(receiverOptions, cancellationToken);
         }
 
@@ -96,7 +111,10 @@ namespace Telegrator
             catch (OperationCanceledException)
             {
                 // Cancelled
+                Alligator.LogInformation("Telegrator bot stopped (cancelled)");
             }
         }
+
+
     }
 }
