@@ -28,7 +28,20 @@ namespace Telegrator.Handlers
     /// </summary>
     public abstract class CallbackQueryHandler() : AbstractUpdateHandler<CallbackQuery>(UpdateType.CallbackQuery)
     {
-        
+        /// <summary>
+        /// Gets the type-specific data from the callback query.
+        /// Returns the data string, chat instance, or game short name depending on the callback query type.
+        /// </summary>
+        protected string TypeData
+        {
+            get => Input switch
+            {
+                { Data: { } data } => data,
+                { ChatInstance: { } chatInstance } => chatInstance,
+                { GameShortName: { } gameShortName } => gameShortName
+            };
+        }
+
         /// <summary>
         /// Sends a response message to the current chat.
         /// </summary>
@@ -76,7 +89,6 @@ namespace Telegrator.Handlers
         /// <param name="replyMarkup">The reply markup for the message.</param>
         /// <param name="entities">The message entities to include.</param>
         /// <param name="linkPreviewOptions">Options for link preview generation.</param>
-        /// <param name="messageEffectId">The message effect ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The edited message.</returns>
         protected async Task<Message> EditMessage(
@@ -106,21 +118,5 @@ namespace Telegrator.Handlers
             CancellationToken cancellationToken = default)
             => await Container.AnswerCallbackQuery(
                 text, showAlert, url, cacheTime, cancellationToken);
-
-
-        
-        /// <summary>
-        /// Gets the type-specific data from the callback query.
-        /// Returns the data string, chat instance, or game short name depending on the callback query type.
-        /// </summary>
-        protected string TypeData
-        {
-            get => Input switch
-            {
-                { Data: { } data } => data,
-                { ChatInstance: { } chatInstance } => chatInstance,
-                { GameShortName: { } gameShortName } => gameShortName
-            };
-        }
     }
 }

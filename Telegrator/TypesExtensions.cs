@@ -179,7 +179,26 @@ namespace Telegrator
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
                 allowPaidBroadcast, cancellationToken);
-        
+
+        /// <summary>
+        /// Responnces to message that this CallbackQuery was originated from
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="text"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="replyParameters"></param>
+        /// <param name="replyMarkup"></param>
+        /// <param name="linkPreviewOptions"></param>
+        /// <param name="messageThreadId"></param>
+        /// <param name="entities"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="protectContent"></param>
+        /// <param name="messageEffectId"></param>
+        /// <param name="businessConnectionId"></param>
+        /// <param name="allowPaidBroadcast"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<Message> Responce(
             this IAbstractHandlerContainer<CallbackQuery> container,
             string text,
@@ -195,14 +214,32 @@ namespace Telegrator
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
             CancellationToken cancellationToken = default)
-            => await container.Client.SendMessage(
-                container.ActualUpdate.From.Id, text, parseMode, replyParameters,
+        {
+            CallbackQuery query = container.ActualUpdate;
+            if (query.Message == null)
+                throw new Exception("Callback origin message not found!");
+
+            return await container.Client.SendMessage(
+                query.Message.Chat, text, parseMode, replyParameters,
                 replyMarkup, linkPreviewOptions,
                 messageThreadId, entities,
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
                 allowPaidBroadcast, cancellationToken);
+        }
         
+        /// <summary>
+        /// Edits message text that this CallbackQuery was originated from
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="text"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="replyMarkup"></param>
+        /// <param name="entities"></param>
+        /// <param name="linkPreviewOptions"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<Message> EditMessage(
             this IAbstractHandlerContainer<CallbackQuery> container,
             string text,
@@ -212,18 +249,37 @@ namespace Telegrator
             LinkPreviewOptions? linkPreviewOptions = null,
             CancellationToken cancellationToken = default)
         {
-                var update = container.ActualUpdate;
-                return await container.Client.EditMessageText(
-                    chatId: update.Message.Chat.Id,
-                    messageId: update.Message.MessageId,
-                    text: text,
-                    parseMode: parseMode,
-                    replyMarkup: replyMarkup,
-                    entities: entities,
-                    linkPreviewOptions: linkPreviewOptions,
-                    cancellationToken: cancellationToken);
+            CallbackQuery query = container.ActualUpdate;
+            if (query.Message == null)
+                throw new Exception("Callback origin message not found!");
+
+            return await container.Client.EditMessageText(
+                query.Message.Chat,
+                query.Message.MessageId,
+                text: text,
+                parseMode: parseMode,
+                replyMarkup: replyMarkup,
+                entities: entities,
+                linkPreviewOptions: linkPreviewOptions,
+                cancellationToken: cancellationToken);
         }
-        
+
+        /// <summary>
+        /// Use this method to send answers to callback queries sent from <a href="https://core.telegram.org/bots/features#inline-keyboards">inline keyboards</a>.
+        /// The answer will be displayed to the user as a notification at the top of the chat screen or as an alert
+        /// </summary>
+        /// <remarks>
+        /// Alternatively, the user can be redirected to the specified Game URL.
+        /// For this option to work, you must first create a game for your bot via <a href="https://t.me/botfather">@BotFather</a> and accept the terms.
+        /// Otherwise, you may use links like <c>t.me/your_bot?start=XXXX</c> that open your bot with a parameter.
+        /// </remarks>
+        /// <param name="container"></param>
+        /// <param name="text"></param>
+        /// <param name="showAlert"></param>
+        /// <param name="url"></param>
+        /// <param name="cacheTime"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task AnswerCallbackQuery(
             this IAbstractHandlerContainer<CallbackQuery> container,
             string? text = null,
@@ -231,22 +287,14 @@ namespace Telegrator
             string? url = null,
             int cacheTime = 0,
             CancellationToken cancellationToken = default)
-        {
-            var callbackQueryId = container.ActualUpdate.Id;
-            
-            await container.Client.AnswerCallbackQuery(
-                callbackQueryId: callbackQueryId,
+            => await container.Client.AnswerCallbackQuery(
+                callbackQueryId: container.ActualUpdate.Id,
                 text: text,
                 showAlert: showAlert,
                 url: url,
                 cacheTime: cacheTime,
                 cancellationToken: cancellationToken);
-        }
-
-
     }
-    
-    
 
     /// <summary>
     /// Extensions methods for Awaiter Handler Builders
