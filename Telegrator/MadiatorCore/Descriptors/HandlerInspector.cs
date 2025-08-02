@@ -82,6 +82,12 @@ namespace Telegrator.MadiatorCore.Descriptors
             }
         }
 
+        /// <summary>
+        /// Gets the aspects configuration for the specified handler type.
+        /// Inspects the handler for both self-processing (implements interfaces) and typed processing (uses attributes).
+        /// </summary>
+        /// <param name="handlerType">The type of the handler to inspect.</param>
+        /// <returns>A <see cref="DescriptorAspectsSet"/> containing the aspects configuration.</returns>
         public static DescriptorAspectsSet GetAspects(Type handlerType)
         {
             bool selfPre = handlerType.GetInterface(nameof(IPreProcessor)) != null;
@@ -100,7 +106,7 @@ namespace Telegrator.MadiatorCore.Descriptors
             {
                 Attribute? postAttr = handlerType.GetCustomAttribute(typeof(AfterExecutionAttribute<>));
                 if (postAttr != null)
-                    typedPre = postAttr.GetType().GetGenericArguments()[0];
+                    typedPost = postAttr.GetType().GetGenericArguments()[0];
             }
 
             return new DescriptorAspectsSet(selfPre, typedPre, selfPost, typedPost);

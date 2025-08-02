@@ -82,6 +82,10 @@ namespace Telegrator.MadiatorCore.Descriptors
             protected set;
         }
 
+        /// <summary>
+        /// Gets or sets the aspects configuration for this handler.
+        /// Contains pre and post-execution processors if the handler uses the aspect system.
+        /// </summary>
         public DescriptorAspectsSet? Aspects
         {
             get;
