@@ -15,6 +15,12 @@ namespace Telegrator.Logging
         public static int AdaptersCount => _adapters.Count;
 
         /// <summary>
+        /// Minimal level of logging messages.
+        /// Any messages below thi value will not be writen!
+        /// </summary>
+        public static LogLevel MinimalLevel { get; set; }
+
+        /// <summary>
         /// Adds a logger adapter to the centralized logging system.
         /// </summary>
         /// <param name="adapter">The logger adapter to add.</param>
@@ -70,6 +76,9 @@ namespace Telegrator.Logging
             if (_adapters.Count == 0)
                 return;
 
+            if (level < MinimalLevel)
+                return;
+
             // Lock only during enumeration to prevent collection modification during iteration
             lock (_lock)
             {
@@ -106,12 +115,32 @@ namespace Telegrator.Logging
         }
 
         /// <summary>
+        /// Logs a debug message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="args"></param>
+        public static void LogDebug(string message, params object[] args)
+        {
+            Log(LogLevel.Debug, string.Format(message, args));
+        }
+
+        /// <summary>
         /// Logs an information message to all registered adapters.
         /// </summary>
         /// <param name="message">The message to log.</param>
         public static void LogInformation(string message)
         {
             Log(LogLevel.Information, message);
+        }
+
+        /// <summary>
+        /// Logs an information message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="args"></param>
+        public static void LogInformation(string message, params object[] args)
+        {
+            Log(LogLevel.Information, string.Format(message, args));
         }
 
         /// <summary>
@@ -124,6 +153,16 @@ namespace Telegrator.Logging
         }
 
         /// <summary>
+        /// Logs a warning message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="args"></param>
+        public static void LogWarning(string message, params object[] args)
+        {
+            Log(LogLevel.Warning, string.Format(message, args));
+        }
+
+        /// <summary>
         /// Logs an error message to all registered adapters.
         /// </summary>
         /// <param name="message">The message to log.</param>
@@ -131,6 +170,16 @@ namespace Telegrator.Logging
         public static void LogError(string message, Exception? exception = null)
         {
             Log(LogLevel.Error, message, exception);
+        }
+
+        /// <summary>
+        /// Logs an error message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="args"></param>
+        public static void LogError(string message, params object[] args)
+        {
+            Log(LogLevel.Error, string.Format(message, args));
         }
 
         /// <summary>

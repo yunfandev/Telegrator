@@ -8,14 +8,6 @@ namespace Telegrator
     /// </summary>
     public class TelegratorOptions : ITelegratorOptions
     {
-        /*
-        /// <inheritdoc/>
-        public bool ExecuteOnlyFirstFoundHanlder { get; set; }
-
-        /// <inheritdoc/>
-        public bool DescendDescriptorIndex { get; set; } = true;
-        */
-
         /// <inheritdoc/>
         public int? MaximumParallelWorkingHandlers { get; set; }
 

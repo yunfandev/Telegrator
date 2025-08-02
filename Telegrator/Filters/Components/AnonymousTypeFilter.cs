@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types;
+using Telegrator.Logging;
 
 namespace Telegrator.Filters.Components
 {
@@ -49,7 +50,7 @@ namespace Telegrator.Filters.Components
             if (!filter.CanPass(context))
             {
                 if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                    Alligator.FilterWriteLine("(E) {0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
+                    Alligator.LogDebug("{0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
 
                 return false;
             }

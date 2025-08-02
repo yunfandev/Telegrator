@@ -1,4 +1,6 @@
-﻿namespace Telegrator.Filters.Components
+﻿using Telegrator.Logging;
+
+namespace Telegrator.Filters.Components
 {
     /// <summary>
     /// Represents a filter that composes multiple filters and passes only if all of them pass.
@@ -39,7 +41,7 @@
                 if (!filter.CanPass(context))
                 {
                     if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                        Alligator.FilterWriteLine("(E) {0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
+                        Alligator.LogDebug("{0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
 
                     return false;
                 }

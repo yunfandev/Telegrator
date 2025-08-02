@@ -80,7 +80,7 @@ namespace Telegrator
             updateRouter = new UpdateRouter(handlerProvider, awaitingProvider, Options, BotInfo);
             
             // Log startup
-            Alligator.LogInformation($"Telegrator bot starting up - BotId: {BotInfo.Id}, Username: {BotInfo.Username}, MaxParallelHandlers: {Options.MaximumParallelWorkingHandlers ?? -1}");
+            Alligator.LogInformation($"Telegrator bot starting up - BotId: {BotInfo.User.Id}, Username: {BotInfo.User.Username}, MaxParallelHandlers: {Options.MaximumParallelWorkingHandlers ?? -1}");
 
             StartReceivingInternal(receiverOptions, cancellationToken);
         }

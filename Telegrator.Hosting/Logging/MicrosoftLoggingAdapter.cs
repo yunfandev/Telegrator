@@ -34,11 +34,11 @@ namespace Telegrator.Hosting.Logging
 
             if (exception != null)
             {
-                _logger.Log(msLogLevel, default, exception, message);
+                _logger.Log(msLogLevel, default, message, exception, (str, exc) => string.Format("{0} : {1}", str, exc));
             }
             else
             {
-                _logger.Log(msLogLevel, message);
+                _logger.Log(msLogLevel, default, message, null, (str, _) => str);
             }
         }
     }
