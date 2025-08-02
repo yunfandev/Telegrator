@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using Telegrator.Attributes;
 using Telegrator.Filters.Components;
 using Telegrator.Handlers.Components;
@@ -27,6 +28,87 @@ namespace Telegrator.Handlers
     /// </summary>
     public abstract class CallbackQueryHandler() : AbstractUpdateHandler<CallbackQuery>(UpdateType.CallbackQuery)
     {
+        
+        /// <summary>
+        /// Sends a response message to the current chat.
+        /// </summary>
+        /// <param name="text">The text of the message to send.</param>
+        /// <param name="parseMode">The parse mode for the message text.</param>
+        /// <param name="replyParameters">The reply parameters for the message.</param>
+        /// <param name="replyMarkup">The reply markup for the message.</param>
+        /// <param name="linkPreviewOptions">Options for link preview generation.</param>
+        /// <param name="messageThreadId">The thread ID for forum topics.</param>
+        /// <param name="entities">The message entities to include.</param>
+        /// <param name="disableNotification">Whether to disable notification for the message.</param>
+        /// <param name="protectContent">Whether to protect the message content.</param>
+        /// <param name="messageEffectId">The message effect ID.</param>
+        /// <param name="businessConnectionId">The business connection ID.</param>
+        /// <param name="allowPaidBroadcast">Whether to allow paid broadcast.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The sent message.</returns>
+        protected async Task<Message> Responce(
+            string text,
+            ParseMode parseMode = ParseMode.None,
+            ReplyParameters? replyParameters = null,
+            ReplyMarkup? replyMarkup = null,
+            LinkPreviewOptions? linkPreviewOptions = null,
+            int? messageThreadId = null,
+            IEnumerable<MessageEntity>? entities = null,
+            bool disableNotification = false,
+            bool protectContent = false,
+            string? messageEffectId = null,
+            string? businessConnectionId = null,
+            bool allowPaidBroadcast = false,
+            CancellationToken cancellationToken = default)
+            => await Container.Responce(
+                text, parseMode, replyParameters,
+                replyMarkup, linkPreviewOptions,
+                messageThreadId, entities,
+                disableNotification, protectContent,
+                messageEffectId, businessConnectionId,
+                allowPaidBroadcast, cancellationToken);
+        
+        /// <summary>
+        /// Edits the current callback message with new text.
+        /// </summary>
+        /// <param name="text">The new text of the message.</param>
+        /// <param name="parseMode">The parse mode for the message text.</param>
+        /// <param name="replyMarkup">The reply markup for the message.</param>
+        /// <param name="entities">The message entities to include.</param>
+        /// <param name="linkPreviewOptions">Options for link preview generation.</param>
+        /// <param name="messageEffectId">The message effect ID.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The edited message.</returns>
+        protected async Task<Message> EditMessage(
+            string text,
+            ParseMode parseMode = ParseMode.None,
+            InlineKeyboardMarkup? replyMarkup = null,
+            IEnumerable<MessageEntity>? entities = null,
+            LinkPreviewOptions? linkPreviewOptions = null,
+            CancellationToken cancellationToken = default)
+            => await Container.EditMessage(
+                text, parseMode, replyMarkup,
+                entities, linkPreviewOptions, cancellationToken);
+        
+        /// <summary>
+        /// Answers the current callback query with optional alert or message.
+        /// </summary>
+        /// <param name="text">The text to display in the callback answer.</param>
+        /// <param name="showAlert">Whether to show an alert popup instead of a toast.</param>
+        /// <param name="url">A URL that will be opened by the client.</param>
+        /// <param name="cacheTime">The maximum amount of time in seconds that the result of the callback query may be cached client-side.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        protected async Task AnswerCallbackQuery(
+            string? text = null,
+            bool showAlert = false,
+            string? url = null,
+            int cacheTime = 0,
+            CancellationToken cancellationToken = default)
+            => await Container.AnswerCallbackQuery(
+                text, showAlert, url, cacheTime, cancellationToken);
+
+
+        
         /// <summary>
         /// Gets the type-specific data from the callback query.
         /// Returns the data string, chat instance, or game short name depending on the callback query type.

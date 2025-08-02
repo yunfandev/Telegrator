@@ -179,7 +179,74 @@ namespace Telegrator
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
                 allowPaidBroadcast, cancellationToken);
+        
+        public static async Task<Message> Responce(
+            this IAbstractHandlerContainer<CallbackQuery> container,
+            string text,
+            ParseMode parseMode = ParseMode.None,
+            ReplyParameters? replyParameters = null,
+            ReplyMarkup? replyMarkup = null,
+            LinkPreviewOptions? linkPreviewOptions = null,
+            int? messageThreadId = null,
+            IEnumerable<MessageEntity>? entities = null,
+            bool disableNotification = false,
+            bool protectContent = false,
+            string? messageEffectId = null,
+            string? businessConnectionId = null,
+            bool allowPaidBroadcast = false,
+            CancellationToken cancellationToken = default)
+            => await container.Client.SendMessage(
+                container.ActualUpdate.From.Id, text, parseMode, replyParameters,
+                replyMarkup, linkPreviewOptions,
+                messageThreadId, entities,
+                disableNotification, protectContent,
+                messageEffectId, businessConnectionId,
+                allowPaidBroadcast, cancellationToken);
+        
+        public static async Task<Message> EditMessage(
+            this IAbstractHandlerContainer<CallbackQuery> container,
+            string text,
+            ParseMode parseMode = ParseMode.None,
+            InlineKeyboardMarkup? replyMarkup = null,
+            IEnumerable<MessageEntity>? entities = null,
+            LinkPreviewOptions? linkPreviewOptions = null,
+            CancellationToken cancellationToken = default)
+        {
+                var update = container.ActualUpdate;
+                return await container.Client.EditMessageText(
+                    chatId: update.Message.Chat.Id,
+                    messageId: update.Message.MessageId,
+                    text: text,
+                    parseMode: parseMode,
+                    replyMarkup: replyMarkup,
+                    entities: entities,
+                    linkPreviewOptions: linkPreviewOptions,
+                    cancellationToken: cancellationToken);
+        }
+        
+        public static async Task AnswerCallbackQuery(
+            this IAbstractHandlerContainer<CallbackQuery> container,
+            string? text = null,
+            bool showAlert = false,
+            string? url = null,
+            int cacheTime = 0,
+            CancellationToken cancellationToken = default)
+        {
+            var callbackQueryId = container.ActualUpdate.Id;
+            
+            await container.Client.AnswerCallbackQuery(
+                callbackQueryId: callbackQueryId,
+                text: text,
+                showAlert: showAlert,
+                url: url,
+                cacheTime: cacheTime,
+                cancellationToken: cancellationToken);
+        }
+
+
     }
+    
+    
 
     /// <summary>
     /// Extensions methods for Awaiter Handler Builders
