@@ -1,4 +1,5 @@
 ﻿using Telegrator.Handlers;
+using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -65,7 +66,7 @@ namespace Telegrator.Polling
             {
                 if (lastResult?.NextType != null)
                 {
-                    if (lastResult.NextType != handlerInfo.HandlerInstance.GetType())
+                    if (lastResult.NextType != handlerInfo.From.HandlerType)
                         continue;
                 }
 
@@ -76,9 +77,16 @@ namespace Telegrator.Polling
 
                 try
                 {
+                    Alligator.LogDebug("Described handler '{0}'", handlerInfo.DisplayString);
                     HandlerExecuting?.Invoke(handlerInfo);
-                    lastResult = await handlerInfo.Execute(GlobalCancellationToken);
+
+                    lastResult = await handlerInfo.HandlerInstance.Execute(handlerInfo);
                     ExecutingHandlersSemaphore?.Release(1);
+
+                    if (lastResult.RouteNext)
+                    {
+                        Alligator.LogDebug("Handler requested route continuation");
+                    }
                 }
                 catch (OperationCanceledException)
                 {

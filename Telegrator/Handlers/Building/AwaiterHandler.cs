@@ -36,10 +36,9 @@ namespace Telegrator.Handlers.Building
         /// <summary>
         /// Creates a handler container for this awaiter handler.
         /// </summary>
-        /// <param name="_">The awaiting provider (unused).</param>
         /// <param name="describedHandler">The handler information containing the update.</param>
         /// <returns>An empty handler container.</returns>
-        public IHandlerContainer CreateContainer(IAwaitingProvider _, DescribedHandlerInfo describedHandler)
+        public IHandlerContainer CreateContainer(DescribedHandlerInfo describedHandler)
         {
             HandlingUpdate = describedHandler.HandlingUpdate;
             return new EmptyHandlerContainer();

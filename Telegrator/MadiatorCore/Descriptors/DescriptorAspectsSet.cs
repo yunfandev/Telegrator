@@ -51,22 +51,22 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// </summary>
         /// <param name="handler">The handler instance.</param>
         /// <param name="container">The handler container with update context.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>A <see cref="Result"/> indicating whether execution should continue.</returns>
         /// <exception cref="InvalidOperationException">Thrown when handler claims to implement <see cref="IPreProcessor"/> but doesn't.</exception>
-        public async Task<Result> ExecutePre(UpdateHandlerBase handler, IHandlerContainer container)
+        public async Task<Result> ExecutePre(UpdateHandlerBase handler, IHandlerContainer container, CancellationToken cancellationToken)
         {
             if (SelfPre)
             {
                 if (handler is not IPreProcessor preProcessor)
                     throw new InvalidOperationException();
 
-                return await preProcessor.BeforeExecution(container);
+                return await preProcessor.BeforeExecution(container, cancellationToken).ConfigureAwait(false);
             }
-
-            if (TypedPre != null)
+            else if (TypedPre != null)
             {
                 IPreProcessor preProcessor = (IPreProcessor)Activator.CreateInstance(TypedPre);
-                return await preProcessor.BeforeExecution(container);
+                return await preProcessor.BeforeExecution(container, cancellationToken).ConfigureAwait(false);
             }
 
             return Result.Ok();
@@ -77,22 +77,22 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// </summary>
         /// <param name="handler">The handler instance.</param>
         /// <param name="container">The handler container with update context.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>A <see cref="Result"/> indicating the final execution result.</returns>
         /// <exception cref="InvalidOperationException">Thrown when handler claims to implement <see cref="IPostProcessor"/> but doesn't.</exception>
-        public async Task<Result> ExecutePost(UpdateHandlerBase handler, IHandlerContainer container)
+        public async Task<Result> ExecutePost(UpdateHandlerBase handler, IHandlerContainer container, CancellationToken cancellationToken)
         {
             if (SelfPost)
             {
                 if (handler is not IPostProcessor postProcessor)
                     throw new InvalidOperationException();
 
-                return await postProcessor.AfterExecution(container);
+                return await postProcessor.AfterExecution(container, cancellationToken).ConfigureAwait(false);
             }
-
-            if (TypedPost != null)
+            else if (TypedPost != null)
             {
                 IPostProcessor postProcessor = (IPostProcessor)Activator.CreateInstance(TypedPost);
-                return await postProcessor.AfterExecution(container);
+                return await postProcessor.AfterExecution(container, cancellationToken).ConfigureAwait(false);
             }
 
             return Result.Ok();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Telegrator.Handlers;
+﻿using Telegrator.Handlers;
 using Telegrator.Handlers.Components;
 
 namespace Telegrator.Aspects
@@ -16,7 +13,8 @@ namespace Telegrator.Aspects
         /// Executes after the handler's main execution logic.
         /// </summary>
         /// <param name="container">The handler container containing the current update and context.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>A <see cref="Result"/> indicating the final execution result.</returns>
-        public Task<Result> AfterExecution(IHandlerContainer container);
+        public Task<Result> AfterExecution(IHandlerContainer container, CancellationToken cancellationToken);
     }
 }

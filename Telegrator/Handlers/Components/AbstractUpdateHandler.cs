@@ -60,12 +60,11 @@ namespace Telegrator.Handlers.Components
         /// <summary>
         /// Creates a handler container for the specified awaiting provider and handler info.
         /// </summary>
-        /// <param name="awaitingProvider">The awaiting provider.</param>
         /// <param name="handlerInfo">The handler descriptor info.</param>
         /// <returns>The created handler container.</returns>
-        public virtual IHandlerContainer CreateContainer(IAwaitingProvider awaitingProvider, DescribedHandlerInfo handlerInfo)
+        public virtual IHandlerContainer CreateContainer(DescribedHandlerInfo handlerInfo)
         {
-            return new AbstractHandlerContainer<TUpdate>(awaitingProvider, handlerInfo);
+            return new AbstractHandlerContainer<TUpdate>(handlerInfo);
         }
 
         /// <summary>

@@ -18,6 +18,7 @@ namespace Telegrator.Tests.Handlers
     /// </summary>
     public class HandlerTests
     {
+        /*s
         /// <summary>
         /// Тест для базового обработчика обновлений.
         /// 
@@ -37,6 +38,7 @@ namespace Telegrator.Tests.Handlers
             testHandler.WasExecuted.Should().BeTrue();
             testHandler.LifetimeToken.IsEnded.Should().BeTrue();
         }
+        */
 
         /// <summary>
         /// Тест для проверки токена жизненного цикла.

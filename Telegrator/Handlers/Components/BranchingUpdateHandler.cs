@@ -103,13 +103,12 @@ namespace Telegrator.Handlers.Components
         /// <summary>
         /// Creates a handler container for this branching handler.
         /// </summary>
-        /// <param name="awaitingProvider">The awaiting provider for the container.</param>
         /// <param name="handlerInfo">The handler information.</param>
         /// <returns>A handler container for this branching handler.</returns>
         /// <exception cref="Exception">Thrown when the awaiting provider is not of the expected type.</exception>
-        public override IHandlerContainer CreateContainer(IAwaitingProvider awaitingProvider, DescribedHandlerInfo handlerInfo)
+        public override IHandlerContainer CreateContainer(DescribedHandlerInfo handlerInfo)
         {
-            return new AbstractHandlerContainer<TUpdate>(awaitingProvider, handlerInfo);
+            return new AbstractHandlerContainer<TUpdate>(handlerInfo);
         }
 
         /// <summary>

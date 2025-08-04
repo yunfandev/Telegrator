@@ -23,6 +23,11 @@ namespace Telegrator.MadiatorCore.Descriptors
         public readonly IUpdateRouter UpdateRouter;
 
         /// <summary>
+        /// The awaiting provider to fetch new updates inside handler
+        /// </summary>
+        public readonly IAwaitingProvider AwaitingProvider;
+
+        /// <summary>
         /// The Telegram bot client used for this handler.
         /// </summary>
         public readonly ITelegramBotClient Client;
@@ -53,11 +58,6 @@ namespace Telegrator.MadiatorCore.Descriptors
         public HandlerLifetimeToken HandlerLifetime => HandlerInstance.LifetimeToken;
 
         /// <summary>
-        /// The handler container created during execution.
-        /// </summary>
-        public IHandlerContainer? HandlerContainer { get; private set; }
-
-        /// <summary>
         /// Display string for the handler (for debugging or logging).
         /// </summary>
         public string DisplayString { get; set; }
@@ -66,87 +66,27 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// Initializes a new instance of the <see cref="DescribedHandlerInfo"/> class.
         /// </summary>
         /// <param name="fromDescriptor">descriptor from that handler was described from</param>
+        /// <param name="awaitingProvider"></param>
         /// <param name="updateRouter">The update router.</param>
         /// <param name="client">The Telegram bot client.</param>
         /// <param name="handlerInstance">The handler instance.</param>
         /// <param name="filterContext">The filter execution context.</param>
         /// <param name="displayString">Optional display string.</param>
-        public DescribedHandlerInfo(HandlerDescriptor fromDescriptor, IUpdateRouter updateRouter, ITelegramBotClient client, UpdateHandlerBase handlerInstance, FilterExecutionContext<Update> filterContext, string? displayString)
+        public DescribedHandlerInfo(HandlerDescriptor fromDescriptor, IUpdateRouter updateRouter, IAwaitingProvider awaitingProvider, ITelegramBotClient client, UpdateHandlerBase handlerInstance, FilterExecutionContext<Update> filterContext, string? displayString)
         {
             From = fromDescriptor;
             UpdateRouter = updateRouter;
+            AwaitingProvider = awaitingProvider;
             Client = client;
             HandlerInstance = handlerInstance;
             ExtraData = filterContext.Data;
             CompletedFilters = filterContext.CompletedFilters;
             HandlingUpdate = filterContext.Update;
-            DisplayString = displayString ?? handlerInstance.GetType().Name;
-        }
-
-        /// <summary>
-        /// Executes the handler logic asynchronously.
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="Exception">Thrown if the handler lifetime has ended or the handler is not a container factory.</exception>
-        public async Task<Result> Execute(CancellationToken cancellationToken)
-        {
-            if (HandlerLifetime.IsEnded)
-                throw new Exception();
-
-            try
-            {
-                HandlerContainer = GetContainer(UpdateRouter.AwaitingProvider, this);
-
-                if (From.Aspects != null)
-                {
-                    Result preResult = await From.Aspects.ExecutePre(HandlerInstance, HandlerContainer);
-                    if (!preResult.Positive)
-                        return preResult;
-                }
-
-                Result execResult = await HandlerInstance.Execute(HandlerContainer, cancellationToken);
-                if (!execResult.Positive)
-                    return execResult;
-
-                if (From.Aspects != null)
-                {
-                    Result postResult = await From.Aspects.ExecutePost(HandlerInstance, HandlerContainer);
-                    if (!postResult.Positive)
-                        return postResult;
-                }
-
-                return Result.Ok();
-            }
-            catch (OperationCanceledException)
-            {
-                // Cancelled
-                _ = 0xBAD + 0xC0DE;
-                return Result.Ok();
-            }
-            catch (Exception exception)
-            {
-                await UpdateRouter
-                    .HandleErrorAsync(Client, exception, HandleErrorSource.HandleUpdateError, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return Result.Fault();
-            }
-        }
-
-        private IHandlerContainer GetContainer(IAwaitingProvider awaitingProvider, DescribedHandlerInfo handlerInfo)
-        {
-            if (HandlerInstance is IHandlerContainerFactory handlerDefainedContainerFactory)
-                return handlerDefainedContainerFactory.CreateContainer(awaitingProvider, handlerInfo);
-
-            if (UpdateRouter.DefaultContainerFactory is not null)
-                return UpdateRouter.DefaultContainerFactory.CreateContainer(awaitingProvider, handlerInfo);
-            
-            throw new Exception();
+            DisplayString = displayString ?? fromDescriptor.HandlerType.Name;
         }
 
         /// <inheritdoc/>
         public override string ToString()
-            => DisplayString ?? HandlerInstance.GetType().Name;
+            => DisplayString ?? From.HandlerType.Name;
     }
 }

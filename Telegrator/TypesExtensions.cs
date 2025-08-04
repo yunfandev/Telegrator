@@ -844,8 +844,6 @@ namespace Telegrator
     /// </summary>
     public static partial class ReflectionExtensions
     {
-        private static readonly BindingFlags BindAll = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-
         /// <summary>
         /// Checks if a type implements the <see cref="ICustomDescriptorsProvider"/> interface.
         /// </summary>
