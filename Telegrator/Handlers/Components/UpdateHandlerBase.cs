@@ -1,10 +1,8 @@
-﻿using System.ComponentModel;
-using System.Threading;
-using Telegram.Bot.Polling;
+﻿using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegrator.MadiatorCore;
+using Telegrator.Filters.Components;
 using Telegrator.MadiatorCore.Descriptors;
-using Telegrator.Polling;
 
 namespace Telegrator.Handlers.Components
 {
@@ -102,5 +100,20 @@ namespace Telegrator.Handlers.Components
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected abstract Task<Result> ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Handles failed filters during handler describing.
+        /// Use <see cref="Result"/> to control how router should treat this fail.
+        /// <see cref="Result.Ok"/> to silently continue decribing.
+        /// <see cref="Result.Fault"/> to stop\break decribing sequence.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="failedFilter"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        public virtual Task<Result> FiltersFallback(FilterExecutionContext<Update> context, IFilter<Update> failedFilter, FilterOrigin origin)
+        {
+            return Task.FromResult(Result.Ok());
+        }
     }
 }

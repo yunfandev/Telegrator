@@ -71,6 +71,33 @@
     }
 
     /// <summary>
+    /// Messages from where this filter was originated
+    /// </summary>
+    public enum FilterOrigin
+    {
+        /// <summary>
+        /// None, empty filter
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// From <see cref="Attributes.UpdateHandlerAttribute{T}"/> update validator filter
+        /// </summary>
+        Validator,
+
+        /// <summary>
+        /// From <see cref="Attributes.StateKeeperAttribute{TKey, TState, TKeeper}"/> state machine filter
+        /// </summary>
+        StateKeeper,
+
+        /// <summary>
+        /// From regular <see cref="Attributes.UpdateFilterAttribute{T}"/>
+        /// </summary>
+        Regualr
+    }
+
+    /*
+    /// <summary>
     /// Levels of debug writing
     /// </summary>
     [Flags]
@@ -101,4 +128,5 @@
         /// </summary>
         HandlersPool = 0x8
     }
+    */
 }

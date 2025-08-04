@@ -215,11 +215,18 @@ namespace Telegrator.Polling
                 { "handler_name", descriptor.ToString() }
             };
 
-            FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(_botInfo, update, update, data, []);
-            if (descriptor.Filters != null && !descriptor.Filters.Validate(filterContext))
-                return null;
-
             UpdateHandlerBase handlerInstance = provider.GetHandlerInstance(descriptor, cancellationToken);
+
+            FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(_botInfo, update, update, data, []);
+            if (descriptor.Filters != null && !descriptor.Filters.Validate(filterContext, out IFilter<Update> failedFilter, out FilterOrigin origin))
+            {
+                Result fallbackResult = handlerInstance.FiltersFallback(filterContext, failedFilter, origin).Result;
+                if (!fallbackResult.Positive)
+                    throw new BreakDescribingException();
+
+                return null;
+            }
+
             return new DescribedHandlerInfo(descriptor, this, AwaitingProvider, client, handlerInstance, filterContext, descriptor.DisplayString);
         }
 
@@ -266,5 +273,7 @@ namespace Telegrator.Polling
                     }
             }
         }
+
+        private class BreakDescribingException : Exception { }
     }
 }
