@@ -66,8 +66,15 @@ namespace Telegrator.Hosting.Web
             if (!_settings.DisableAutoConfigure)
             {
                 Services.Configure<TelegratorWebOptions>(Configuration.GetSection(nameof(TelegratorWebOptions)));
-                Services.Configure<TelegratorOptions>(Configuration.GetSection(nameof(TelegratorOptions)));
                 Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
+            }
+            else
+            {
+                if (null == Services.SingleOrDefault(srvc => srvc.ImplementationType == typeof(IOptions<TelegratorWebOptions>)))
+                    throw new MissingMemberException("Auto configuration disabled, yet no options of type 'TelegratorWebOptions' wasn't registered. This configuration is runtime required!");
+
+                if (null == Services.SingleOrDefault(srvc => srvc.ImplementationType == typeof(IOptions<TelegramBotClientOptions>)))
+                    throw new MissingMemberException("Auto configuration disabled, yet no options of type 'TelegramBotClientOptions' wasn't registered. This configuration is runtime required!");
             }
 
             Services.AddSingleton<IConfigurationManager>(Configuration);

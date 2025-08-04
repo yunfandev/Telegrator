@@ -75,6 +75,16 @@ namespace Telegrator.Hosting
                 Services.Configure<ReceiverOptions>(Configuration.GetSection(nameof(ReceiverOptions)));
                 Services.Configure<TelegramBotClientOptions>(Configuration.GetSection(nameof(TelegramBotClientOptions)), new TelegramBotClientOptionsProxy());
             }
+            else
+            {
+                /*
+                if (null == Services.SingleOrDefault(srvc => srvc.ImplementationType == typeof(IOptions<ReceiverOptions>)))
+                    throw new MissingMemberException("Auto configuration disabled, yet no options of type 'ReceiverOptions' wasn't registered. This configuration is runtime required!");
+                */
+
+                if (null == Services.SingleOrDefault(srvc => srvc.ImplementationType == typeof(IOptions<TelegramBotClientOptions>)))
+                    throw new MissingMemberException("Auto configuration disabled, yet no options of type 'TelegramBotClientOptions' wasn't registered. This configuration is runtime required!");
+            }
 
             Services.AddSingleton<IOptions<TelegratorOptions>>(Options.Create(_settings));
             Services.AddSingleton<IConfigurationManager>(Configuration);
