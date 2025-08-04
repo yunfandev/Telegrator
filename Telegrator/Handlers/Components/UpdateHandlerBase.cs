@@ -9,7 +9,7 @@ namespace Telegrator.Handlers.Components
     /// <summary>
     /// Base class for update handlers, providing execution and lifetime management for Telegram updates.
     /// </summary>
-    public abstract class UpdateHandlerBase(UpdateType handlingUpdateType)
+    public abstract class UpdateHandlerBase(UpdateType handlingUpdateType) : IDisposable
     {
         /// <summary>
         /// Gets the <see cref="UpdateType"/> that this handler processes.
@@ -102,6 +102,16 @@ namespace Telegrator.Handlers.Components
         protected abstract Task<Result> ExecuteInternal(IHandlerContainer container, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Dispose resources of this handler. Override if needed
+        /// </summary>
+        /// <param name="disposing"></param>
+        /// <returns>Return <see langword="true"/> if dispose was successfull and garbage collecting for this object can be supressed</returns>
+        protected virtual bool Dispose(bool disposing)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Handles failed filters during handler describing.
         /// Use <see cref="Result"/> to control how router should treat this fail.
         /// <see cref="Result.Ok"/> to silently continue decribing.
@@ -114,6 +124,16 @@ namespace Telegrator.Handlers.Components
         public virtual Task<Result> FiltersFallback(FilterExecutionContext<Update> context, IFilter<Update> failedFilter, FilterOrigin origin)
         {
             return Task.FromResult(Result.Ok());
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (LifetimeToken.IsEnded)
+                return;
+
+            if (Dispose(true))
+                GC.SuppressFinalize(this);
         }
     }
 }

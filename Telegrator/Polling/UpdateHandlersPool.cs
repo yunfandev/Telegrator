@@ -1,4 +1,5 @@
-﻿using Telegrator.Logging;
+﻿using Telegrator.Handlers.Components;
+using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -79,20 +80,32 @@ namespace Telegrator.Polling
                     Alligator.LogDebug("Described handler '{0}'", handlerInfo.DisplayString);
                     HandlerExecuting?.Invoke(handlerInfo);
 
-                    lastResult = await handlerInfo.HandlerInstance.Execute(handlerInfo);
-                    ExecutingHandlersSemaphore?.Release(1);
+                    using (UpdateHandlerBase instance = handlerInfo.HandlerInstance)
+                    {
+                        lastResult = await instance.Execute(handlerInfo);
+                        ExecutingHandlersSemaphore?.Release(1);
+                    }
 
                     if (lastResult.RouteNext)
                     {
                         Alligator.LogDebug("Handler requested route continuation");
                     }
                 }
+                catch (NotImplementedException)
+                {
+                    _ = 0xBAD + 0xC0DE;
+                }
                 catch (OperationCanceledException)
                 {
+                    _ = 0xBAD + 0xC0DE;
                     break;
                 }
+                catch (Exception ex)
+                {
+                    Alligator.LogError("Failed to process handler!", ex);
+                }
 
-                if (!lastResult.RouteNext)
+                if (lastResult != null && !lastResult.RouteNext)
                     break;
             }
         }
