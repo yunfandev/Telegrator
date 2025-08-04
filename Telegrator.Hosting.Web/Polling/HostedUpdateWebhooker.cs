@@ -45,18 +45,21 @@ namespace Telegrator.Hosting.Web.Polling
         /// <inheritdoc/>
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            StartInternal(cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        private async void StartInternal(CancellationToken cancellationToken)
+        {
             string pattern = new UriBuilder(_options.WebhookUri).Path;
             _botHost.MapPost(pattern, (Delegate)ReceiveUpdate);
 
-            _botClient.SetWebhook(
+            await _botClient.SetWebhook(
                 url: _options.WebhookUri,
                 maxConnections: _options.MaxConnections,
                 allowedUpdates: _botHost.UpdateRouter.HandlersProvider.AllowedTypes,
                 dropPendingUpdates: _options.DropPendingUpdates,
-                cancellationToken: cancellationToken)
-                .Wait(cancellationToken);
-
-            return Task.CompletedTask;
+                cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc/>
