@@ -15,12 +15,12 @@ namespace Telegrator.Attributes
         /// <summary>
         /// Gets the compiled anonymous filter for this attribute.
         /// </summary>
-        public override Filter<Update> AnonymousFilter { get; protected set; }
+        public override IFilter<Update> AnonymousFilter { get; protected set; }
 
         /// <summary>
         /// Gets the compiled filter logic for the update target.
         /// </summary>
-        public Filter<T> UpdateFilter { get; protected set; }
+        public IFilter<T> UpdateFilter { get; protected set; }
 
         /// <summary>
         /// Empty constructor for internal using
@@ -38,18 +38,20 @@ namespace Telegrator.Attributes
         /// <param name="filters">The filters to compose</param>
         protected UpdateFilterAttribute(params IFilter<T>[] filters)
         {
-            UpdateFilter = CompiledFilter<T>.Compile(filters);
-            AnonymousFilter = AnonymousTypeFilter.Compile(UpdateFilter, GetFilterringTarget);
+            string name = GetType().Name;
+            UpdateFilter = new CompiledFilter<T>(name, filters);
+            AnonymousFilter = AnonymousTypeFilter.Compile(name, UpdateFilter, GetFilterringTarget);
         }
 
         /// <summary>
         /// Initializes the attribute with a precompiled filter for the update target.
         /// </summary>
         /// <param name="updateFilter">The compiled filter</param>
-        protected UpdateFilterAttribute(Filter<T> updateFilter)
+        protected UpdateFilterAttribute(IFilter<T> updateFilter)
         {
+            string name = GetType().Name;
             UpdateFilter = updateFilter;
-            AnonymousFilter = AnonymousTypeFilter.Compile(UpdateFilter, GetFilterringTarget);
+            AnonymousFilter = AnonymousTypeFilter.Compile(name, UpdateFilter, GetFilterringTarget);
         }
 
         /// <summary>
@@ -60,13 +62,13 @@ namespace Telegrator.Attributes
         public override sealed bool ProcessModifiers(UpdateFilterAttributeBase? previous)
         {
             if (Modifiers.HasFlag(FilterModifier.Not))
-                AnonymousFilter = AnonymousFilter.Not();
+                AnonymousFilter = Filter<T>.Not(AnonymousFilter);
 
             if (previous is not null)
             {
                 if (previous.Modifiers.HasFlag(FilterModifier.OrNext))
                 {
-                    AnonymousFilter = previous.AnonymousFilter.Or(AnonymousFilter);
+                    AnonymousFilter = Filter<Update>.Or(previous.AnonymousFilter, AnonymousFilter);
                 }
             }
 

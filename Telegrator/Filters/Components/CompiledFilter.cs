@@ -6,27 +6,32 @@ namespace Telegrator.Filters.Components
     /// Represents a filter that composes multiple filters and passes only if all of them pass.
     /// </summary>
     /// <typeparam name="T">The type of the input for the filter.</typeparam>
-    public class CompiledFilter<T> : Filter<T> where T : class
+    public class CompiledFilter<T> : Filter<T>, INamedFilter where T : class
     {
         private readonly IFilter<T>[] Filters;
+        private readonly string _name;
+
+        public virtual string Name => _name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompiledFilter{T}"/> class.
         /// </summary>
         /// <param name="filters">The filters to compose.</param>
-        private CompiledFilter(IFilter<T>[] filters)
+        public CompiledFilter(params IFilter<T>[] filters)
         {
+            _name = string.Join("+", filters.Select(fltr => fltr.GetType().Name));
             Filters = filters;
         }
 
         /// <summary>
-        /// Compiles multiple filters into a <see cref="CompiledFilter{T}"/>.
+        /// Initializes a new instance of the <see cref="CompiledFilter{T}"/> class.
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="filters">The filters to compose.</param>
-        /// <returns>A new <see cref="CompiledFilter{T}"/> instance.</returns>
-        public static CompiledFilter<T> Compile(params IFilter<T>[] filters)
+        public CompiledFilter(string name, params IFilter<T>[] filters)
         {
-            return new CompiledFilter<T>(filters);
+            _name = name;
+            Filters = filters;
         }
 
         /// <summary>
@@ -41,14 +46,14 @@ namespace Telegrator.Filters.Components
                 if (!filter.CanPass(context))
                 {
                     if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                        Alligator.LogDebug("{0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
+                        Alligator.LogDebug("{0} filter of {1} didnt pass! (Compiled)", filter.GetType().Name, context.Data["handler_name"]);
 
                     return false;
                 }
 
                 context.CompletedFilters.Add(filter);
             }
-
+    
             return true;
         }
     }

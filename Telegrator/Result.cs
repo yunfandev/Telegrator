@@ -37,7 +37,6 @@ namespace Telegrator
         /// Represents 'success'
         /// <list type="bullet">
         /// <item>Inside <see cref="IPreProcessor"/> - let handler's main block be executed</item>
-        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FilterExecutionContext{Update}, IFilter{Update}, FilterOrigin)"/> - let router continue describing</item>
         /// <item>Inside <see cref="UpdateHandlerBase.ExecuteInternal(IHandlerContainer, CancellationToken)"/> - tells <see cref="IUpdateRouter"/> that he can stop describing, as needed handler was found</item>
         /// </list>
         /// </summary>
@@ -49,7 +48,7 @@ namespace Telegrator
         /// Represents 'fault' or 'error'. Use cases:
         /// <list type="bullet">
         /// <item>Inside <see cref="IPreProcessor"/> - interupts execution of handler, main block and <see cref="IPostProcessor"/> wont be executed</item>
-        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FilterExecutionContext{Update}, IFilter{Update}, FilterOrigin)"/> - interupts router's describing sequence</item>
+        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FiltersFallbackReport, Telegram.Bot.ITelegramBotClient, CancellationToken)"/> - interupts <see cref="IUpdateRouter"/>'s describing sequence</item>
         /// </list>
         /// </summary>
         /// <returns></returns>
@@ -59,6 +58,7 @@ namespace Telegrator
         /// <summary>
         /// Represents 'continue'. Use cases:
         /// <list type="bullet">
+        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FiltersFallbackReport, Telegram.Bot.ITelegramBotClient, CancellationToken)"/> - let router continue describing</item>
         /// <item>Inside <see cref="UpdateHandlerBase.ExecuteInternal(IHandlerContainer, CancellationToken)"/> - Tells <see cref="IUpdateRouter"/> to continue describing handlers</item>
         /// </list>
         /// </summary>

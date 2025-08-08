@@ -1,4 +1,4 @@
-﻿namespace Telegrator.MadiatorCore.Descriptors
+﻿namespace Telegrator.Handlers.Components
 {
     /// <summary>
     /// Represents a token that tracks the lifetime of a handler instance.

@@ -20,7 +20,7 @@ namespace Telegrator.Attributes.Components
         /// <summary>
         /// Gets the <see cref="IFilter{T}"/> that <see cref="UpdateHandlerBase"/> processing
         /// </summary>
-        public abstract Filter<Update> AnonymousFilter { get; protected set; }
+        public abstract IFilter<Update> AnonymousFilter { get; protected set; }
 
         /// <summary>
         /// Gets or sets the filter modifiers that affect how this filter is combined with others.

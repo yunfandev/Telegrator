@@ -121,7 +121,7 @@ namespace Telegrator.Tests.Filters
             var filter2 = Filter<Update>.If(_ => true);
             var filter3 = Filter<Update>.If(_ => false);
             
-            var compiledFilter = CompiledFilter<Update>.Compile(filter1, filter2, filter3);
+            var compiledFilter = new CompiledFilter<Update>(filter1, filter2, filter3);
             var context = new FilterExecutionContext<Update>(new TelegramBotInfo(null), new Update(), new Update(), new Dictionary<string, object>(), new CompletedFiltersList());
 
             // Act

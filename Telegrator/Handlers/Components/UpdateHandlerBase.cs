@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Polling;
+﻿using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Filters.Components;
@@ -41,7 +42,10 @@ namespace Telegrator.Handlers.Components
                 // Executing pre processor
                 if (aspects != null)
                 {
-                    Result? preResult = await aspects.ExecutePre(this, container, cancellationToken).ConfigureAwait(false);
+                    Result? preResult = await aspects
+                        .ExecutePre(this, container, cancellationToken)
+                        .ConfigureAwait(false);
+
                     if (!preResult.Positive)
                         return preResult;
                 }
@@ -54,7 +58,10 @@ namespace Telegrator.Handlers.Components
                 // Executing post processor
                 if (aspects != null)
                 {
-                    Result postResult = await aspects.ExecutePost(this, container, cancellationToken).ConfigureAwait(false);
+                    Result postResult = await aspects
+                        .ExecutePost(this, container, cancellationToken)
+                        .ConfigureAwait(false);
+
                     if (!postResult.Positive)
                         return postResult;
                 }
@@ -82,7 +89,7 @@ namespace Telegrator.Handlers.Components
             }
         }
 
-        private IHandlerContainer GetContainer(DescribedHandlerInfo handlerInfo)
+        internal IHandlerContainer GetContainer(DescribedHandlerInfo handlerInfo)
         {
             if (this is IHandlerContainerFactory handlerDefainedContainerFactory)
                 return handlerDefainedContainerFactory.CreateContainer(handlerInfo);
@@ -114,14 +121,14 @@ namespace Telegrator.Handlers.Components
         /// <summary>
         /// Handles failed filters during handler describing.
         /// Use <see cref="Result"/> to control how router should treat this fail.
-        /// <see cref="Result.Ok"/> to silently continue decribing.
-        /// <see cref="Result.Fault"/> to stop\break decribing sequence.
+        /// <see cref="Result.Next"/> to silently continue decribing.
+        /// <see cref="Result.Fault"/> to stop\break desribing sequence.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="failedFilter"></param>
-        /// <param name="origin"></param>
+        /// <param name="report"></param>
+        /// <param name="client"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public virtual Task<Result> FiltersFallback(FilterExecutionContext<Update> context, IFilter<Update> failedFilter, FilterOrigin origin)
+        public virtual Task<Result> FiltersFallback(FiltersFallbackReport report, ITelegramBotClient client, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Result.Ok());
         }

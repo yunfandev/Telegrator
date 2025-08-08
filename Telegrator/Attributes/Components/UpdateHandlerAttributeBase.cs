@@ -35,6 +35,8 @@ namespace Telegrator.Attributes.Components
         /// </summary>
         public int Priority { get; set; }
         
+        public bool FormReport { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="UpdateHandlerAttributeBase"/>
         /// </summary>

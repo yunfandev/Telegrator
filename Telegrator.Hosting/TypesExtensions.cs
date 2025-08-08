@@ -100,12 +100,13 @@ namespace Telegrator.Hosting
         /// Adds a Microsoft.Extensions.Logging adapter to Alligator using a logger factory.
         /// </summary>
         /// <param name="host"></param>
-        public static void AddLoggingAdapter(this ITelegramBotHost host)
+        public static ITelegramBotHost AddLoggingAdapter(this ITelegramBotHost host)
         {
             ILoggerFactory loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
             ILogger logger = loggerFactory.CreateLogger("Telegrator");
             MicrosoftLoggingAdapter adapter = new MicrosoftLoggingAdapter(logger);
             Alligator.AddAdapter(adapter);
+            return host;
         }
     }
 

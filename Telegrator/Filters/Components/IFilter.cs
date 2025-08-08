@@ -1,5 +1,10 @@
 ﻿namespace Telegrator.Filters.Components
 {
+    public interface INamedFilter
+    {
+        public string Name { get; }
+    }
+
     /// <summary>
     /// Interface for filters that can be collected into a completed filters list.
     /// Provides information about whether a filter should be tracked during execution.

@@ -31,6 +31,14 @@ namespace Telegrator.Filters
             => new ReverseFilter<T>(this);
 
         /// <summary>
+        /// Creates a filter that inverts the result of this filter.
+        /// </summary>
+        /// <typeparam name="Q"></typeparam>
+        /// <returns>A <see cref="ReverseFilter{T}"/> instance.</returns>
+        public static Filter<Q> Not<Q>(IFilter<Q> filter) where Q : class
+            => new ReverseFilter<Q>(filter);
+
+        /// <summary>
         /// Creates a filter that passes only if both this and the specified filter pass.
         /// </summary>
         /// <param name="filter">The filter to combine with.</param>
@@ -45,6 +53,16 @@ namespace Telegrator.Filters
         /// <returns>An <see cref="OrFilter{T}"/> instance.</returns>
         public OrFilter<T> Or(IFilter<T> filter)
             => new OrFilter<T>(this, filter);
+
+        /// <summary>
+        /// Creates a filter that passes if either this or the specified filter pass.
+        /// </summary>
+        /// <typeparam name="Q"></typeparam>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns>An <see cref="OrFilter{Q}"/> instance.</returns>
+        public static OrFilter<Q> Or<Q>(IFilter<Q> left, IFilter<Q> right) where Q : class
+            => new OrFilter<Q>(left, right);
 
         /// <summary>
         /// Gets a value indicating whether this filter is collectible.

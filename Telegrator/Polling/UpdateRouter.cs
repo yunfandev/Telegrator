@@ -178,23 +178,21 @@ namespace Telegrator.Polling
         /// <returns>A collection of described handler information</returns>
         protected virtual IEnumerable<DescribedHandlerInfo> DescribeDescriptors(IHandlersProvider provider, HandlerDescriptorList descriptors, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            try
+            Alligator.LogDebug("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+            foreach (HandlerDescriptor descriptor in descriptors.Reverse())
             {
-                Alligator.LogDebug("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
-                foreach (HandlerDescriptor descriptor in descriptors.Reverse())
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    DescribedHandlerInfo? describedHandler = DescribeHandler(provider, descriptor, client, update, cancellationToken);
-                    if (describedHandler == null)
-                        continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                DescribedHandlerInfo? describedHandler = DescribeHandler(provider, descriptor, client, update, out bool breakRouting, cancellationToken);
+                if (breakRouting)
+                    yield break;
 
-                    yield return describedHandler;
-                }
+                if (describedHandler == null)
+                    continue;
+
+                yield return describedHandler;
             }
-            finally
-            {
-                Alligator.LogDebug("Describing for Update ({0}) finished", update.Id);
-            }
+
+            Alligator.LogDebug("Describing for Update ({0}) finished", update.Id);
         }
 
         /// <summary>
@@ -205,10 +203,12 @@ namespace Telegrator.Polling
         /// <param name="descriptor">The handler descriptor to process</param>
         /// <param name="client">The Telegram bot client instance</param>
         /// <param name="update">The incoming Telegram update to process</param>
+        /// <param name="breakRouting"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The described handler info if validation passes; otherwise, null</returns>
-        public virtual DescribedHandlerInfo? DescribeHandler(IHandlersProvider provider, HandlerDescriptor descriptor, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
+        public virtual DescribedHandlerInfo? DescribeHandler(IHandlersProvider provider, HandlerDescriptor descriptor, ITelegramBotClient client, Update update, out bool breakRouting, CancellationToken cancellationToken = default)
         {
+            breakRouting = false;
             cancellationToken.ThrowIfCancellationRequested();
             Dictionary<string, object> data = new Dictionary<string, object>()
             {
@@ -216,15 +216,23 @@ namespace Telegrator.Polling
             };
 
             UpdateHandlerBase handlerInstance = provider.GetHandlerInstance(descriptor, cancellationToken);
-
             FilterExecutionContext<Update> filterContext = new FilterExecutionContext<Update>(_botInfo, update, update, data, []);
-            if (descriptor.Filters != null && !descriptor.Filters.Validate(filterContext, out IFilter<Update> failedFilter, out FilterOrigin origin))
-            {
-                Result fallbackResult = handlerInstance.FiltersFallback(filterContext, failedFilter, origin).Result;
-                if (!fallbackResult.Positive)
-                    throw new BreakDescribingException();
 
-                return null;
+            if (descriptor.Filters != null)
+            {
+                FiltersFallbackReport report = new FiltersFallbackReport(descriptor, filterContext);
+                Result filtersResult = descriptor.Filters.Validate(filterContext, descriptor.FormReport, ref report);
+
+                if (filtersResult.RouteNext)
+                {
+                    Result fallbackResult = handlerInstance.FiltersFallback(report, client, cancellationToken).Result;
+                    breakRouting = !fallbackResult.RouteNext;
+                    return null;
+                }
+                else if (!filtersResult.Positive)
+                {
+                    return null;
+                }
             }
 
             return new DescribedHandlerInfo(descriptor, this, AwaitingProvider, client, handlerInstance, filterContext, descriptor.DisplayString);

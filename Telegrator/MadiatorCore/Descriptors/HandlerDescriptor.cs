@@ -73,6 +73,12 @@ namespace Telegrator.MadiatorCore.Descriptors
             set;
         }
 
+        public bool FormReport
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// The set of filters associated with this handler.
         /// </summary>
@@ -163,6 +169,7 @@ namespace Telegrator.MadiatorCore.Descriptors
 
             UpdateType = handlerAttribute.Type;
             Indexer = handlerAttribute.GetIndexer();
+            FormReport = handlerAttribute.FormReport;
             Filters = new DescriptorFiltersSet(handlerAttribute, stateKeeperAttribute, filters);
             Aspects = HandlerInspector.GetAspects(handlerType);
             DisplayString = HandlerInspector.GetDisplayName(handlerType);

@@ -6,20 +6,25 @@ namespace Telegrator.Filters.Components
     /// <summary>
     /// Represents a filter that applies a filter action to an anonymous target type extracted from an update.
     /// </summary>
-    public class AnonymousTypeFilter : Filter<Update>
+    public class AnonymousTypeFilter : Filter<Update>, INamedFilter
     {
         private readonly Func<FilterExecutionContext<Update>, object, bool> FilterAction;
         private readonly Func<Update, object?> GetFilterringTarget;
+        private readonly string _name;
+
+        public virtual string Name => _name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnonymousTypeFilter"/> class.
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="filterAction">The filter action delegate.</param>
         /// <param name="getFilterringTarget">The function to get the filtering target from an update.</param>
-        protected AnonymousTypeFilter(Func<FilterExecutionContext<Update>, object, bool> filterAction, Func<Update, object?> getFilterringTarget)
+        public AnonymousTypeFilter(string name, Func<Update, object?> getFilterringTarget, Func<FilterExecutionContext<Update>, object, bool> filterAction)
         {
             FilterAction = filterAction;
             GetFilterringTarget = getFilterringTarget;
+            _name = name;
         }
 
         /// <summary>
@@ -32,8 +37,25 @@ namespace Telegrator.Filters.Components
         public static AnonymousTypeFilter Compile<T>(IFilter<T> filter, Func<Update, T?> getFilterringTarget) where T : class
         {
             return new AnonymousTypeFilter(
-                (context, filterringTarget) => CanPassInternal(context, filter, filterringTarget),
-                getFilterringTarget);
+                filter.GetType().Name,
+                getFilterringTarget,
+                (context, filterringTarget) => CanPassInternal(context, filter, filterringTarget));
+        }
+
+        /// <summary>
+        /// Compiles a filter for a specific target type.
+        /// </summary>
+        /// <typeparam name="T">The type of the filtering target.</typeparam>
+        /// <param name="name"></param>
+        /// <param name="filter">The filter to apply.</param>
+        /// <param name="getFilterringTarget">The function to get the filtering target from an update.</param>
+        /// <returns>The compiled filter.</returns>
+        public static AnonymousTypeFilter Compile<T>(string name, IFilter<T> filter, Func<Update, T?> getFilterringTarget) where T : class
+        {
+            return new AnonymousTypeFilter(
+                name,
+                getFilterringTarget,
+                (context, filterringTarget) => CanPassInternal(context, filter, filterringTarget));
         }
 
         /// <summary>

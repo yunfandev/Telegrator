@@ -1,5 +1,7 @@
 ﻿using Telegram.Bot.Types;
+using Telegrator.Filters;
 using Telegrator.Filters.Components;
+using Telegrator.Handlers.Components;
 using Telegrator.Logging;
 
 namespace Telegrator.MadiatorCore.Descriptors
@@ -41,61 +43,108 @@ namespace Telegrator.MadiatorCore.Descriptors
         /// Validates the filter context using all filters in the set.
         /// </summary>
         /// <param name="filterContext">The filter execution context.</param>
-        /// <param name="failedFilter"></param>
-        /// <param name="origin"></param>
+        /// <param name="formReport"></param>
+        /// <param name="report"></param>
         /// <returns>True if all filters pass; otherwise, false.</returns>
-        public bool Validate(FilterExecutionContext<Update> filterContext, out IFilter<Update> failedFilter, out FilterOrigin origin)
+        public Result Validate(FilterExecutionContext<Update> filterContext, bool formReport, ref FiltersFallbackReport report)
         {
+            bool anyErrors = false;
+            bool anyMatches = false;
+
             if (UpdateValidator != null)
             {
-                if (!UpdateValidator.CanPass(filterContext))
+                bool result = ExecuteFilter(UpdateValidator, filterContext, out Exception? exc);
+
+                if (formReport)
                 {
-                    Alligator.LogDebug("(E) UpdateValidator filter of {0} for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
-                    failedFilter = UpdateValidator;
-                    origin = FilterOrigin.Validator;
-                    return false;
+                    report.UpdateValidator = new FilterFallbackInfo("Validator", UpdateValidator, !result, exc);
                 }
 
-                //LeveledDebug.FilterWriteLine("UpdateValidator of {0} for Update ({2}) passed", filterContext.Data["handler_name"]);
-                filterContext.CompletedFilters.Add(UpdateValidator);
+                if (!result)
+                {
+                    anyErrors = true;
+                    Alligator.LogDebug("(E) UpdateValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
+
+                    if (!formReport)
+                        return Result.Fault();
+                }
+                else
+                {
+                    //anyMatches = true; // DO NOT COUNT
+                    filterContext.CompletedFilters.Add(UpdateValidator);
+                }
             }
 
             if (StateKeeperValidator != null)
             {
-                if (!StateKeeperValidator.CanPass(filterContext))
+                bool result = ExecuteFilter(StateKeeperValidator, filterContext, out Exception? exc);
+
+                if (formReport)
                 {
-                    Alligator.LogDebug("(E) StateKeeperValidator filter of {0} for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
-                    failedFilter = StateKeeperValidator;
-                    origin = FilterOrigin.StateKeeper;
-                    return false;
+                    report.StateKeeperValidator = new FilterFallbackInfo("State", StateKeeperValidator, !result, exc);
                 }
 
-                //LeveledDebug.FilterWriteLine("StateKeeperValidator of {0} for Update ({2}) passed", filterContext.Data["handler_name"]);
-                filterContext.CompletedFilters.Add(StateKeeperValidator);
+                if (!result)
+                {
+                    anyErrors = true;
+                    Alligator.LogDebug("(E) StateKeeperValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
+
+                    if (!formReport)
+                        return Result.Fault();
+                }
+                else
+                {
+                    anyMatches = true;
+                    filterContext.CompletedFilters.Add(StateKeeperValidator);
+                }
             }
 
             if (UpdateFilters != null)
             {
                 foreach (IFilter<Update> filter in UpdateFilters)
                 {
-                    if (!filter.CanPass(filterContext))
-                    {
-                        if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                            Alligator.LogDebug("(E) {0} filter of {1} for Update ({2}) didnt pass!", filter.GetType().Name, filterContext.Data["handler_name"], filterContext.Update.Id);
+                    bool result = ExecuteFilter(filter, filterContext, out Exception? exc);
+                    string filterName = filter is INamedFilter named ? named.Name : filter.GetType().Name;
 
-                        failedFilter = filter;
-                        origin = FilterOrigin.Regualr;
-                        return false;
+                    if (formReport)
+                    {
+                        report.UpdateFilters.Add(new FilterFallbackInfo(filterName, filter, !result, exc));
                     }
 
-                    //LeveledDebug.FilterWriteLine("{0} filter of {1} for Update ({2}) passed", filter.GetType().Name, filterContext.Data["handler_name"]);
-                    filterContext.CompletedFilters.Add(filter);
+                    if (!result)
+                    {
+                        anyErrors = true;
+                        Alligator.LogDebug("(E) '{0}' filter of '{1}' for Update ({2}) didnt pass!", filterName, filterContext.Data["handler_name"], filterContext.Update.Id);
+
+                        if (!formReport)
+                            return Result.Fault();
+                    }
+                    else
+                    {
+                        anyMatches = true;
+                        filterContext.CompletedFilters.Add(filter);
+                    }
                 }
             }
 
-            failedFilter = null!;
-            origin = FilterOrigin.None;
-            return true;
+            if (!anyErrors)
+                return Result.Ok();
+
+            return formReport ? Result.Next() : Result.Fault();
+        }
+
+        private static bool ExecuteFilter<T>(IFilter<T> filter, FilterExecutionContext<T> context, out Exception? exception) where T : class
+        {
+            try
+            {
+                exception = null;
+                return filter.CanPass(context);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+                return false;
+            }
         }
     }
 }

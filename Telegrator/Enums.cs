@@ -70,6 +70,7 @@
         Sender
     }
 
+    /*
     /// <summary>
     /// Messages from where this filter was originated
     /// </summary>
@@ -95,6 +96,7 @@
         /// </summary>
         Regualr
     }
+    */
 
     /*
     /// <summary>
