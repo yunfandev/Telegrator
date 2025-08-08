@@ -1,7 +1,13 @@
 ﻿namespace Telegrator.Filters.Components
 {
+    /// <summary>
+    /// Interface for filters that have a name for identification and debugging purposes.
+    /// </summary>
     public interface INamedFilter
     {
+        /// <summary>
+        /// Gets the name of the filter.
+        /// </summary>
         public string Name { get; }
     }
 

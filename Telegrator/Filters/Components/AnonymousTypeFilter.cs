@@ -12,12 +12,15 @@ namespace Telegrator.Filters.Components
         private readonly Func<Update, object?> GetFilterringTarget;
         private readonly string _name;
 
+        /// <summary>
+        /// Gets the name of this filter.
+        /// </summary>
         public virtual string Name => _name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnonymousTypeFilter"/> class.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The name of the filter.</param>
         /// <param name="filterAction">The filter action delegate.</param>
         /// <param name="getFilterringTarget">The function to get the filtering target from an update.</param>
         public AnonymousTypeFilter(string name, Func<Update, object?> getFilterringTarget, Func<FilterExecutionContext<Update>, object, bool> filterAction)
@@ -43,10 +46,10 @@ namespace Telegrator.Filters.Components
         }
 
         /// <summary>
-        /// Compiles a filter for a specific target type.
+        /// Compiles a filter for a specific target type with a custom name.
         /// </summary>
         /// <typeparam name="T">The type of the filtering target.</typeparam>
-        /// <param name="name"></param>
+        /// <param name="name">The custom name for the compiled filter.</param>
         /// <param name="filter">The filter to apply.</param>
         /// <param name="getFilterringTarget">The function to get the filtering target from an update.</param>
         /// <returns>The compiled filter.</returns>

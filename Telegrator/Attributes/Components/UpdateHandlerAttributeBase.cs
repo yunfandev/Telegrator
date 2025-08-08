@@ -35,17 +35,20 @@ namespace Telegrator.Attributes.Components
         /// </summary>
         public int Priority { get; set; }
         
+        /// <summary>
+        /// Gets or sets a value indicating whether to form a fallback report for debugging purposes.
+        /// </summary>
         public bool FormReport { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="UpdateHandlerAttributeBase"/>
         /// </summary>
-        /// <param name="expectingHandlerType"></param>
-        /// <param name="updateType"></param>
-        /// <param name="importance"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="Exception"></exception>
+        /// <param name="expectingHandlerType">The types of handlers that this attribute can be applied to.</param>
+        /// <param name="updateType">The type of update that this handler processes.</param>
+        /// <param name="importance">The importance level of this handler (default: 0).</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="expectingHandlerType"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when one of the handler types is not a valid handler type.</exception>
+        /// <exception cref="Exception">Thrown when <paramref name="updateType"/> is <see cref="UpdateType.Unknown"/>.</exception>
         protected internal UpdateHandlerAttributeBase(Type[] expectingHandlerType, UpdateType updateType, int importance = 0)
         {
             if (expectingHandlerType == null)
@@ -65,15 +68,15 @@ namespace Telegrator.Attributes.Components
         /// <summary>
         /// Gets an <see cref="DescriptorIndexer"/> of this <see cref="UpdateHandlerAttributeBase"/> from <see cref="Importance"/> and <see cref="Priority"/>
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A descriptor indexer for this handler attribute.</returns>
         public DescriptorIndexer GetIndexer()
             => new DescriptorIndexer(0, this);
 
         /// <summary>
         /// Validator (<see cref="IFilter{T}"/>) of the <see cref="Update"/> that <see cref="UpdateHandlerBase"/> will process
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
+        /// <param name="context">The filter execution context containing the update to validate.</param>
+        /// <returns>True if the update passes validation; otherwise, false.</returns>
         public abstract bool CanPass(FilterExecutionContext<Update> context);
     }
 }

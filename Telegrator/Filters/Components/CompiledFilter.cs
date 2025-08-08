@@ -11,6 +11,9 @@ namespace Telegrator.Filters.Components
         private readonly IFilter<T>[] Filters;
         private readonly string _name;
 
+        /// <summary>
+        /// Gets the name of this compiled filter.
+        /// </summary>
         public virtual string Name => _name;
 
         /// <summary>
@@ -24,9 +27,9 @@ namespace Telegrator.Filters.Components
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompiledFilter{T}"/> class.
+        /// Initializes a new instance of the <see cref="CompiledFilter{T}"/> class with a custom name.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The custom name for the compiled filter.</param>
         /// <param name="filters">The filters to compose.</param>
         public CompiledFilter(string name, params IFilter<T>[] filters)
         {

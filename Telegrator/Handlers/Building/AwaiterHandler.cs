@@ -1,7 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Handlers.Components;
-using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
 namespace Telegrator.Handlers.Building
@@ -56,13 +55,15 @@ namespace Telegrator.Handlers.Building
             return Task.FromResult(Result.Ok());
         }
 
-        /// <summary>
-        /// Disposes of the reset event.
-        /// </summary>
-        public void Dispose()
+        /// <inheritdoc/>
+        protected override bool Dispose(bool disposing)
         {
+            if (!disposing)
+                return true;
+
             ResetEvent.Dispose();
             ResetEvent = null!;
+            return true;
         }
     }
 }
