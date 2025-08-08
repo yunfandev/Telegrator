@@ -36,7 +36,7 @@ namespace Telegrator.Attributes.Components
         public int Priority { get; set; }
         
         /// <summary>
-        /// Gets or sets a value indicating whether to form a fallback report for debugging purposes.
+        /// Gets or sets a value indicating whether to form a fallback report.
         /// </summary>
         public bool FormReport { get; set; }
 
