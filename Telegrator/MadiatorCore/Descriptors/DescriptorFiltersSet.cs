@@ -49,7 +49,6 @@ namespace Telegrator.MadiatorCore.Descriptors
         public Result Validate(FilterExecutionContext<Update> filterContext, bool formReport, ref FiltersFallbackReport report)
         {
             bool anyErrors = false;
-            bool anyMatches = false;
 
             if (UpdateValidator != null)
             {
@@ -70,7 +69,6 @@ namespace Telegrator.MadiatorCore.Descriptors
                 }
                 else
                 {
-                    //anyMatches = true; // DO NOT COUNT
                     filterContext.CompletedFilters.Add(UpdateValidator);
                 }
             }
@@ -94,7 +92,6 @@ namespace Telegrator.MadiatorCore.Descriptors
                 }
                 else
                 {
-                    anyMatches = true;
                     filterContext.CompletedFilters.Add(StateKeeperValidator);
                 }
             }
@@ -121,7 +118,6 @@ namespace Telegrator.MadiatorCore.Descriptors
                     }
                     else
                     {
-                        anyMatches = true;
                         filterContext.CompletedFilters.Add(filter);
                     }
                 }
