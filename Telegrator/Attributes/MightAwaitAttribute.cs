@@ -3,7 +3,9 @@
 namespace Telegrator.Attributes
 {
     /// <summary>
-    /// Attribute that says if this handler cn await some of await types, that is not listed by its handler base
+    /// Attribute that says if this handler can await some of await types, that is not listed by its handler base.
+    /// Used for automatic collecting allowed to receiving <see cref="UpdateType"/>'s.
+    /// If you don't use it, you won't be able to await the updates inside handler.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class MightAwaitAttribute : Attribute

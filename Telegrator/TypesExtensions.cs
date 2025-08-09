@@ -41,6 +41,56 @@ namespace Telegrator
 
             return message.Text.Substring(entity.Offset, entity.Length);
         }
+
+        public static bool IsCommand(this Message message, out string? command)
+        {
+            command = null;
+            if (message is not { Entities.Length: > 0, Text.Length: > 0 })
+                return false;
+
+            MessageEntity commandEntity = message.Entities[0];
+            if (commandEntity.Type != MessageEntityType.BotCommand)
+                return false;
+
+            command = message.Text.Substring(commandEntity.Offset + 1, commandEntity.Length - 1);
+            if (command.Contains('@'))
+            {
+                string[] split = command.Split('@');
+                command = split[0];
+            }
+
+            return true;
+        }
+
+        public static string[] SplitArgs(this Message message)
+        {
+            if (!message.IsCommand(out string? command))
+                throw new InvalidDataException("Message does not contain a command");
+
+            if (message is not { Text.Length: > 0 })
+                throw new ArgumentNullException("Command text cannot be null or empty");
+
+            if (!message.Text.Contains(' '))
+                throw new MissingMemberException("Command dont contains arguments");
+
+            return message.Text.Split([' '], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
+        }
+
+        public static bool TrySplitArgs(this Message message, out string[]? args)
+        {
+            args = null;
+            if (!message.IsCommand(out string? command))
+                return false;
+
+            if (message is not { Text.Length: > 0 })
+                return false;
+
+            if (!message.Text.Contains(' '))
+                return false;
+
+            args = message.Text.Split([' '], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
+            return true;
+        }
     }
 
     /// <summary>

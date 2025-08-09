@@ -1,5 +1,4 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegrator.Attributes.Components;
 using Telegrator.Filters.Components;
 using Telegrator.MadiatorCore.Descriptors;
@@ -39,23 +38,6 @@ namespace Telegrator.Handlers.Components
         /// </summary>
         public List<FilterFallbackInfo> UpdateFilters { get; } = [];
 
-        /*
-        public FilterFallbackInfo OfType<T>(int index = 0) where T : IFilter<Update>
-        {
-            return UpdateFilters.Where(info => info.Failed is T).ElementAt(index);
-        }
-
-        public FilterFallbackInfo OfAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
-        {
-            return UpdateFilters.Where(info => info.Name == typeof(T).Name).ElementAt(index);
-        }
-
-        public FilterFallbackInfo OfName(string name, int index = 0)
-        {
-            return UpdateFilters.Where(info => info.Name == name).ElementAt(index);
-        }
-        */
-
         /// <summary>
         /// Checks if the failure is due to a specific attribute type, excluding other failures.
         /// </summary>
@@ -65,11 +47,17 @@ namespace Telegrator.Handlers.Components
         public bool ExceptAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
         {
             string name = typeof(T).Name;
+            
             IEnumerable<FilterFallbackInfo> failed = UpdateFilters.Where(info => info.Failed);
-            if (failed.Count() > 1)
+            if (failed.Count() != 1)
                 return false;
 
-            return failed.SingleOrDefault()?.Name == name;
+            FilterFallbackInfo info = failed.ElementAt(0);
+            if (info.Name != name)
+                return false;
+
+            FilterFallbackInfo? target = UpdateFilters.ElementAtOrDefault(index);
+            return target == info;
         }
     }
 

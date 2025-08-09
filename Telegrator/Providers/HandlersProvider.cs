@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Handlers.Components;
@@ -41,7 +40,7 @@ namespace Telegrator.Providers
             AllowedTypes = handlers.AllowedTypes;
             HandlersDictionary = handlers.Values.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            Alligator.LogDebug("{0} created!", GetType().Name);
+            Alligator.LogTrace("{0} created!", GetType().Name);
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace Telegrator.Providers
             AllowedTypes = Update.AllTypes;
             HandlersDictionary = handlers.ForEach(list => list.Freeze()).ToReadOnlyDictionary(list => list.HandlingType);
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            Alligator.LogDebug("{0} created!", GetType().Name);
+            Alligator.LogTrace("{0} created!", GetType().Name);
         }
 
         /// <inheritdoc/>
@@ -64,22 +63,26 @@ namespace Telegrator.Providers
         {
             try
             {
+                // Checking handler instance status
                 cancellationToken.ThrowIfCancellationRequested();
                 bool useSingleton = UseSingleton(descriptor);
 
+                // Returning singleton instance
                 if (useSingleton && descriptor.SingletonInstance != null)
                     return descriptor.SingletonInstance;
 
+                // Creating instance
                 UpdateHandlerBase instance = GetHandlerInstanceInternal(descriptor);
                 if (useSingleton)
                     descriptor.TrySetInstance(instance);
 
+                // Lazy initialization execution
                 descriptor.LazyInitialization?.Invoke(instance);
                 return instance;
             }
-            catch
+            catch (Exception ex)
             {
-                Alligator.LogDebug("Failed to create instance of {0}", descriptor.ToString());
+                Alligator.LogError("Failed to create instance of '{0}'", exception: ex, descriptor.ToString());
                 throw;
             }
         }

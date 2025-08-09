@@ -100,7 +100,6 @@ namespace Telegrator.Polling
         public virtual async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             // Logging
-            Alligator.LogDebug("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
             LogUpdate(update);
 
             try
@@ -115,18 +114,18 @@ namespace Telegrator.Polling
                     // Chicking if awaiting handlers has exclusive routing
                     if (Options.ExclusiveAwaitingHandlerRouting)
                     {
-                        Alligator.LogDebug("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
+                        Alligator.LogTrace("Receiving Update ({0}) completed with only awaiting handlers", update.Id);
                         return;
                     }
                 }
 
                 // Queuing reagular handlers for execution
                 await HandlersPool.Enqueue(GetHandlers(HandlersProvider, botClient, update, cancellationToken));
-                Alligator.LogDebug("Receiving Update ({0}) finished", update.Id);
+                Alligator.LogTrace("Receiving Update ({0}) finished", update.Id);
             }
             catch (OperationCanceledException)
             {
-                Alligator.LogDebug("Receiving Update ({0}) cancelled", update.Id);
+                Alligator.LogTrace("Receiving Update ({0}) cancelled", update.Id);
             }
             catch (Exception ex)
             {
@@ -146,16 +145,16 @@ namespace Telegrator.Polling
         /// <returns>A collection of described handler information for the update</returns>
         protected virtual IEnumerable<DescribedHandlerInfo> GetHandlers(IHandlersProvider provider, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            Alligator.LogDebug("Requested handlers for UpdateType.{0}", update.Type);
+            Alligator.LogTrace("Requested handlers for UpdateType.{0}", update.Type);
             if (!provider.TryGetDescriptorList(update.Type, out HandlerDescriptorList? descriptors))
             {
-                Alligator.LogDebug("No registered, providing Any");
+                Alligator.LogTrace("No registered, providing Any");
                 provider.TryGetDescriptorList(UpdateType.Unknown, out descriptors);
             }
 
             if (descriptors == null || descriptors.Count == 0)
             {
-                Alligator.LogDebug("No handlers provided");
+                Alligator.LogTrace("No handlers provided");
                 return [];
             }
 
@@ -178,7 +177,7 @@ namespace Telegrator.Polling
         /// <returns>A collection of described handler information</returns>
         protected virtual IEnumerable<DescribedHandlerInfo> DescribeDescriptors(IHandlersProvider provider, HandlerDescriptorList descriptors, ITelegramBotClient client, Update update, CancellationToken cancellationToken = default)
         {
-            Alligator.LogDebug("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
+            Alligator.LogTrace("Describing descriptors of descriptorsList.HandlingType.{0} for Update ({1})", descriptors.HandlingType, update.Id);
             foreach (HandlerDescriptor descriptor in descriptors.Reverse())
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -192,7 +191,7 @@ namespace Telegrator.Polling
                 yield return describedHandler;
             }
 
-            Alligator.LogDebug("Describing for Update ({0}) finished", update.Id);
+            Alligator.LogTrace("Describing for Update ({0}) finished", update.Id);
         }
 
         /// <summary>
@@ -245,41 +244,41 @@ namespace Telegrator.Polling
         /// <exception cref="NullReferenceException"></exception>
         protected static void LogUpdate(Update update)
         {
-            switch (update.Type)
+            if (Alligator.MinimalLevel > LogLevel.Trace)
+                return;
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("Received Update ({0}) of type \"{1}\"", update.Id, update.Type);
+
+            switch (update)
             {
-                case UpdateType.Message:
+                case { Message: { } message }:
                     {
-                        Message msg = update.Message ?? throw new NullReferenceException();
-                        StringBuilder sb = new StringBuilder("Update.Message");
+                        if (message is { From: { } from })
+                            sb.AppendFormat(" from '{0}' ({1})", from.Username, from.Id);
 
-                        if (msg.From != null)
-                            sb.AppendFormat(" from {0} ({1})", msg.From.Username, msg.From.Id);
+                        if (message is { Text: { } text })
+                            sb.AppendFormat(" with text '{0}'", text);
 
-                        if (msg.Text != null)
-                            sb.AppendFormat(" with text '{0}'", msg.Text);
+                        if (message is { Sticker: { } sticker })
+                            sb.AppendFormat(" with sticker '{0}'", sticker.Emoji);
 
-                        if (msg.Sticker != null)
-                            sb.AppendFormat(" with sticker '{0}'", msg.Sticker.Emoji);
-
-                        Alligator.LogDebug(sb.ToString());
                         break;
                     }
 
-                case UpdateType.CallbackQuery:
+                case { CallbackQuery: { } callback }:
                     {
-                        CallbackQuery cq = update.CallbackQuery ?? throw new NullReferenceException();
-                        StringBuilder sb = new StringBuilder("Update.CallbackQuery");
+                        if (callback is { From: { } from })
+                            sb.AppendFormat(" from '{0}' ({1})", from.Username, from.Id);
 
-                        if (cq.From != null)
-                            sb.AppendFormat(" from {0} ({1})", cq.From.Username, cq.From.Id);
+                        if (callback is { Data: { } data })
+                            sb.AppendFormat(" with data '{0}'", data);
 
-                        if (cq.From != null)
-                            sb.AppendFormat(" with data '{0}'", cq.Data);
-
-                        Alligator.LogDebug(sb.ToString());
                         break;
                     }
             }
+
+            Alligator.LogTrace(sb.ToString());
         }
 
         private class BreakDescribingException : Exception { }

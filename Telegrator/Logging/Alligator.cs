@@ -106,6 +106,16 @@ namespace Telegrator.Logging
         }
 
         /// <summary>
+        /// Logs a trace message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="args"></param>
+        public static void LogTrace(string message, params object[] args)
+        {
+            Log(LogLevel.Trace, string.Format(message, args));
+        }
+
+        /// <summary>
         /// Logs a debug message to all registered adapters.
         /// </summary>
         /// <param name="message">The message to log.</param>
@@ -189,6 +199,17 @@ namespace Telegrator.Logging
         public static void LogError(Exception exception)
         {
             Log(LogLevel.Error, exception.Message, exception);
+        }
+
+        /// <summary>
+        /// Logs an error message to all registered adapters.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">Optional exception.</param>
+        /// <param name="args"></param>
+        public static void LogError(string message, Exception? exception = null, params object[] args)
+        {
+            Log(LogLevel.Error, string.Format(message, args), exception);
         }
     }
 } 

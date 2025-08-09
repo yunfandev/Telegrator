@@ -33,7 +33,7 @@ namespace Telegrator.Hosting.Polling
         /// <inheritdoc/>
         public override Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            Logger.LogInformation("Received update of type \"{type}\"", update.Type);
+            //Logger.LogInformation("Received update of type \"{type}\"", update.Type);
             return base.HandleUpdateAsync(botClient, update, cancellationToken);
         }
 

@@ -16,6 +16,8 @@ namespace Telegrator.Handlers
         /// </summary>
         public string ReceivedCommand { get; private set; } = null!;
 
+        public string[]? Arguments { get; internal set; } = null;
+
         /// <summary>
         /// Checks if the update contains a valid bot command and extracts the command text.
         /// </summary>

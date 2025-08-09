@@ -77,7 +77,7 @@ namespace Telegrator.Polling
 
                 try
                 {
-                    Alligator.LogDebug("Described handler '{0}'", handlerInfo.DisplayString);
+                    Alligator.LogDebug("Described handler '{0}' (Update {1})", handlerInfo.DisplayString, handlerInfo.HandlingUpdate.Id);
                     HandlerExecuting?.Invoke(handlerInfo);
 
                     using (UpdateHandlerBase instance = handlerInfo.HandlerInstance)
@@ -88,7 +88,7 @@ namespace Telegrator.Polling
 
                     if (lastResult.RouteNext)
                     {
-                        Alligator.LogDebug("Handler requested route continuation");
+                        Alligator.LogTrace("Handler '{0}' requested route continuation (Update {1})", handlerInfo.DisplayString, handlerInfo.HandlingUpdate.Id);
                     }
                 }
                 catch (NotImplementedException)
@@ -102,7 +102,7 @@ namespace Telegrator.Polling
                 }
                 catch (Exception ex)
                 {
-                    Alligator.LogError("Failed to process handler!", ex);
+                    Alligator.LogError("Failed to process handler '{0}' (Update {1})", exception: ex, handlerInfo.DisplayString, handlerInfo.HandlingUpdate.Id);
                 }
 
                 if (lastResult != null && !lastResult.RouteNext)
@@ -123,14 +123,6 @@ namespace Telegrator.Polling
                 ExecutingHandlersSemaphore.Dispose();
                 ExecutingHandlersSemaphore = null!;
             }
-
-            /*
-            if (AwaitingHandlersQueuedEvent != null)
-            {
-                AwaitingHandlersQueuedEvent.Dispose();
-                AwaitingHandlersQueuedEvent = null!;
-            }
-            */
 
             if (SyncObj != null)
                 SyncObj = null!;

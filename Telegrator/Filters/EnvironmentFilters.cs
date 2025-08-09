@@ -113,11 +113,11 @@ namespace Telegrator.Filters
         {
             string? envValue = Environment.GetEnvironmentVariable(_variable);
 
-            if (envValue == null && _value == null)
-                return true;
-
             if (envValue == null)
-                return false;
+                return _value == null;
+
+            if (_value == "{NOT_NULL}")
+                return true;
 
             return envValue.Equals(_value, _comparison);
         }
