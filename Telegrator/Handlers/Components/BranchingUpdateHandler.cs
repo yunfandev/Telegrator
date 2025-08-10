@@ -29,7 +29,7 @@ namespace Telegrator.Handlers.Components
         /// <summary>
         /// Gets the allowed return types for branch methods.
         /// </summary>
-        protected virtual Type[] AllowedBranchReturnTypes => [typeof(void), typeof(Task)];
+        protected virtual Type[] AllowedBranchReturnTypes => [typeof(void), typeof(Task<Result>)];
 
         /// <summary>
         /// Gets the cancellation token for the current execution.
@@ -75,10 +75,10 @@ namespace Telegrator.Handlers.Components
             Type thisType = GetType();
 
             if (branch.GetParameters().Length != 0)
-                throw new Exception();
+                throw new Exception("Branch method must have no parameters.");
 
             if (!AllowedBranchReturnTypes.Any(branch.ReturnType.Equals))
-                throw new Exception();
+                throw new Exception("Branch method must have one of allowed return types. [void, Task<Result>]");
 
             try
             {

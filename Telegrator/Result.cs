@@ -38,6 +38,7 @@ namespace Telegrator
         /// <list type="bullet">
         /// <item>Inside <see cref="IPreProcessor"/> - let handler's main block be executed</item>
         /// <item>Inside <see cref="UpdateHandlerBase.ExecuteInternal(IHandlerContainer, CancellationToken)"/> - tells <see cref="IUpdateRouter"/> that he can stop describing, as needed handler was found</item>
+        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FiltersFallbackReport, Telegram.Bot.ITelegramBotClient, CancellationToken)"/> - let <see cref="IUpdateRouter"/> continue describing</item>
         /// </list>
         /// </summary>
         /// <returns></returns>
@@ -58,7 +59,7 @@ namespace Telegrator
         /// <summary>
         /// Represents 'continue'. Use cases:
         /// <list type="bullet">
-        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FiltersFallbackReport, Telegram.Bot.ITelegramBotClient, CancellationToken)"/> - let router continue describing</item>
+        /// <item>Inside <see cref="UpdateHandlerBase.FiltersFallback(FiltersFallbackReport, Telegram.Bot.ITelegramBotClient, CancellationToken)"/> - let <see cref="IUpdateRouter"/> continue describing</item>
         /// <item>Inside <see cref="UpdateHandlerBase.ExecuteInternal(IHandlerContainer, CancellationToken)"/> - Tells <see cref="IUpdateRouter"/> to continue describing handlers</item>
         /// </list>
         /// </summary>
