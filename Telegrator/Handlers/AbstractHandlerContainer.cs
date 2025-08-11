@@ -33,6 +33,10 @@ namespace Telegrator.Handlers
         /// <inheritdoc/>
         public IAwaitingProvider AwaitingProvider { get; }
 
+        /// <summary>
+        /// Initializes new instance of <see cref="AbstractHandlerContainer{TUpdate}"/>
+        /// </summary>
+        /// <param name="handlerInfo"></param>
         public AbstractHandlerContainer(DescribedHandlerInfo handlerInfo)
         {
             ActualUpdate = handlerInfo.HandlingUpdate.GetActualUpdateObject<TUpdate>();
@@ -43,6 +47,15 @@ namespace Telegrator.Handlers
             AwaitingProvider = handlerInfo.AwaitingProvider;
         }
 
+        /// <summary>
+        /// Initializes new instance of <see cref="AbstractHandlerContainer{TUpdate}"/>
+        /// </summary>
+        /// <param name="actualUpdate"></param>
+        /// <param name="handlingUpdate"></param>
+        /// <param name="client"></param>
+        /// <param name="extraData"></param>
+        /// <param name="filters"></param>
+        /// <param name="awaitingProvider"></param>
         public AbstractHandlerContainer(TUpdate actualUpdate, Update handlingUpdate, ITelegramBotClient client, Dictionary<string, object> extraData, CompletedFiltersList filters, IAwaitingProvider awaitingProvider)
         {
             ActualUpdate = actualUpdate;
@@ -53,6 +66,11 @@ namespace Telegrator.Handlers
             AwaitingProvider = awaitingProvider;
         }
 
+        /// <summary>
+        /// Creates new container of specific update type from thos contatiner
+        /// </summary>
+        /// <typeparam name="QUpdate"></typeparam>
+        /// <returns></returns>
         public AbstractHandlerContainer<QUpdate> CreateChild<QUpdate>() where QUpdate : class
         {
             return new AbstractHandlerContainer<QUpdate>(
@@ -61,6 +79,12 @@ namespace Telegrator.Handlers
                 CompletedFilters, AwaitingProvider);
         }
 
+        /// <summary>
+        /// Creates new container of specific update type from existing container
+        /// </summary>
+        /// <typeparam name="QUpdate"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public static AbstractHandlerContainer<TUpdate> From<QUpdate>(IAbstractHandlerContainer<QUpdate> other) where QUpdate : class
         {
             return new AbstractHandlerContainer<TUpdate>(

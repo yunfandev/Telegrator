@@ -42,6 +42,12 @@ namespace Telegrator
             return message.Text.Substring(entity.Offset, entity.Length);
         }
 
+        /// <summary>
+        /// Checkes if sent <see cref="Message"/> contains command. Automatically cuts bot name from it
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public static bool IsCommand(this Message message, out string? command)
         {
             command = null;
@@ -52,7 +58,10 @@ namespace Telegrator
             if (commandEntity.Type != MessageEntityType.BotCommand)
                 return false;
 
-            command = message.Text.Substring(commandEntity.Offset + 1, commandEntity.Length - 1);
+            if (commandEntity.Offset != 0)
+                return false;
+
+            command = message.Text.Substring(1, commandEntity.Length - 1);
             if (command.Contains('@'))
             {
                 string[] split = command.Split('@');
@@ -62,9 +71,17 @@ namespace Telegrator
             return true;
         }
 
+        /// <summary>
+        /// Split message text into arguments, ignoring command instance. Splits by space character
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidDataException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="MissingMemberException"></exception>
         public static string[] SplitArgs(this Message message)
         {
-            if (!message.IsCommand(out string? command))
+            if (!message.IsCommand(out _))
                 throw new InvalidDataException("Message does not contain a command");
 
             if (message is not { Text.Length: > 0 })
@@ -76,10 +93,16 @@ namespace Telegrator
             return message.Text.Split([' '], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
         }
 
+        /// <summary>
+        /// Tries to split message text into arguments, ignoring command instance. Splits by space character. Exception-free version of <see cref="SplitArgs(Message)"/>
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static bool TrySplitArgs(this Message message, out string[]? args)
         {
             args = null;
-            if (!message.IsCommand(out string? command))
+            if (!message.IsCommand(out _))
                 return false;
 
             if (message is not { Text.Length: > 0 })
@@ -150,21 +173,37 @@ namespace Telegrator
     /// </summary>
     public static class AbstractHandlerContainerExtensions
     {
+        /// <summary>
+        /// Changes bot's reaction to message
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="reaction"></param>
+        /// <param name="isBig"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task React(
             this IAbstractHandlerContainer<Message> container,
-            IEnumerable<ReactionType> reactions,
+            ReactionType reaction,
             bool isBig = false,
             CancellationToken cancellationToken = default)
             => await container.Client.SetMessageReaction(
                 container.ActualUpdate.Chat,
                 container.ActualUpdate.Id,
-                reactions, isBig, cancellationToken);
+                [reaction], isBig, cancellationToken);
 
+        /// <summary>
+        /// Changes bot's reaction to message
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="reactions"></param>
+        /// <param name="isBig"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task React(
             this IAbstractHandlerContainer<Message> container,
+            IEnumerable<ReactionType> reactions,
             bool isBig = false,
-            CancellationToken cancellationToken = default,
-            params IEnumerable<ReactionType> reactions)
+            CancellationToken cancellationToken = default)
             => await container.Client.SetMessageReaction(
                 container.ActualUpdate.Chat,
                 container.ActualUpdate.Id,
@@ -365,6 +404,17 @@ namespace Telegrator
                 cacheTime: cacheTime,
                 cancellationToken: cancellationToken);
 
+        /// <summary>
+        /// Answers inline query
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="results"></param>
+        /// <param name="cacheTime"></param>
+        /// <param name="isPersonal"></param>
+        /// <param name="nextOffset"></param>
+        /// <param name="button"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task AnswerInlineQuery(
             this IAbstractHandlerContainer<InlineQuery> container,
             IEnumerable<InlineQueryResult> results,

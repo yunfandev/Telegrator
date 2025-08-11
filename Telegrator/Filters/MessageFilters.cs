@@ -107,7 +107,7 @@ namespace Telegrator.Filters
     /// </summary>
     public class DiceThrowedFilter : MessageFilterBase
     {
-        private readonly DiceType? Dice;
+        private readonly DiceType Dice;
         private readonly int Value;
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Telegrator.Filters
             if (Target.Dice == null)
                 return false;
 
-            if (Dice != null && Target.Dice.Emoji != GetEmojyForDiceType(Dice))
+            if (Target.Dice.Emoji != GetEmojyForDiceType(Dice))
                 return false;
 
             return Target.Dice.Value == Value;

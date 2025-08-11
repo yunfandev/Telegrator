@@ -72,7 +72,7 @@ namespace Telegrator.Polling
 
                 if (ExecutingHandlersSemaphore != null)
                 {
-                    await ExecutingHandlersSemaphore.WaitAsync();
+                    await ExecutingHandlersSemaphore.WaitAsync().ConfigureAwait(false);
                 }
 
                 try
@@ -82,7 +82,11 @@ namespace Telegrator.Polling
 
                     using (UpdateHandlerBase instance = handlerInfo.HandlerInstance)
                     {
-                        lastResult = await instance.Execute(handlerInfo);
+                        Task<Result> task = instance.Execute(handlerInfo);
+                        HandlerEnqueued?.Invoke(handlerInfo);
+
+                        await task.ConfigureAwait(false);
+                        lastResult = task.Result;
                         ExecutingHandlersSemaphore?.Release(1);
                     }
 

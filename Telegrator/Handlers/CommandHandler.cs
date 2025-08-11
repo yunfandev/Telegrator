@@ -16,6 +16,9 @@ namespace Telegrator.Handlers
         /// </summary>
         public string ReceivedCommand { get; private set; } = null!;
 
+        /// <summary>
+        /// Message text splited by space characters
+        /// </summary>
         public string[]? Arguments { get; internal set; } = null;
 
         /// <summary>
@@ -32,7 +35,10 @@ namespace Telegrator.Handlers
             if (commandEntity.Type != MessageEntityType.BotCommand)
                 return false;
 
-            ReceivedCommand = message.Text.Substring(commandEntity.Offset + 1, commandEntity.Length - 1);
+            if (commandEntity.Offset != 0)
+                return false;
+
+            ReceivedCommand = message.Text.Substring(1, commandEntity.Length - 1);
             if (ReceivedCommand.Contains('@'))
             {
                 string[] split = ReceivedCommand.Split('@');
