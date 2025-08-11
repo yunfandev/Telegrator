@@ -9,6 +9,7 @@ namespace Telegrator.Handlers
 {
     /// <summary>
     /// Attribute that marks a handler to process inline queries.
+    /// IMPORTANT! You can have only ONE instance of this handler.
     /// </summary>
     public class InlineQueryHandlerAttribute(int importance = 0) : UpdateHandlerAttribute<InlineQueryHandler>(UpdateType.InlineQuery, importance)
     {
@@ -18,6 +19,7 @@ namespace Telegrator.Handlers
 
     /// <summary>
     /// Abstract base class for handlers that process inline queries.
+    /// IMPORTANT! You can have only ONE instance of this handler.
     /// </summary>
     public abstract class InlineQueryHandler() : AbstractUpdateHandler<Update>(UpdateType.InlineQuery)
     {
