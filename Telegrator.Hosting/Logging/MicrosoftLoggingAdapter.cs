@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Telegrator.Logging;
 
 namespace Telegrator.Hosting.Logging
@@ -8,27 +9,27 @@ namespace Telegrator.Hosting.Logging
     /// </summary>
     public class MicrosoftLoggingAdapter : ITelegratorLogger
     {
-        private readonly Microsoft.Extensions.Logging.ILogger _logger;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of MicrosoftLoggingAdapter.
         /// </summary>
         /// <param name="logger">The Microsoft.Extensions.Logging logger instance.</param>
-        public MicrosoftLoggingAdapter(Microsoft.Extensions.Logging.ILogger logger)
+        public MicrosoftLoggingAdapter(ILogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
-        public void Log(LogLevel level, string message, Exception? exception = null)
+        public void Log(Telegrator.Logging.LogLevel level, string message, Exception? exception = null)
         {
             var msLogLevel = level switch
             {
-                LogLevel.Trace => Microsoft.Extensions.Logging.LogLevel.Trace,
-                LogLevel.Debug => Microsoft.Extensions.Logging.LogLevel.Debug,
-                LogLevel.Information => Microsoft.Extensions.Logging.LogLevel.Information,
-                LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
-                LogLevel.Error => Microsoft.Extensions.Logging.LogLevel.Error,
+                Telegrator.Logging.LogLevel.Trace => Microsoft.Extensions.Logging.LogLevel.Trace,
+                Telegrator.Logging.LogLevel.Debug => Microsoft.Extensions.Logging.LogLevel.Debug,
+                Telegrator.Logging.LogLevel.Information => Microsoft.Extensions.Logging.LogLevel.Information,
+                Telegrator.Logging.LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
+                Telegrator.Logging.LogLevel.Error => Microsoft.Extensions.Logging.LogLevel.Error,
                 _ => Microsoft.Extensions.Logging.LogLevel.Information
             };
 

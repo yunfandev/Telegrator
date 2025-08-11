@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
@@ -50,7 +49,6 @@ namespace Telegrator.Hosting
             services.AddSingleton<IAwaitingProvider, HostAwaitingProvider>();
             services.AddSingleton<IHandlersProvider, HostHandlersProvider>();
             services.AddSingleton<IUpdateRouter, HostUpdateRouter>();
-            //services.AddSingleton<ITelegramBotInfo, TelegramBotInfo>(services => new TelegramBotInfo(services.GetRequiredService<ITelegramBotClient>().GetMe().Result));
             services.AddSingleton<ITelegramBotInfo, HostedTelegramBotInfo>();
 
             return services;

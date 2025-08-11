@@ -105,6 +105,9 @@ namespace Telegrator.Providers
         /// <inheritdoc/>
         public virtual bool TryGetDescriptorList(UpdateType updateType, out HandlerDescriptorList? list)
         {
+            if (UpdateTypeExtensions.SuppressTypes.TryGetValue(updateType, out UpdateType suppressType))
+                updateType = suppressType;
+
             return HandlersDictionary.TryGetValue(updateType, out list);
         }
 

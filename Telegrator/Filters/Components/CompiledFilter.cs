@@ -49,7 +49,7 @@ namespace Telegrator.Filters.Components
                 if (!filter.CanPass(context))
                 {
                     if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
-                        Alligator.LogDebug("{0} filter of {1} didnt pass! (Compiled)", filter.GetType().Name, context.Data["handler_name"]);
+                        Alligator.LogTrace("{0} filter of {1} didnt pass! (Compiled)", filter.GetType().Name, context.Data["handler_name"]);
 
                     return false;
                 }

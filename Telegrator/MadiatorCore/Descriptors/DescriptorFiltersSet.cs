@@ -61,7 +61,7 @@ namespace Telegrator.MadiatorCore.Descriptors
                 if (!result)
                 {
                     anyErrors = true;
-                    Alligator.LogDebug("(E) UpdateValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
+                    Alligator.LogTrace("(E) UpdateValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
 
                     if (!formReport)
                         return Result.Fault();
@@ -84,7 +84,7 @@ namespace Telegrator.MadiatorCore.Descriptors
                 if (!result)
                 {
                     anyErrors = true;
-                    Alligator.LogDebug("(E) StateKeeperValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
+                    Alligator.LogTrace("(E) StateKeeperValidator filter of '{0}' for Update ({1}) didnt pass!", filterContext.Data["handler_name"], filterContext.Update.Id);
 
                     if (!formReport)
                         return Result.Fault();
@@ -110,7 +110,7 @@ namespace Telegrator.MadiatorCore.Descriptors
                     if (!result)
                     {
                         anyErrors = true;
-                        Alligator.LogDebug("(E) '{0}' filter of '{1}' for Update ({2}) didnt pass!", filterName, filterContext.Data["handler_name"], filterContext.Update.Id);
+                        Alligator.LogTrace("(E) '{0}' filter of '{1}' for Update ({2}) didnt pass!", filterName, filterContext.Data["handler_name"], filterContext.Update.Id);
 
                         if (!formReport)
                             return Result.Fault();

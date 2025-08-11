@@ -12,7 +12,7 @@ namespace Telegrator.Attributes.Components
     public abstract class StateKeeperAttributeBase : Attribute, IFilter<Update>
     {
         /// <inheritdoc/>
-        public bool IsCollectible => this.HasPublicProperties();
+        public bool IsCollectible => GetType().HasPublicProperties();
 
         /// <summary>
         /// Creates a new instance <see cref="StateKeeperBase{TKey, TState}"/>

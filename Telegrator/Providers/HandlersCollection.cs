@@ -76,7 +76,15 @@ namespace Telegrator.Providers
                 _allowedTypes.Union(mightAwaits.SelectMany(attr => attr.UpdateTypes));
 
             IntersectCommands(descriptor);
-            GetDescriptorList(descriptor).Add(descriptor);
+            HandlerDescriptorList list = GetDescriptorList(descriptor);
+
+            if (descriptor.UpdateType == UpdateType.InlineQuery || descriptor.UpdateType == UpdateType.ChosenInlineResult)
+            {
+                if (list.Count > 0)
+                    throw new Exception("Bot cannot have more than one InlineQuery handler");
+            }
+
+            list.Add(descriptor);
             return this;
         }
 
@@ -123,10 +131,14 @@ namespace Telegrator.Providers
         /// <returns>The descriptor list for the update type.</returns>
         public virtual HandlerDescriptorList GetDescriptorList(HandlerDescriptor descriptor)
         {
-            if (!InnerDictionary.TryGetValue(descriptor.UpdateType, out HandlerDescriptorList? list))
+            UpdateType updateType = UpdateTypeExtensions.SuppressTypes.TryGetValue(descriptor.UpdateType, out UpdateType suppressType) 
+                ? suppressType
+                : descriptor.UpdateType;
+
+            if (!InnerDictionary.TryGetValue(updateType, out HandlerDescriptorList? list))
             {
-                list = new HandlerDescriptorList(descriptor.UpdateType, Options);
-                InnerDictionary.Add(descriptor.UpdateType, list);
+                list = new HandlerDescriptorList(updateType, Options);
+                InnerDictionary.Add(updateType, list);
             }
 
             return list;

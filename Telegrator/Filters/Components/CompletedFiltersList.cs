@@ -47,7 +47,7 @@ namespace Telegrator.Filters.Components
             if (!typeof(TFilter).IsFilterType())
                 throw new NotFilterTypeException(typeof(TFilter));
 
-            return CompletedFilters.WhereCast<TFilter>();
+            return CompletedFilters.OfType<TFilter>();
         }
 
         /// <summary>

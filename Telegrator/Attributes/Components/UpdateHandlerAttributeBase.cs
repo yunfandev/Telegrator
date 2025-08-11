@@ -13,7 +13,7 @@ namespace Telegrator.Attributes.Components
     public abstract class UpdateHandlerAttributeBase : Attribute, IFilter<Update>
     {
         /// <inheritdoc/>
-        public bool IsCollectible => this.HasPublicProperties();
+        public bool IsCollectible => GetType().HasPublicProperties();
 
         /// <summary>
         /// Gets an array of <see cref="UpdateHandlerBase"/> that this attribute can be attached to

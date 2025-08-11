@@ -67,7 +67,7 @@ namespace Telegrator.Filters
         /// <summary>
         /// Gets a value indicating whether this filter is collectible.
         /// </summary>
-        public bool IsCollectible => this.HasPublicProperties();
+        public bool IsCollectible => GetType().HasPublicProperties();
 
         /// <summary>
         /// Determines whether the filter can pass for the given context.

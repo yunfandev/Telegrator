@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 namespace Telegrator.Logging
 {
     /// <summary>
@@ -70,28 +72,29 @@ namespace Telegrator.Logging
         /// <param name="level">The log level.</param>
         /// <param name="message">The message to log.</param>
         /// <param name="exception">Optional exception.</param>
-        public static void Log(LogLevel level, string message, Exception? exception = null)
+        /// <param name="args"></param>
+        public static void Log(LogLevel level, string message, Exception? exception = null, params object[] args)
         {
             // Fast path: if no adapters, do nothing
             if (_adapters.Count == 0)
                 return;
 
-            if (level < MinimalLevel)
+            if (level != LogLevel.Trace & level < MinimalLevel)
                 return;
 
             // Lock only during enumeration to prevent collection modification during iteration
-            lock (_lock)
+            foreach (var adapter in _adapters)
             {
-                foreach (var adapter in _adapters)
+                try
                 {
-                    try
-                    {
-                        adapter.Log(level, message, exception);
-                    }
-                    catch
-                    {
-                        _ = 0xBAD + 0xC0DE; // Ignore adapter errors to prevent logging failures
-                    }
+                    if (args != null)
+                        message = string.Format(message, args);
+
+                    adapter.Log(level, message, exception);
+                }
+                catch
+                {
+                    _ = 0xBAD + 0xC0DE; // Ignore adapter errors to prevent logging failures
                 }
             }
         }
@@ -112,7 +115,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogTrace(string message, params object[] args)
         {
-            Log(LogLevel.Trace, string.Format(message, args));
+            Log(LogLevel.Trace, message, args: args);
         }
 
         /// <summary>
@@ -131,7 +134,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogDebug(string message, params object[] args)
         {
-            Log(LogLevel.Debug, string.Format(message, args));
+            Log(LogLevel.Debug, message, args: args);
         }
 
         /// <summary>
@@ -150,7 +153,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogInformation(string message, params object[] args)
         {
-            Log(LogLevel.Information, string.Format(message, args));
+            Log(LogLevel.Information, message, args: args);
         }
 
         /// <summary>
@@ -169,7 +172,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogWarning(string message, params object[] args)
         {
-            Log(LogLevel.Warning, string.Format(message, args));
+            Log(LogLevel.Warning, message, args: args);
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogError(string message, params object[] args)
         {
-            Log(LogLevel.Error, string.Format(message, args));
+            Log(LogLevel.Error, message, args: args);
         }
 
         /// <summary>
@@ -209,7 +212,7 @@ namespace Telegrator.Logging
         /// <param name="args"></param>
         public static void LogError(string message, Exception? exception = null, params object[] args)
         {
-            Log(LogLevel.Error, string.Format(message, args), exception);
+            Log(LogLevel.Error, message, exception, args);
         }
     }
 } 

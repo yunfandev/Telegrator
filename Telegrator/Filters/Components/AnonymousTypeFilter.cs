@@ -8,6 +8,8 @@ namespace Telegrator.Filters.Components
     /// </summary>
     public class AnonymousTypeFilter : Filter<Update>, INamedFilter
     {
+        private static readonly Type[] IgnoreLog = [typeof(CompiledFilter<>), typeof(AnonymousCompiledFilter), typeof(AnonymousTypeFilter)];
+
         private readonly Func<FilterExecutionContext<Update>, object, bool> FilterAction;
         private readonly Func<Update, object?> GetFilterringTarget;
         private readonly string _name;
@@ -74,7 +76,7 @@ namespace Telegrator.Filters.Components
             FilterExecutionContext<T> context = updateContext.CreateChild((T)filterringTarget);
             if (!filter.CanPass(context))
             {
-                if (filter is not AnonymousCompiledFilter && filter is not AnonymousTypeFilter)
+                if (IgnoreLog.Contains(filter.GetType().MakeGenericType()))
                     Alligator.LogDebug("{0} filter of {1} didnt pass!", filter.GetType().Name, context.Data["handler_name"]);
 
                 return false;

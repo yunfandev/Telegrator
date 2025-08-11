@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reflection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegrator.Annotations;
@@ -150,6 +150,26 @@ namespace Telegrator
     /// </summary>
     public static class AbstractHandlerContainerExtensions
     {
+        public static async Task React(
+            this IAbstractHandlerContainer<Message> container,
+            IEnumerable<ReactionType> reactions,
+            bool isBig = false,
+            CancellationToken cancellationToken = default)
+            => await container.Client.SetMessageReaction(
+                container.ActualUpdate.Chat,
+                container.ActualUpdate.Id,
+                reactions, isBig, cancellationToken);
+
+        public static async Task React(
+            this IAbstractHandlerContainer<Message> container,
+            bool isBig = false,
+            CancellationToken cancellationToken = default,
+            params IEnumerable<ReactionType> reactions)
+            => await container.Client.SetMessageReaction(
+                container.ActualUpdate.Chat,
+                container.ActualUpdate.Id,
+                reactions, isBig, cancellationToken);
+
         /// <summary>
         /// Sends a reply message to the current message.
         /// </summary>
@@ -344,6 +364,19 @@ namespace Telegrator
                 url: url,
                 cacheTime: cacheTime,
                 cancellationToken: cancellationToken);
+
+        public static async Task AnswerInlineQuery(
+            this IAbstractHandlerContainer<InlineQuery> container,
+            IEnumerable<InlineQueryResult> results,
+            int? cacheTime = null,
+            bool isPersonal = false,
+            string? nextOffset = null,
+            InlineQueryResultsButton? button = null,
+            CancellationToken cancellationToken = default)
+        {
+            string id = container.ActualUpdate.Id;
+            await container.Client.AnswerInlineQuery(id, results.Take(50), cacheTime, isPersonal, nextOffset, button, cancellationToken);
+        }
     }
 
     /// <summary>
@@ -806,6 +839,7 @@ namespace Telegrator
             return source;
         }
 
+        /* Found built in method :_(
         /// <summary>
         /// Creates a new <see cref="IEnumerable{T}"/> with the elements of the <paramref name="source"/> that were successfully cast to the <typeparamref name="TResult"/>
         /// </summary>
@@ -820,6 +854,7 @@ namespace Telegrator
                     yield return result;
             }
         }
+        */
 
         /// <summary>
         /// Sets the value of a key in a dictionary, or if the key does not exist, adds it
@@ -1000,12 +1035,12 @@ namespace Telegrator
         */
 
         /// <summary>
-        /// Checks is <paramref name="obj"/> has public properties
+        /// Checks is <paramref name="type"/> has public properties
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static bool HasPublicProperties(this object obj)
-            => obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(prop => prop.Name != "IsCollectible").Any();
+        public static bool HasPublicProperties(this Type type)
+            => type.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(prop => prop.Name != "IsCollectible").Any();
 
         /// <summary>
         /// Determines whether an instance of a specified type can be assigned to an instance of the current type
@@ -1181,6 +1216,9 @@ namespace Telegrator
         /// <returns></returns>
         public static T GetActualUpdateObject<T>(this Update update)
         {
+            if (update is T upd)
+                return upd;
+
             object actualUpdate = update.GetActualUpdateObject() ?? throw new Exception();
             if (actualUpdate is not T actualCasted)
                 throw new Exception();
@@ -1206,6 +1244,14 @@ namespace Telegrator
             UpdateType.ChannelPost,
             UpdateType.EditedChannelPost
         ];
+
+        /// <summary>
+        /// Dictionary of <see cref="UpdateType"/>s that suppresses to generic type for handling types that has complex multi-type handlers
+        /// </summary>
+        public static readonly Dictionary<UpdateType, UpdateType> SuppressTypes = new Dictionary<UpdateType, UpdateType>()
+        {
+            { UpdateType.ChosenInlineResult, UpdateType.InlineQuery }
+        };
 
         /// <summary>
         /// Checks if <typeparamref name="T"/> matches one of the <see cref="UpdateType"/>'s give on <paramref name="allowedTypes"/>
