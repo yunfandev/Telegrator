@@ -79,6 +79,9 @@ namespace Telegrator.MadiatorCore.Descriptors
 
                 descriptor.Indexer = descriptor.Indexer.UpdateIndex(count++);
                 _innerCollection.Add(descriptor.Indexer, descriptor);
+
+                if (_handlingType == UpdateType.InlineQuery)
+                    IsReadOnly = true;
             }
         }
 
