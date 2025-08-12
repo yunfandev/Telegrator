@@ -1,13 +1,13 @@
 ﻿using Telegrator.Annotations.StateKeeping;
 using Telegrator.Handlers.Components;
-using Telegrator.StateKeeping.Components;
+using Telegrator.StateKeeping.Abstracts;
 
 namespace Telegrator.StateKeeping
 {
     /// <summary>
     /// State keeper that manages string-based states for chat sessions.
     /// </summary>
-    public class StringStateKeeper() : StateKeeperBase<string, string>()
+    public class StringStateKeeper() : StateKeeperBase<long, string>()
     {
         /// <summary>
         /// Gets the default state value, which is an empty string.
@@ -15,13 +15,13 @@ namespace Telegrator.StateKeeping
         public override string DefaultState => string.Empty;
 
         /// <inheritdoc/>
-        protected override string MoveBackward(string currentState, string currentKey)
+        protected override string MoveBackward(string currentState, long currentKey)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
-        protected override string MoveForward(string currentState, string currentKey)
+        protected override string MoveForward(string currentState, long currentKey)
         {
             throw new NotImplementedException();
         }
@@ -63,8 +63,10 @@ namespace Telegrator.StateKeeping
         public static void SetStringState(this IHandlerContainer container, string? newState)
             => container.StringStateKeeper().SetState(container.HandlingUpdate, newState ?? StringStateAttribute.DefaultState);
 
+        /*
         public static string GetStringState(this IHandlerContainer container, string key)
             => container.StringStateKeeper().GetState()
+        */
 
         /*
         /// <summary>

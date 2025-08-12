@@ -1,6 +1,6 @@
 ﻿using Telegrator.Annotations.StateKeeping;
 using Telegrator.Handlers.Components;
-using Telegrator.StateKeeping.Components;
+using Telegrator.StateKeeping.Abstracts;
 
 namespace Telegrator.StateKeeping
 {

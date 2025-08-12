@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot.Types;
+using Telegrator.StateKeeping.Components;
 
-namespace Telegrator.StateKeeping.Components
+namespace Telegrator.StateKeeping.Abstracts
 {
     /// <summary>
     /// Base class for managing state associated with updates and keys.

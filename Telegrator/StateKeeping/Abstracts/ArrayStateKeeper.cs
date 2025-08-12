@@ -1,6 +1,4 @@
-﻿using Telegrator.StateKeeping.Components;
-
-namespace Telegrator.StateKeeping
+﻿namespace Telegrator.StateKeeping.Abstracts
 {
     /// <summary>
     /// Abstract base class for state keepers that manage state transitions using an array of predefined states.
