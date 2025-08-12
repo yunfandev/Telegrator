@@ -1,25 +1,30 @@
 ﻿using Telegrator.Annotations.StateKeeping;
 using Telegrator.Handlers.Components;
+using Telegrator.StateKeeping.Components;
 
 namespace Telegrator.StateKeeping
 {
     /// <summary>
     /// State keeper that manages string-based states for chat sessions.
-    /// Inherits from <see cref="ArrayStateKeeper{TKey, TState}"/> with long keys and string states.
     /// </summary>
-    /// <param name="states">Initial array of string states to manage</param>
-    public class StringStateKeeper(params string[] states) : ArrayStateKeeper<long, string>(states)
+    public class StringStateKeeper() : StateKeeperBase<string, string>()
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="StringStateKeeper"/> with an empty state array.
-        /// </summary>
-        public StringStateKeeper()
-            : this([]) { }
-
         /// <summary>
         /// Gets the default state value, which is an empty string.
         /// </summary>
         public override string DefaultState => string.Empty;
+
+        /// <inheritdoc/>
+        protected override string MoveBackward(string currentState, string currentKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        protected override string MoveForward(string currentState, string currentKey)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>
@@ -58,6 +63,10 @@ namespace Telegrator.StateKeeping
         public static void SetStringState(this IHandlerContainer container, string? newState)
             => container.StringStateKeeper().SetState(container.HandlingUpdate, newState ?? StringStateAttribute.DefaultState);
 
+        public static string GetStringState(this IHandlerContainer container, string key)
+            => container.StringStateKeeper().GetState()
+
+        /*
         /// <summary>
         /// Moves the string state forward to the next state in the sequence.
         /// </summary>
@@ -71,5 +80,6 @@ namespace Telegrator.StateKeeping
         /// <param name="container">The handler container instance</param>
         public static void BackwardStringState(this IHandlerContainer container)
             => container.StringStateKeeper().MoveBackward(container.HandlingUpdate);
+        */
     }
 }

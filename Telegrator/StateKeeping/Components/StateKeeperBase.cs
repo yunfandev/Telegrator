@@ -26,7 +26,7 @@ namespace Telegrator.StateKeeping.Components
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
         /// <param name="newState">The new state value.</param>
-        public void SetState(Update keySource, TState newState)
+        public virtual void SetState(Update keySource, TState newState)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             States.Set(key, newState, DefaultState);
@@ -37,7 +37,7 @@ namespace Telegrator.StateKeeping.Components
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
         /// <returns>The state value.</returns>
-        public TState GetState(Update keySource)
+        public virtual TState GetState(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             return States[key];
@@ -49,7 +49,7 @@ namespace Telegrator.StateKeeping.Components
         /// <param name="keySource">The update to use as a key source.</param>
         /// <param name="state">When this method returns, contains the state value if found; otherwise, the default value.</param>
         /// <returns>True if the state was found; otherwise, false.</returns>
-        public bool TryGetState(Update keySource, out TState? state)
+        public virtual bool TryGetState(Update keySource, out TState? state)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             return States.TryGetValue(key, out state);
@@ -60,7 +60,7 @@ namespace Telegrator.StateKeeping.Components
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
         /// <returns>True if the state exists; otherwise, false.</returns>
-        public bool HasState(Update keySource)
+        public virtual bool HasState(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             return States.ContainsKey(key);
@@ -70,7 +70,7 @@ namespace Telegrator.StateKeeping.Components
         /// Creates a state for the specified update using the default state value.
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
-        public void CreateState(Update keySource)
+        public virtual void CreateState(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             States.Set(key, DefaultState);
@@ -80,7 +80,7 @@ namespace Telegrator.StateKeeping.Components
         /// Deletes the state for the specified update.
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
-        public void DeleteState(Update keySource)
+        public virtual void DeleteState(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             States.Remove(key);
@@ -90,7 +90,7 @@ namespace Telegrator.StateKeeping.Components
         /// Moves the state forward for the specified update.
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
-        public void MoveForward(Update keySource)
+        public virtual void MoveForward(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
             if (!States.TryGetValue(key, out TState currentState))
@@ -107,22 +107,29 @@ namespace Telegrator.StateKeeping.Components
         /// Moves the state backward for the specified update.
         /// </summary>
         /// <param name="keySource">The update to use as a key source.</param>
-        public void MoveBackward(Update keySource)
+        public virtual void MoveBackward(Update keySource)
         {
             TKey key = KeyResolver.ResolveKey(keySource);
-            TState currentState = States[key];
+            if (!States.TryGetValue(key, out TState currentState))
+            {
+                States.Set(key, DefaultState);
+                return;
+            }
+
             TState newState = MoveBackward(currentState, key);
             States[key] = newState;
         }
 
+        /*
         /// <summary>
         /// Gets the state keeper for the specified key.
         /// </summary>
         /// <typeparam name="TStateKeeper">The type of the state keeper.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The state keeper instance.</returns>
-        protected TStateKeeper GetKeeper<TStateKeeper>(TKey key) where TStateKeeper : StateKeeperBase<TKey, TState>
+        protected virtual TStateKeeper GetKeeper<TStateKeeper>(TKey key) where TStateKeeper : StateKeeperBase<TKey, TState>
             => States[key] as TStateKeeper ?? throw new InvalidCastException();
+        */
 
         /// <summary>
         /// Moves the state forward for the specified current state and key.

@@ -110,7 +110,7 @@ namespace Telegrator.Handlers
         /// <param name="url">A URL that will be opened by the client.</param>
         /// <param name="cacheTime">The maximum amount of time in seconds that the result of the callback query may be cached client-side.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        protected async Task AnswerCallbackQuery(
+        protected async Task Answer(
             string? text = null,
             bool showAlert = false,
             string? url = null,
