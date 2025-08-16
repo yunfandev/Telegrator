@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text;
 using System.Xml.Linq;
+using Telegrator.RoslynExtensions;
 
-#pragma warning disable CS0162
-namespace Telegrator.Generators
+namespace Telegrator.RoslynGenerators
 {
     /// <summary>
     /// Source Generator для автоматической генерации Markdown-документации по публичному API Telegrator.

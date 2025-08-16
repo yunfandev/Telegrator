@@ -5,46 +5,37 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<LangVersion>latest</LangVersion>
-    <Configurations>Debug;Release</Configurations>
+	  
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <PackageProjectUrl></PackageProjectUrl>
-    <Title>Telegrator : Telegram.Bot mediator framework</Title>
-    <PackageIcon>telegrator_nuget.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Rikitav/Telegrator</RepositoryUrl>
-    <PackageTags>telegram;bot;mediator;attributes;aspect;hosting;host;framework;easy;simple;handlers</PackageTags>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	  
+    <Title>Telegrator : Telegram.Bot mediator framework</Title>
+    <PackageIcon>telegrator_nuget.png</PackageIcon>
+    <RepositoryUrl>https://github.com/Rikitav/Telegrator</RepositoryUrl>
+    <PackageTags>telegram;bot;mediator;attributes;aspect;hosting;host;framework;easy;simple;handlers</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.14.0</Version>
+    <Version>1.15.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\resources\telegrator_nuget.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Include="..\LICENSE" Pack="True" PackagePath="\" />
+    <None Include="..\README.md" Pack="True" PackagePath="\" />
+    <None Include="..\resources\telegrator_nuget.png" Pack="True" PackagePath="\" />
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Telegram.Bot" Version="22.5.1" />	  
   </ItemGroup>
 
-	<ItemGroup>
-		<None Include="..\Telegrator.Analyzers\bin\$(Configuration)\netstandard2.0\Telegrator.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-	</ItemGroup>
+  <ItemGroup>
+	<None Include="..\Telegrator.Analyzers\bin\$(Configuration)\netstandard2.0\Telegrator.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Telegrator.Generators\Telegrator.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  <ItemGroup>
+	<ProjectReference Include="..\dev\Telegrator.RoslynGenerators\Telegrator.RoslynGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

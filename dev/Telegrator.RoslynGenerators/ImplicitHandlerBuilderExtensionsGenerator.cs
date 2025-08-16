@@ -2,19 +2,16 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Text;
+using Telegrator.RoslynExtensions;
 
-namespace Telegrator.Generators
+namespace Telegrator.RoslynGenerators
 {
     [Generator(LanguageNames.CSharp)]
     public class ImplicitHandlerBuilderExtensionsGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-#if ANALYZERSDEBUG
-            Debugger.Launch();
-#endif
             IncrementalValueProvider<ImmutableArray<ClassDeclarationSyntax>> pipeline = context.SyntaxProvider
                 .CreateSyntaxProvider(SyntaxPredicate, SyntaxTransform)
                 .Where(declaration => declaration != null)
@@ -68,7 +65,7 @@ namespace Telegrator.Generators
             {
                 try
                 {
-                    usingDirectives.UnionAdd(classDeclaration.FindCompilationUnitSyntax().Usings.Select(use => use.ToString()));
+                    usingDirectives.UnionAdd(classDeclaration.FindAncestor<CompilationUnitSyntax>().Usings.Select(use => use.ToString()));
                     ParseClassDeclaration(sourceBuilder, classDeclaration, targeters);
                 }
                 catch (TargteterNotFoundException)
@@ -86,7 +83,7 @@ namespace Telegrator.Generators
             {
                 try
                 {
-                    usingDirectives.UnionAdd(classDeclaration.FindCompilationUnitSyntax().Usings.Select(use => use.ToString()));
+                    usingDirectives.UnionAdd(classDeclaration.FindAncestor<CompilationUnitSyntax>().Usings.Select(use => use.ToString()));
                     ParseClassDeclaration(sourceBuilder, classDeclaration, targeters);
                 }
                 catch (Exception exc)

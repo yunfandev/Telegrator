@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text;
+using Telegrator.RoslynExtensions;
 
 namespace Telegrator.Analyzers
 {
@@ -33,7 +34,7 @@ namespace Telegrator.Analyzers
         private static HandlerDeclarationModel Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
         {
             ClassDeclarationSyntax classSyntax = (ClassDeclarationSyntax)context.Node;
-            IEnumerable<AttributeSyntax> attributes = classSyntax.GetHandlerAttributes();
+            IEnumerable<AttributeSyntax> attributes = []; //classSyntax.GetHandlerAttributes();
             BaseTypeSyntax? baseType = classSyntax.GetHandlerBaseClass();
 
             if (baseType == null && !attributes.Any())
@@ -58,7 +59,7 @@ namespace Telegrator.Analyzers
                 context.CancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    usingDirectives.UnionAdd(handler.ClassDeclaration.FindCompilationUnitSyntax().Usings.Select(use => use.ToString()));
+                    usingDirectives.UnionAdd(handler.ClassDeclaration.FindAncestor<CompilationUnitSyntax>().Usings.Select(use => use.ToString()));
                     ParseHandlerDeclaration(context, sourceBuilder, handler, context.CancellationToken);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
