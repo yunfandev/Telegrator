@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text;
-using Telegrator.RoslynExtensions;
+using Telegrator.Analyzers.RoslynExtensions;
 
 namespace Telegrator.Analyzers
 {

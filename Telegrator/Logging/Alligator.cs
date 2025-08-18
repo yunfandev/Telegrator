@@ -20,7 +20,7 @@ namespace Telegrator.Logging
         /// Minimal level of logging messages.
         /// Any messages below thi value will not be writen!
         /// </summary>
-        public static LogLevel MinimalLevel { get; set; }
+        public static LogLevel MinimalLevel { get; set; } = LogLevel.Information;
 
         /// <summary>
         /// Adds a logger adapter to the centralized logging system.

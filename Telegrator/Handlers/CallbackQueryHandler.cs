@@ -57,6 +57,8 @@ namespace Telegrator.Handlers
         /// <param name="messageEffectId">The message effect ID.</param>
         /// <param name="businessConnectionId">The business connection ID.</param>
         /// <param name="allowPaidBroadcast">Whether to allow paid broadcast.</param>
+        /// <param name="directMessageTopicId"></param>
+        /// <param name="suggestedPostParameters"></param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The sent message.</returns>
         protected async Task<Message> Responce(
@@ -72,6 +74,8 @@ namespace Telegrator.Handlers
             string? messageEffectId = null,
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
+            int? directMessageTopicId = null,
+            SuggestedPostParameters? suggestedPostParameters = null,
             CancellationToken cancellationToken = default)
             => await Container.Responce(
                 text, parseMode, replyParameters,
@@ -79,8 +83,9 @@ namespace Telegrator.Handlers
                 messageThreadId, entities,
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
-                allowPaidBroadcast, cancellationToken);
-        
+                allowPaidBroadcast, directMessageTopicId,
+                suggestedPostParameters, cancellationToken);
+
         /// <summary>
         /// Edits the current callback message with new text.
         /// </summary>

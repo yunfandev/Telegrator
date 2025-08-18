@@ -225,6 +225,8 @@ namespace Telegrator
         /// <param name="messageEffectId">The message effect ID.</param>
         /// <param name="businessConnectionId">The business connection ID.</param>
         /// <param name="allowPaidBroadcast">Whether to allow paid broadcast.</param>
+        /// <param name="directMessageTopicId"></param>
+        /// <param name="suggestedPostParameters"></param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The sent message.</returns>
         public static async Task<Message> Reply(
@@ -240,6 +242,8 @@ namespace Telegrator
             string? messageEffectId = null,
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
+            int? directMessageTopicId = null,
+            SuggestedPostParameters? suggestedPostParameters = null,
             CancellationToken cancellationToken = default)
             => await container.Client.SendMessage(
                 container.ActualUpdate.Chat, text, parseMode, container.ActualUpdate,
@@ -247,7 +251,8 @@ namespace Telegrator
                 messageThreadId, entities,
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
-                allowPaidBroadcast, cancellationToken);
+                allowPaidBroadcast, directMessageTopicId,
+                suggestedPostParameters, cancellationToken);
 
         /// <summary>
         /// Sends a response message to the current chat.
@@ -265,6 +270,8 @@ namespace Telegrator
         /// <param name="messageEffectId">The message effect ID.</param>
         /// <param name="businessConnectionId">The business connection ID.</param>
         /// <param name="allowPaidBroadcast">Whether to allow paid broadcast.</param>
+        /// <param name="directMessageTopicId"></param>
+        /// <param name="suggestedPostParameters"></param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The sent message.</returns>
         public static async Task<Message> Responce(
@@ -281,6 +288,8 @@ namespace Telegrator
             string? messageEffectId = null,
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
+            int? directMessageTopicId = null,
+            SuggestedPostParameters? suggestedPostParameters = null,
             CancellationToken cancellationToken = default)
             => await container.Client.SendMessage(
                 container.ActualUpdate.Chat, text, parseMode, replyParameters,
@@ -288,7 +297,8 @@ namespace Telegrator
                 messageThreadId, entities,
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
-                allowPaidBroadcast, cancellationToken);
+                allowPaidBroadcast, directMessageTopicId,
+                suggestedPostParameters, cancellationToken);
 
         /// <summary>
         /// Responnces to message that this CallbackQuery was originated from
@@ -306,6 +316,8 @@ namespace Telegrator
         /// <param name="messageEffectId"></param>
         /// <param name="businessConnectionId"></param>
         /// <param name="allowPaidBroadcast"></param>
+        /// <param name="directMessageTopicId"></param>
+        /// <param name="suggestedPostParameters"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
@@ -323,6 +335,8 @@ namespace Telegrator
             string? messageEffectId = null,
             string? businessConnectionId = null,
             bool allowPaidBroadcast = false,
+            int? directMessageTopicId = null,
+            SuggestedPostParameters? suggestedPostParameters = null,
             CancellationToken cancellationToken = default)
         {
             CallbackQuery query = container.ActualUpdate;
@@ -335,7 +349,8 @@ namespace Telegrator
                 messageThreadId, entities,
                 disableNotification, protectContent,
                 messageEffectId, businessConnectionId,
-                allowPaidBroadcast, cancellationToken);
+                allowPaidBroadcast, directMessageTopicId,
+                suggestedPostParameters, cancellationToken);
         }
         
         /// <summary>

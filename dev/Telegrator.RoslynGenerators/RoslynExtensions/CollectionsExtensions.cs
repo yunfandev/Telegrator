@@ -15,11 +15,11 @@
             }
         }
 
-        public static IList<TValue> UnionAdd<TValue>(this IList<TValue> source, IEnumerable<TValue> toUnion)
+        public static IList<TValue> UnionAdd<TValue>(this IList<TValue> source, IEnumerable<TValue> toUnion, IEqualityComparer<TValue> comparer)
         {
             foreach (TValue toUnionValue in toUnion)
             {
-                if (!source.Contains(toUnionValue, EqualityComparer<TValue>.Default))
+                if (!source.Contains(toUnionValue, comparer))
                     source.Add(toUnionValue);
             }
 
@@ -59,6 +59,6 @@
         }
 
         public static IEnumerable<T> Repeat<T>(this T item, int times)
-            => Enumerable.Range(0, times - 1).Select(_ => item);
+            => Enumerable.Range(0, times).Select(_ => item);
     }
 }

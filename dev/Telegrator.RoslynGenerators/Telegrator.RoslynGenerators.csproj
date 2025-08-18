@@ -6,9 +6,6 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
 	<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<IsRoslynComponent>True</IsRoslynComponent>
-	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,10 +16,5 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
   </ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Telegrator.RoslynExtensions\Telegrator.RoslynExtensions.csproj" PrivateAssets="all" />
-		<None Include="$(OutputPath)\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-	</ItemGroup>
-
+	
 </Project>

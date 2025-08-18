@@ -158,10 +158,6 @@ namespace Telegrator.Polling
                 return [];
             }
 
-            //IEnumerable<DescribedHandlerInfo> described = DescribeDescriptors(provider, descriptors, updateRouter, client, update, cancellationToken);
-            //Alligator.RouterWriteLine("Described total of {0} handlers for Update ({1}) from {2} provider", described.Count(), update.Id, provider.GetType().Name);
-            //Alligator.RouterWriteLine("Described handlers : {0}", string.Join(", ", described));
-
             return DescribeDescriptors(provider, descriptors, client, update, cancellationToken);
         }
 

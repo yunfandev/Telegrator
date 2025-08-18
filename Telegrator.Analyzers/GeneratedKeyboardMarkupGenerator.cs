@@ -2,7 +2,8 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using Telegrator.RoslynExtensions;
+using Telegrator.Analyzers.RoslynExtensions;
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -69,7 +70,11 @@ namespace Telegrator.Analyzers
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            IncrementalValueProvider<ImmutableArray<MethodDeclarationSyntax>> pipeline = context.SyntaxProvider.CreateSyntaxProvider(Provide, Transform).Where(x => x != null).Collect();
+            IncrementalValueProvider<ImmutableArray<MethodDeclarationSyntax>> pipeline = context.SyntaxProvider
+                .CreateSyntaxProvider(Provide, Transform)
+                .Where(x => x != null)
+                .Collect();
+
             context.RegisterSourceOutput(pipeline, Execute);
         }
 
@@ -183,21 +188,10 @@ namespace Telegrator.Analyzers
 
                 try
                 {
-                    if (model.OriginalMethod.Parent is not ClassDeclarationSyntax containerClass)
+                    if (model.OriginalMethod.Parent is not ClassDeclarationSyntax)
                         throw new MissingMemberException();
 
-                    FieldDeclarationSyntax genField = model.GeneratedField
-                        .WithLeadingTrivia(NewLineTrivia, TabulationTrivia, TabulationTrivia);
-
-                    MethodDeclarationSyntax genMethod = model.GeneratedMethod
-                        .WithLeadingTrivia(NewLineTrivia, TabulationTrivia, TabulationTrivia);
-
-                    //ClassDeclarationSyntax genClass = GeneratedClassDeclaration(containerClass.Identifier.WithLeadingTrivia(WhitespaceTrivia).WithTrailingTrivia(NewLineTrivia), containerClass.Modifiers, genField, genMethod);
-                    NamespaceDeclarationSyntax genNamespace = GeneratedNamespaceDeclaration(model.OriginalMethod, [genField, genMethod]);
-
-                    genNamespace = genNamespace
-                        .WithCloseBraceToken(genNamespace.CloseBraceToken.WithLeadingTrivia(NewLineTrivia));
-
+                    NamespaceDeclarationSyntax genNamespace = GeneratedNamespaceDeclaration(model.OriginalMethod, [model.GeneratedField, model.GeneratedMethod]);
                     compilationUnit = compilationUnit.AddMembers(genNamespace);
                 }
                 catch (Exception ex)
@@ -209,30 +203,6 @@ namespace Telegrator.Analyzers
             compilationUnit = compilationUnit.WithUsings(usingDirectives);
             context.AddSource("GeneratedKeyboards.g", compilationUnit.ToFullString());
         }
-
-        /*
-        private static NamespaceDeclarationSyntax GeneratedNamespaceDeclaration(NameSyntax name, params IEnumerable<MemberDeclarationSyntax> members)
-        {
-            NamespaceDeclarationSyntax genNamespace = SyntaxFactory.NamespaceDeclaration(name)
-                .WithMembers(new SyntaxList<MemberDeclarationSyntax>(members))
-                .WithLeadingTrivia(NewLineTrivia);
-
-            return genNamespace
-                .WithCloseBraceToken(genNamespace.CloseBraceToken.WithLeadingTrivia(NewLineTrivia));
-        }
-
-        private static ClassDeclarationSyntax GeneratedClassDeclaration(SyntaxToken identifier, SyntaxTokenList modifiers, params IEnumerable<MemberDeclarationSyntax> members)
-        {
-            ClassDeclarationSyntax genClass = SyntaxFactory.ClassDeclaration(identifier)
-                .WithMembers(new SyntaxList<MemberDeclarationSyntax>(members))
-                .WithModifiers(modifiers)
-                .WithLeadingTrivia(NewLineTrivia, TabulationTrivia);
-
-            return genClass
-                .WithOpenBraceToken(genClass.OpenBraceToken.WithLeadingTrivia(TabulationTrivia))
-                .WithCloseBraceToken(genClass.CloseBraceToken.WithLeadingTrivia(NewLineTrivia, TabulationTrivia));
-        }
-        */
 
         private static MethodDeclarationSyntax GeneratedMethodDeclaration(string identifier, SyntaxTokenList modifiers, TypeSyntax returnType, FieldDeclarationSyntax field)
         {
@@ -267,11 +237,11 @@ namespace Telegrator.Analyzers
             if (method.Parent is not ClassDeclarationSyntax containerClass)
                 throw new MemberAccessException();
 
-            int times = method.CountParentTree() - 1;
+            int times = method.CountParentTree();
             ClassDeclarationSyntax generatedContainerClass = SyntaxFactory.ClassDeclaration(containerClass.Identifier)
                 .WithMembers(new SyntaxList<MemberDeclarationSyntax>(generatedMembers.Select(member => member.DecorateMember(times + 1))))
                 .WithModifiers(containerClass.Modifiers.Decorate())
-                .Decorate(times);
+                .DecorateType(times);
 
             MemberDeclarationSyntax generated = generatedContainerClass;
             MemberDeclarationSyntax inspecting = containerClass;
@@ -290,7 +260,7 @@ namespace Telegrator.Analyzers
                             generated = SyntaxFactory.ClassDeclaration(classDeclaration.Identifier)
                                 .WithMembers([generated])
                                 .WithModifiers(classDeclaration.Modifiers.Decorate())
-                                .Decorate(times);
+                                .DecorateType(times);
 
                             break;
                         }
@@ -300,7 +270,7 @@ namespace Telegrator.Analyzers
                             generated = SyntaxFactory.StructDeclaration(structDeclaration.Identifier)
                                 .WithMembers([generated])
                                 .WithModifiers(structDeclaration.Modifiers.Decorate())
-                                .Decorate(times);
+                                .DecorateType(times);
 
                             break;
                         }
