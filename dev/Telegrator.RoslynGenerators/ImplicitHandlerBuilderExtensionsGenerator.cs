@@ -25,15 +25,11 @@ namespace Telegrator.RoslynGenerators
         private static readonly MemberAccessExpressionSyntax BuilderAdderMethodAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName("builder"), SyntaxFactory.IdentifierName("AddTargetedFilters"));
         private static readonly IEqualityComparer<UsingDirectiveSyntax> UsingEqualityComparer = new UsingDirectiveEqualityComparer();
 
-        private static SyntaxTrivia TabulationTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, "\t");
         private static SyntaxTrivia WhitespaceTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " ");
         private static SyntaxTrivia NewLineTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\n");
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-#if DEBUG
-            Debugger.Launch();
-#endif
             IncrementalValueProvider<ImmutableArray<ClassDeclarationSyntax>> pipeline = context.SyntaxProvider
                 .CreateSyntaxProvider(SyntaxPredicate, SyntaxTransform)
                 .Where(declaration => declaration != null)
@@ -67,24 +63,6 @@ namespace Telegrator.RoslynGenerators
         {
             StringBuilder debugExport = new StringBuilder("/*");
             List<UsingDirectiveSyntax> usings = ParseUsings(DefaultUsings).ToList();
-
-            /*
-            Dictionary<string, string> targeters = [];
-            List<string> usingDirectives =
-            [
-                "using Telegrator.Handlers.Building;",
-                "using Telegrator.Handlers.Building.Components;"
-            ];
-            */
-
-            /*
-            StringBuilder sourceBuilder = new StringBuilder()
-                .AppendLine("namespace Telegrator")
-                .AppendLine("{")
-                .Append("\t//").Append(string.Join(", ", declarations.Select(decl => decl.Identifier.ToString()))).AppendLine()
-                .AppendLine("\tpublic static partial class HandlerBuilderExtensions")
-                .AppendLine("\t{");
-            */
 
             Dictionary<string, MethodDeclarationSyntax> targetters = [];
             foreach (ClassDeclarationSyntax classDeclaration in declarations)
@@ -303,117 +281,5 @@ namespace Telegrator.RoslynGenerators
                 return obj.GetHashCode();
             }
         }
-
-        /*
-        private static void ParseClassDeclaration(StringBuilder sourceBuilder, ClassDeclarationSyntax classDeclaration, Dictionary<string, string> targeters)
-        {
-            string className = classDeclaration.Identifier.ToString();
-            if (className == "FilterAnnotation")
-                return;
-
-            IEnumerable<MethodDeclarationSyntax> methods = classDeclaration.Members.OfType<MethodDeclarationSyntax>();
-            MethodDeclarationSyntax? targeterMethod = methods.FirstOrDefault(method => method.Identifier.ToString() == "GetFilterringTarget");
-
-            string filterName = className.Replace("Attribute", string.Empty);
-            string classTargetterMethodName = filterName + "_GetFilterringTarget";
-
-            if (targeterMethod != null)
-            {
-                targeters.Add(className, classTargetterMethodName);
-                RenderTargeterMethod(sourceBuilder, classTargetterMethodName, targeterMethod);
-                sourceBuilder.AppendLine();
-            }
-            else
-            {
-                if (classDeclaration.BaseList == null)
-                    throw new Exception();
-
-                string baseClassName = classDeclaration.BaseList.Types
-                    .ElementAt(0).GetBaseTypeSyntaxName();
-
-                if (!targeters.ContainsKey(baseClassName))
-                    throw new TargteterNotFoundException();
-
-                classTargetterMethodName = targeters[baseClassName];
-            }
-
-            if (classDeclaration.Modifiers.HasModifiers("abstract"))
-                return;
-
-            if (classDeclaration.ParameterList != null)
-            {
-                if (classDeclaration.BaseList != null)
-                {
-                    PrimaryConstructorBaseTypeSyntax primaryConstructor = (PrimaryConstructorBaseTypeSyntax)classDeclaration.BaseList.Types.ElementAt(0);
-                    RenderExtensionMethod(sourceBuilder, filterName, classTargetterMethodName, classDeclaration.ParameterList.Parameters, primaryConstructor.ArgumentList.Arguments);
-                }
-                else
-                {
-                    RenderExtensionMethod(sourceBuilder, filterName, classTargetterMethodName, classDeclaration.ParameterList.Parameters, []);
-                }
-
-                sourceBuilder.AppendLine();
-            }
-
-            foreach (ConstructorDeclarationSyntax constructor in classDeclaration.Members.OfType<ConstructorDeclarationSyntax>())
-            {
-                if (constructor.Initializer == null)
-                    continue;
-
-                RenderExtensionMethod(sourceBuilder, filterName, classTargetterMethodName, constructor.ParameterList.Parameters, constructor.Initializer.ArgumentList.Arguments);
-                sourceBuilder.AppendLine();
-            }
-        }
-        */
-
-        /*
-        private static void RenderExtensionMethod(StringBuilder sourceBuilder, string filterName, string classTargetterMethodName, SeparatedSyntaxList<ParameterSyntax> parameters, SeparatedSyntaxList<ArgumentSyntax> arguments)
-        {
-            if (filterName == "ChatType")
-                filterName = "InChatType"; // Because it conflicting
-
-            sourceBuilder
-                .Append("\t\t/// <summary>").AppendLine()
-                .Append("\t\t/// Adds ").Append(filterName).Append(" filter to implicit handler").AppendLine()
-                .Append("\t\t/// </summary>").AppendLine();
-
-            sourceBuilder.Append("\t\tpublic static TBuilder ").Append(filterName).Append("<TBuilder>(this TBuilder builder");
-
-            if (parameters.Any())
-                sourceBuilder.Append(", ").Append(parameters.ToFullString());
-
-            sourceBuilder
-                .Append(") where TBuilder : IHandlerBuilder").AppendLine()
-                .Append("\t\t{").AppendLine()
-                .Append("\t\t\tbuilder.AddTargetedFilter");
-
-            if (arguments.Count > 1)
-                sourceBuilder.Append("s");
-
-            sourceBuilder.Append("(").Append(classTargetterMethodName);
-
-            if (arguments.Any())
-                sourceBuilder.Append(", ").Append(arguments.ToFullString());
-
-            sourceBuilder
-                .Append(");").AppendLine()
-                .Append("\t\t\treturn builder;").AppendLine()
-                .Append("\t\t}").AppendLine();
-        }
-
-        private static void RenderTargeterMethod(StringBuilder sourceBuilder, string classTargetterMethodName, MethodDeclarationSyntax targeterMethod)
-        {
-            sourceBuilder.Append("\t\tprivate static ").Append(targeterMethod.ReturnType.ToString()).Append(" ").Append(classTargetterMethodName).Append(targeterMethod.ParameterList.ToFullString());
-
-            if (targeterMethod.ExpressionBody != null)
-            {
-                sourceBuilder.Append(targeterMethod.ExpressionBody.ToFullString()).Append(";").AppendLine();
-            }
-            else if (targeterMethod.Body != null)
-            {
-                sourceBuilder.Append(targeterMethod.Body.ToFullString());
-            }
-        }
-        */
     }
 }

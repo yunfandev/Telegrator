@@ -4,11 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using Telegrator.Analyzers.RoslynExtensions;
 
-
-#if DEBUG
-using System.Diagnostics;
-#endif
-
 namespace Telegrator.Analyzers
 {
     [Generator(LanguageNames.CSharp)]

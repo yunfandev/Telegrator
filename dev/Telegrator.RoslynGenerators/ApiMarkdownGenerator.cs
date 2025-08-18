@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using Telegrator.RoslynExtensions;
 
+#if DEBUG
 namespace Telegrator.RoslynGenerators
 {
     /// <summary>
@@ -15,11 +16,6 @@ namespace Telegrator.RoslynGenerators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-#if RELEASE
-            // DEBUG ONLY GENERATOR
-            return;
-#endif
-
             IncrementalValueProvider<ImmutableArray<BaseTypeDeclarationSyntax>> typeDeclarations = context.SyntaxProvider
                 .CreateSyntaxProvider(
                     predicate: (node, _) => node is ClassDeclarationSyntax || node is InterfaceDeclarationSyntax || node is StructDeclarationSyntax || node is EnumDeclarationSyntax,
@@ -285,4 +281,5 @@ namespace Telegrator.RoslynGenerators
             return type.Name;
         }
     }
-} 
+}
+#endif

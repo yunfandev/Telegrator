@@ -45,7 +45,6 @@ TelegramBotWebHostBuilder builder = TelegramBotWebHost.CreateBuilder(new Telegra
 
 // Register handlers
 builder.Handlers.CollectHandlersAssemblyWide();
-builder.Services.AddHandlersFromAssembly(typeof(Program).Assembly);
 
 // Register your services
 builder.Services.AddSingleton<IMyService, MyService>();

@@ -30,7 +30,7 @@ namespace Telegrator.Analyzers
 
             return true;
         }
-
+         
         private static HandlerDeclarationModel Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
         {
             ClassDeclarationSyntax classSyntax = (ClassDeclarationSyntax)context.Node;
@@ -72,7 +72,7 @@ namespace Telegrator.Analyzers
 
             sourceBuilder.AppendLine("\t}\n}");
             sourceBuilder.Insert(0, string.Join("\n", usingDirectives.OrderBy(use => use)) + "\n\n");
-            //context.AddSource("DeveloperHelperAnalyzer.cs", sourceBuilder.ToString());
+            context.AddSource("DeveloperHelperAnalyzer.cs", sourceBuilder.ToString());
         }
 
         private static void ParseHandlerDeclaration(SourceProductionContext context, StringBuilder sourceBuilder, HandlerDeclarationModel handler, CancellationToken cancellationToken)
