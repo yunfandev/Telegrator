@@ -9,9 +9,11 @@ namespace Telegrator.Analyzers
     [Generator(LanguageNames.CSharp)]
     public class GeneratedKeyboardMarkupGenerator : IIncrementalGenerator
     {
+        // Return types
         private const string InlineReturnType = "InlineKeyboardMarkup";
         private const string ReplyReturnType = "ReplyKeyboardMarkup";
 
+        // Attribute names
         private const string CallbackDataAttribute = "CallbackButton";
         private const string CallbackGameAttribute = "GameButton";
         private const string CopyTextAttribute = "CopyTextButton";
@@ -21,12 +23,21 @@ namespace Telegrator.Analyzers
         private const string QueryChosenAttribute = "QueryChosenButton";
         private const string QueryCurrentAttribute = "QueryCurrentButton";
         private const string UrlRedirectAttribute = "UrlRedirectButton";
+        private const string RequestChatAttribute = "RequestChatButton";
+        private const string RequestContactAttribute = "RequestContactButton";
+        private const string RequestLocationAttribute = "RequestLocationButton";
+        private const string RequestPoolAttribute = "RequestPoolButton";
+        private const string RequestUsersAttribute = "RequestUsersButton";
         private const string WebAppAttribute = "WebApp";
 
+        // Markup lists
         private static readonly string[] InlineAttributes = [CallbackDataAttribute, CallbackGameAttribute, CopyTextAttribute, LoginRequestAttribute, PayRequestAttribute, UrlRedirectAttribute, WebAppAttribute, SwitchQueryAttribute, QueryChosenAttribute, QueryCurrentAttribute];
-        private static readonly string[] ReplyAttributes = [];
+        private static readonly string[] ReplyAttributes = [RequestChatAttribute, RequestContactAttribute, RequestLocationAttribute, RequestPoolAttribute, RequestUsersAttribute, WebAppAttribute];
+        
+        // Usings
         private static readonly string[] DefaultUsings = ["Telegram.Bot.Types.ReplyMarkups"];
 
+        // Markup layouts
         private static readonly Dictionary<string, MemberAccessExpressionSyntax> InlineKeyboardLayout = new Dictionary<string, MemberAccessExpressionSyntax>()
         {
             { CallbackDataAttribute, AccessExpression("InlineKeyboardButton", "WithCallbackData") },
@@ -43,21 +54,29 @@ namespace Telegrator.Analyzers
 
         private static readonly Dictionary<string, MemberAccessExpressionSyntax> ReplyKeyboardLayout = new Dictionary<string, MemberAccessExpressionSyntax>()
         {
-
+            { RequestChatAttribute, AccessExpression("KeyboardButton", "WithRequestChat") },
+            { RequestContactAttribute, AccessExpression("KeyboardButton", "WithRequestContact") },
+            { RequestLocationAttribute, AccessExpression("KeyboardButton", "WithRequestLocation") },
+            { RequestPoolAttribute, AccessExpression("KeyboardButton", "WithRequestPoll") },
+            { RequestUsersAttribute, AccessExpression("KeyboardButton", "WithRequestUsers") },
+            { WebAppAttribute, AccessExpression("KeyboardButton", "WithWebApp") }
         };
 
+        // Markup map
         private static readonly Dictionary<string, Dictionary<string, MemberAccessExpressionSyntax>> LayoutNames = new Dictionary<string, Dictionary<string, MemberAccessExpressionSyntax>>()
         {
             { InlineReturnType, InlineKeyboardLayout },
             { ReplyReturnType, ReplyKeyboardLayout }
         };
 
+        // Diagnostic descriptors
         private static readonly DiagnosticDescriptor WrongReturnType = new DiagnosticDescriptor("TG_1001", "Wrong return type", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
-        private static readonly DiagnosticDescriptor UnsupportedAttribute = new DiagnosticDescriptor("TG_1002", "Unsupported attribute", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
+        private static readonly DiagnosticDescriptor UnsupportedAttribute = new DiagnosticDescriptor("TG_1002", "Unsupported or invalid attribute", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor NotPartialMethod = new DiagnosticDescriptor("TG_1003", "Not a partial method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor UseBodylessMethod = new DiagnosticDescriptor("TG_1004", "Use bodyless method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor UseParametrlessMethod = new DiagnosticDescriptor("TG_1005", "Use parametrless method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
 
+        // Trivias
         private static SyntaxTrivia TabulationTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, "\t");
         private static SyntaxTrivia WhitespaceTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " ");
         private static SyntaxTrivia NewLineTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\n");

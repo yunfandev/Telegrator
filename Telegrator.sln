@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.Hosting.Web", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegrator.RoslynGenerators", "dev\Telegrator.RoslynGenerators\Telegrator.RoslynGenerators.csproj", "{93658B7F-C651-4C78-2CB1-2C0AE00C45B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SosalBot", "..\SosalBot\SosalBot\SosalBot.csproj", "{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		AnalyzersDebug|Any CPU = AnalyzersDebug|Any CPU
@@ -65,12 +63,6 @@ Global
 		{93658B7F-C651-4C78-2CB1-2C0AE00C45B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93658B7F-C651-4C78-2CB1-2C0AE00C45B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93658B7F-C651-4C78-2CB1-2C0AE00C45B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.AnalyzersDebug|Any CPU.ActiveCfg = Release|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.AnalyzersDebug|Any CPU.Build.0 = Release|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6AA4D47-0DCE-520E-5779-A14EA9CB1DEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

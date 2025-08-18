@@ -132,4 +132,44 @@ namespace Telegrator.Markups
         /// </summary>
         public string Query { get; } = switchInlineQueryCurrentChat;
     }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequestChatButtonAttribute(string name, int requestId, bool chatIsChannel) : Attribute
+    {
+        public string Name { get; } = name;
+
+        public int RequestId { get; } = requestId;
+
+        public bool ChatIsChannel { get; } = chatIsChannel;
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequestContactButtonAttribute(string name) : Attribute
+    {
+        public string Name { get; } = name;
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequestLocationButtonAttribute(string name) : Attribute
+    {
+        public string Name { get; } = name;
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequestPoolButtonAttribute(string name, KeyboardButtonPollType requestPoll) : Attribute
+    {
+        public string Name { get; } = name;
+
+        public KeyboardButtonPollType PollType { get; } = requestPoll;
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequestUsersButtonAttribute(string name, int requestId, int? maxQuantity = null) : Attribute
+    {
+        public string Name { get; } = name;
+
+        public int RequestId { get; } = requestId;
+
+        public int? MaxQuantity { get; } = maxQuantity;
+    }
 }

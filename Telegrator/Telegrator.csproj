@@ -17,7 +17,7 @@
     <PackageTags>telegram;bot;mediator;attributes;aspect;hosting;host;framework;easy;simple;handlers</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.15.0</Version>
+    <Version>1.15.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
