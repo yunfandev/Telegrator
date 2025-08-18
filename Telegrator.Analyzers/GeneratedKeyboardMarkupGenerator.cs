@@ -72,9 +72,11 @@ namespace Telegrator.Analyzers
         // Diagnostic descriptors
         private static readonly DiagnosticDescriptor WrongReturnType = new DiagnosticDescriptor("TG_1001", "Wrong return type", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor UnsupportedAttribute = new DiagnosticDescriptor("TG_1002", "Unsupported or invalid attribute", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
-        private static readonly DiagnosticDescriptor NotPartialMethod = new DiagnosticDescriptor("TG_1003", "Not a partial method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
+        private static readonly DiagnosticDescriptor NotPartialMethod = new DiagnosticDescriptor("TG_1003", "Not a partial member", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor UseBodylessMethod = new DiagnosticDescriptor("TG_1004", "Use bodyless method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
         private static readonly DiagnosticDescriptor UseParametrlessMethod = new DiagnosticDescriptor("TG_1005", "Use parametrless method", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
+        private static readonly DiagnosticDescriptor UseGetOnlyProperty = new DiagnosticDescriptor("TG_1006", "Use property with only get accessor", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
+        private static readonly DiagnosticDescriptor UseBodylessGetAccessor = new DiagnosticDescriptor("TG_1007", "Use bodyless get accessor", string.Empty, "Modelling", DiagnosticSeverity.Error, true);
 
         // Trivias
         private static SyntaxTrivia TabulationTrivia => SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, "\t");
@@ -84,15 +86,14 @@ namespace Telegrator.Analyzers
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            IncrementalValueProvider<ImmutableArray<MethodDeclarationSyntax>> pipeline = context.SyntaxProvider
-                .CreateSyntaxProvider(Provide, Transform)
-                .Where(x => x != null)
-                .Collect();
+            IncrementalValueProvider<ImmutableArray<MethodDeclarationSyntax>> methodsPipeline = context.SyntaxProvider.CreateSyntaxProvider(ProvideMethods, TransformMethods).Where(x => x != null).Collect();
+            IncrementalValueProvider<ImmutableArray<PropertyDeclarationSyntax>> propertiesPipeline = context.SyntaxProvider.CreateSyntaxProvider(ProvideProperties, TransformProperties).Where(x => x != null).Collect();
 
-            context.RegisterSourceOutput(pipeline, Execute);
+            context.RegisterSourceOutput(methodsPipeline, ExecuteMethodsPipeline);
+            context.RegisterSourceOutput(propertiesPipeline, ExecutePropertiessPipeline);
         }
 
-        private static bool Provide(SyntaxNode syntaxNode, CancellationToken cancellationToken)
+        private static bool ProvideMethods(SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (syntaxNode is not MethodDeclarationSyntax method)
@@ -104,13 +105,133 @@ namespace Telegrator.Analyzers
             return true;
         }
 
-        private static MethodDeclarationSyntax Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+        private static bool ProvideProperties(SyntaxNode syntaxNode, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (syntaxNode is not PropertyDeclarationSyntax property)
+                return false;
+
+            if (!HasGenAttributes(property))
+                return false;
+
+            return true;
+        }
+
+        private static MethodDeclarationSyntax TransformMethods(GeneratorSyntaxContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return (MethodDeclarationSyntax)context.Node;
         }
 
-        private static void Execute(SourceProductionContext context, ImmutableArray<MethodDeclarationSyntax> methods)
+        private static PropertyDeclarationSyntax TransformProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return (PropertyDeclarationSyntax)context.Node;
+        }
+
+        private static void ExecutePropertiessPipeline(SourceProductionContext context, ImmutableArray<PropertyDeclarationSyntax> properties)
+        {
+            List<GeneratedMarkupPropertyModel> models = [];
+            foreach (PropertyDeclarationSyntax prop in properties)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    string methodName = prop.Identifier.Text;
+                    string returnType = prop.Type.ToString();
+                    bool anyErrors = false;
+
+                    if (!LayoutNames.TryGetValue(returnType, out var layout))
+                    {
+                        WrongReturnType.Report(context, prop.Type.GetLocation());
+                        anyErrors = true;
+                    }
+
+                    if (!prop.Modifiers.HasModifiers("partial"))
+                    {
+                        NotPartialMethod.Report(context, prop.Identifier.GetLocation());
+                        anyErrors = true;
+                    }
+
+                    if (prop.Initializer != null)
+                    {
+                        UseGetOnlyProperty.Report(context, prop.Initializer.GetLocation());
+                        anyErrors = true;
+                    }
+
+                    if (prop.ExpressionBody != null)
+                    {
+                        UseGetOnlyProperty.Report(context, prop.ExpressionBody.GetLocation());
+                        anyErrors = true;
+                    }
+
+                    if (prop.AccessorList != null)
+                    {
+                        foreach (AccessorDeclarationSyntax accessor in prop.AccessorList.Accessors)
+                        {
+                            if (accessor.IsKind(SyntaxKind.SetAccessorDeclaration))
+                            {
+                                UseGetOnlyProperty.Report(context, accessor.GetLocation());
+                                anyErrors = true;
+                                continue;
+                            }
+
+                            if (accessor.Body != null)
+                            {
+                                UseBodylessGetAccessor.Report(context, accessor.Body.GetLocation());
+                                anyErrors = true;
+                                continue;
+                            }
+
+                            if (accessor.ExpressionBody != null)
+                            {
+                                UseBodylessGetAccessor.Report(context, accessor.ExpressionBody.GetLocation());
+                                anyErrors = true;
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (anyErrors)
+                        return;
+
+                    SeparatedSyntaxList<CollectionElementSyntax> matrix = ParseAttributesMatrix(context, layout, prop);
+                    PropertyDeclarationSyntax genProp = GeneratedPropertyDeclaration(prop, SyntaxFactory.CollectionExpression(matrix));
+                    models.Add(new GeneratedMarkupPropertyModel(prop, genProp));
+                }
+                catch (Exception ex)
+                {
+                    context.AddSource(prop.Identifier.ToString(), ex.ToString());
+                }
+            }
+
+            context.CancellationToken.ThrowIfCancellationRequested();
+            CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
+            SyntaxList<UsingDirectiveSyntax> usingDirectives = ParseUsings(DefaultUsings).ToSyntaxList();
+
+            foreach (GeneratedMarkupPropertyModel model in models)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    if (model.OriginalProperty.Parent is not ClassDeclarationSyntax)
+                        throw new MissingMemberException();
+
+                    NamespaceDeclarationSyntax genNamespace = GeneratedNamespaceDeclaration(model.OriginalProperty, [model.GeneratedProperty]);
+                    compilationUnit = compilationUnit.AddMembers(genNamespace);
+                }
+                catch (Exception ex)
+                {
+                    context.AddSource(model.OriginalProperty.Identifier.ToString(), ex.ToString());
+                }
+            }
+
+            compilationUnit = compilationUnit.WithUsings(usingDirectives);
+            context.AddSource("GeneratedKeyboards.Properties.g", compilationUnit.ToFullString());
+        }
+
+        private static void ExecuteMethodsPipeline(SourceProductionContext context, ImmutableArray<MethodDeclarationSyntax> methods)
         {
             List<GeneratedMarkupMethodModel> models = [];
             foreach (MethodDeclarationSyntax method in methods)
@@ -155,35 +276,9 @@ namespace Telegrator.Analyzers
                     if (anyErrors)
                         return;
 
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    SeparatedSyntaxList<CollectionElementSyntax> vertical = new SeparatedSyntaxList<CollectionElementSyntax>();
-
-                    foreach (AttributeListSyntax attributeList in method.AttributeLists)
-                    {
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        SeparatedSyntaxList<CollectionElementSyntax> horizontal = new SeparatedSyntaxList<CollectionElementSyntax>();
-
-                        foreach (AttributeSyntax attribute in attributeList.Attributes)
-                        {
-                            context.CancellationToken.ThrowIfCancellationRequested();
-
-                            if (!layout.TryGetValue(attribute.Name.ToString(), out var accessSyntax))
-                            {
-                                UnsupportedAttribute.Report(context, attribute.Name.GetLocation());
-                                return;
-                            }
-
-                            InvocationExpressionSyntax expression = SyntaxFactory.InvocationExpression(accessSyntax, ConvertArguments(attribute.ArgumentList));
-                            horizontal = horizontal.Add(SyntaxFactory.ExpressionElement(expression));
-                        }
-
-                        ExpressionElementSyntax element = SyntaxFactory.ExpressionElement(SyntaxFactory.CollectionExpression(horizontal));
-                        vertical = vertical.Add(element);
-                    }
-
-                    FieldDeclarationSyntax genField = GeneratedFieldDeclaration(methodName, method.ReturnType.WithoutTrivia(), SyntaxFactory.CollectionExpression(vertical));
+                    SeparatedSyntaxList<CollectionElementSyntax> matrix = ParseAttributesMatrix(context, layout, method);
+                    FieldDeclarationSyntax genField = GeneratedFieldDeclaration(methodName, method.ReturnType.WithoutTrivia(), SyntaxFactory.CollectionExpression(matrix));
                     MethodDeclarationSyntax genMethod = GeneratedMethodDeclaration(methodName, method.Modifiers, method.ReturnType, genField);
-                    
                     models.Add(new GeneratedMarkupMethodModel(method, genField, genMethod));
                 }
                 catch (Exception ex)
@@ -215,14 +310,48 @@ namespace Telegrator.Analyzers
             }
 
             compilationUnit = compilationUnit.WithUsings(usingDirectives);
-            context.AddSource("GeneratedKeyboards.g", compilationUnit.ToFullString());
+            context.AddSource("GeneratedKeyboards.Methods.g", compilationUnit.ToFullString());
+        }
+
+        private static SeparatedSyntaxList<CollectionElementSyntax> ParseAttributesMatrix(SourceProductionContext context, Dictionary<string, MemberAccessExpressionSyntax> layout, MemberDeclarationSyntax member)
+        {
+            SeparatedSyntaxList<CollectionElementSyntax> vertical = new SeparatedSyntaxList<CollectionElementSyntax>();
+            foreach (AttributeListSyntax attributeList in member.AttributeLists)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+                SeparatedSyntaxList<CollectionElementSyntax> horizontal = new SeparatedSyntaxList<CollectionElementSyntax>();
+
+                foreach (AttributeSyntax attribute in attributeList.Attributes)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    if (!layout.TryGetValue(attribute.Name.ToString(), out var accessSyntax))
+                    {
+                        UnsupportedAttribute.Report(context, attribute.Name.GetLocation());
+                        continue;
+                    }
+
+                    InvocationExpressionSyntax expression = SyntaxFactory.InvocationExpression(accessSyntax, ConvertArguments(attribute.ArgumentList));
+                    horizontal = horizontal.Add(SyntaxFactory.ExpressionElement(expression));
+                }
+
+                ExpressionElementSyntax element = SyntaxFactory.ExpressionElement(SyntaxFactory.CollectionExpression(horizontal));
+                vertical = vertical.Add(element);
+            }
+
+            return vertical;
+        }
+
+        private static PropertyDeclarationSyntax GeneratedPropertyDeclaration(PropertyDeclarationSyntax property, CollectionExpressionSyntax collection)
+        {
+            return SyntaxFactory.PropertyDeclaration(property.Type, property.Identifier)
+                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseToken(" => "), collection));
         }
 
         private static MethodDeclarationSyntax GeneratedMethodDeclaration(string identifier, SyntaxTokenList modifiers, TypeSyntax returnType, FieldDeclarationSyntax field)
         {
             return SyntaxFactory.MethodDeclaration(returnType.WithTrailingTrivia(WhitespaceTrivia), identifier)
                 .WithModifiers(modifiers)
-                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.IdentifierName(field.Declaration.Variables.ElementAt(0).Identifier)))
+                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseToken(" => "), SyntaxFactory.IdentifierName(field.Declaration.Variables.ElementAt(0).Identifier)))
                 .WithSemicolonToken(Semicolon);
         }
 
@@ -232,7 +361,7 @@ namespace Telegrator.Analyzers
             ObjectCreationExpressionSyntax objectCreation = SyntaxFactory.ObjectCreationExpression(returnType.WithLeadingTrivia(WhitespaceTrivia), arguments, null);
 
             VariableDeclaratorSyntax declarator = SyntaxFactory.VariableDeclarator(identifier + "_generatedMarkup")
-                .WithInitializer(SyntaxFactory.EqualsValueClause(objectCreation));
+                .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseToken(" = "), objectCreation));
 
             return SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(returnType.WithTrailingTrivia(WhitespaceTrivia)).AddVariables(declarator))
                 .WithModifiers(Modifiers(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword));
@@ -246,12 +375,12 @@ namespace Telegrator.Analyzers
             return SyntaxFactory.ArgumentList(SeparatedSyntaxList(attributeArgs.Arguments.Select(CastArgument)));
         }
 
-        private static NamespaceDeclarationSyntax GeneratedNamespaceDeclaration(MethodDeclarationSyntax method, IEnumerable<MemberDeclarationSyntax> generatedMembers)
+        private static NamespaceDeclarationSyntax GeneratedNamespaceDeclaration(MemberDeclarationSyntax member, IEnumerable<MemberDeclarationSyntax> generatedMembers)
         {
-            if (method.Parent is not ClassDeclarationSyntax containerClass)
+            if (member.Parent is not ClassDeclarationSyntax containerClass)
                 throw new MemberAccessException();
 
-            int times = method.CountParentTree();
+            int times = member.CountParentTree();
             ClassDeclarationSyntax generatedContainerClass = SyntaxFactory.ClassDeclaration(containerClass.Identifier)
                 .WithMembers(new SyntaxList<MemberDeclarationSyntax>(generatedMembers.Select(member => member.DecorateMember(times + 1))))
                 .WithModifiers(containerClass.Modifiers.Decorate())
@@ -311,7 +440,7 @@ namespace Telegrator.Analyzers
             .Select(name => SyntaxFactory.IdentifierName(name).WithLeadingTrivia(WhitespaceTrivia))
             .Select(name => SyntaxFactory.UsingDirective(name).WithTrailingTrivia(NewLineTrivia));
 
-        private static bool HasGenAttributes(MethodDeclarationSyntax method) => method.AttributeLists.SelectMany(x => x.Attributes)
+        private static bool HasGenAttributes(MemberDeclarationSyntax member) => member.AttributeLists.SelectMany(x => x.Attributes)
             .Select(x => x.Name.ToString()).Intersect(InlineAttributes.Concat(ReplyAttributes)).Any();
 
         private static SeparatedSyntaxList<T> SeparatedSyntaxList<T>(params IEnumerable<T> elements) where T : SyntaxNode
@@ -321,5 +450,6 @@ namespace Telegrator.Analyzers
             => SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName(className), SyntaxFactory.IdentifierName(methodName));
 
         private record class GeneratedMarkupMethodModel(MethodDeclarationSyntax OriginalMethod, FieldDeclarationSyntax GeneratedField, MethodDeclarationSyntax GeneratedMethod);
+        private record class GeneratedMarkupPropertyModel(PropertyDeclarationSyntax OriginalProperty, PropertyDeclarationSyntax GeneratedProperty);
     }
 }

@@ -10,4 +10,6 @@ TG_1002 | Modelling | Error | GeneratedKeyboardMarkupGenerator
 TG_1003 | Modelling | Error | GeneratedKeyboardMarkupGenerator
 TG_1004 | Modelling | Error | GeneratedKeyboardMarkupGenerator
 TG_1005 | Modelling | Error | GeneratedKeyboardMarkupGenerator
+TG_1006 | Modelling | Error | GeneratedKeyboardMarkupGenerator
+TG_1007 | Modelling | Error | GeneratedKeyboardMarkupGenerator
 TR0001 | Aspect | Error | DiagnosticsHelper
