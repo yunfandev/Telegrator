@@ -37,12 +37,5 @@ namespace Telegrator.MadiatorCore
         /// <param name="descriptor">The handler descriptor to add.</param>
         /// <returns>The updated <see cref="IHandlersCollection"/>.</returns>
         public IHandlersCollection AddDescriptor(HandlerDescriptor descriptor);
-
-        /// <summary>
-        /// Gets the <see cref="HandlerDescriptorList"/> for the specified <see cref="HandlerDescriptor"/>.
-        /// </summary>
-        /// <param name="descriptor">The handler descriptor.</param>
-        /// <returns>The handler descriptor list containing the descriptor.</returns>
-        public HandlerDescriptorList GetDescriptorList(HandlerDescriptor descriptor);
     }
 }

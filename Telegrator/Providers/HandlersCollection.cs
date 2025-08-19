@@ -91,11 +91,11 @@ namespace Telegrator.Providers
         }
 
         /// <summary>
-        /// Gets or creates a descriptor list for the specified update type.
+        /// Gets the <see cref="HandlerDescriptorList"/> for the specified <see cref="HandlerDescriptor"/>.
         /// </summary>
-        /// <param name="descriptor">The handler descriptor to get the list for.</param>
-        /// <returns>The descriptor list for the update type.</returns>
-        public virtual HandlerDescriptorList GetDescriptorList(HandlerDescriptor descriptor)
+        /// <param name="descriptor">The handler descriptor.</param>
+        /// <returns>The handler descriptor list containing the descriptor.</returns>
+        protected virtual HandlerDescriptorList GetDescriptorList(HandlerDescriptor descriptor)
         {
             UpdateType updateType = UpdateTypeExtensions.SuppressTypes.TryGetValue(descriptor.UpdateType, out UpdateType suppressType) 
                 ? suppressType
