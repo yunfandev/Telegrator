@@ -16,7 +16,10 @@ namespace Telegrator.Providers
     /// <param name="options">Optional configuration options for handler collecting.</param>
     public class HandlersCollection(ITelegratorOptions? options) : IHandlersCollection
     {
-        private readonly List<UpdateType> _allowedTypes = [];
+        /// <summary>
+        /// Gets the collection of <see cref="UpdateType"/>'s allowed by registered handlers
+        /// </summary>
+        protected readonly List<UpdateType> _allowedTypes = [];
 
         /// <summary>
         /// Dictionary that organizes handler descriptors by update type.
@@ -71,9 +74,8 @@ namespace Telegrator.Providers
                 throw new Exception("This handler (" + descriptor.HandlerType.FullName + "), must contain constructor without parameters.");
 
             _allowedTypes.UnionAdd(descriptor.UpdateType);
-            MightAwaitAttribute[] mightAwaits = descriptor.HandlerType.GetCustomAttributes<MightAwaitAttribute>().ToArray();
-            if (mightAwaits.Length > 0)
-                _allowedTypes.UnionAdd(mightAwaits.SelectMany(attr => attr.UpdateTypes));
+            foreach (MightAwaitAttribute mightAwaits in descriptor.HandlerType.GetCustomAttributes<MightAwaitAttribute>())
+                _allowedTypes.UnionAdd(mightAwaits.UpdateTypes);
 
             IntersectCommands(descriptor);
             HandlerDescriptorList list = GetDescriptorList(descriptor);
