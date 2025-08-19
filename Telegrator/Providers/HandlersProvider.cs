@@ -22,7 +22,7 @@ namespace Telegrator.Providers
         /// Read-only dictionary mapping <see cref="UpdateType"/> to lists of handler descriptors.
         /// Each descriptor list is frozen to prevent modification after initialization.
         /// </summary>
-        public readonly ReadOnlyDictionary<UpdateType, HandlerDescriptorList> HandlersDictionary;
+        protected readonly ReadOnlyDictionary<UpdateType, HandlerDescriptorList> HandlersDictionary;
 
         /// <summary>
         /// Configuration options for the bot and handler execution behavior.
