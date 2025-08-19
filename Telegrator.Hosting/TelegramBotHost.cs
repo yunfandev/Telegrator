@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -159,7 +160,14 @@ namespace Telegrator.Hosting
 
             services.AddSingleton<ITelegramBotHost>(this);
             services.AddSingleton<ITelegratorBot>(this);
-            services.AddSingleton<IHandlersCollection>(handlers);
+            services.AddSingleton(handlers);
+
+            if (handlers is IHandlersManager manager)
+            {
+                services.RemoveAll<IHandlersProvider>();
+                services.AddSingleton<IHandlersProvider>(manager);
+                services.AddSingleton(manager);
+            }
         }
     }
 }

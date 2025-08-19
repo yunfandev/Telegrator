@@ -91,7 +91,7 @@ namespace Telegrator.MadiatorCore.Descriptors
         public static DescriptorAspectsSet GetAspects(Type handlerType)
         {
             Type? typedPre = handlerType.GetCustomAttribute(typeof(BeforeExecutionAttribute<>))?.GetType().GetGenericArguments()[0];
-            Type? typedPost = handlerType.GetCustomAttribute(typeof(AfterExecutionAttribute<>)).GetType().GetGenericArguments()[0];
+            Type? typedPost = handlerType.GetCustomAttribute(typeof(AfterExecutionAttribute<>))?.GetType().GetGenericArguments()[0];
             return new DescriptorAspectsSet(typedPre, typedPost);
         }
     }

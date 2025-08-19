@@ -3,17 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Text;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
-using Telegrator.Hosting.Providers;
 using Telegrator.Hosting.Web.Components;
-using Telegrator.Hosting.Logging;
-using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -199,15 +196,22 @@ namespace Telegrator.Hosting.Web
             Logger.LogInformation(logBuilder.ToString());
         }
 
-        private void RegisterHostServices(IServiceCollection service, IHandlersCollection handlers)
+        private void RegisterHostServices(IServiceCollection services, IHandlersCollection handlers)
         {
             //service.RemoveAll<IHost>();
             //service.AddSingleton<IHost>(this);
 
-            service.AddSingleton<ITelegramBotHost>(this);
-            service.AddSingleton<ITelegramBotWebHost>(this);
-            service.AddSingleton<ITelegratorBot>(this);
-            service.AddSingleton<IHandlersCollection>(handlers);
+            services.AddSingleton<ITelegramBotHost>(this);
+            services.AddSingleton<ITelegramBotWebHost>(this);
+            services.AddSingleton<ITelegratorBot>(this);
+            services.AddSingleton(handlers);
+
+            if (handlers is IHandlersManager manager)
+            {
+                services.RemoveAll<IHandlersProvider>();
+                services.AddSingleton<IHandlersProvider>(manager);
+                services.AddSingleton(manager);
+            }
         }
     }
 }
