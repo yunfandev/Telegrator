@@ -86,7 +86,7 @@ namespace Telegrator
                 throw new InvalidDataException("Message does not contain a command");
 
             if (message is not { Text.Length: > 0 })
-                throw new ArgumentNullException("Command text cannot be null or empty");
+                throw new ArgumentNullException(nameof(message), "Command text cannot be null or empty");
 
             if (!message.Text.Contains(' '))
                 throw new MissingMemberException("Command dont contains arguments");
@@ -619,6 +619,45 @@ namespace Telegrator
         /// <returns>A handler builder for callback query updates.</returns>
         public static HandlerBuilder<CallbackQuery> CreateCallbackQuery(this IHandlersCollection handlers)
             => handlers.CreateHandler<CallbackQuery>(UpdateType.CallbackQuery);
+
+        /// <summary>
+        /// Adds a handler type to the collection.
+        /// </summary>
+        /// <param name="handlers">The handlers collection.</param>
+        /// <typeparam name="THandler">The type of handler to add.</typeparam>
+        /// <returns>This collection instance for method chaining.</returns>
+        public static IHandlersCollection AddHandler<THandler>(this IHandlersCollection handlers) where THandler : UpdateHandlerBase
+            => handlers.AddHandler(typeof(THandler));
+
+        /// <summary>
+        /// Adds a handler type to the collection.
+        /// </summary>
+        /// <param name="handlers">The handlers collection.</param>
+        /// <param name="handlerType">The type of handler to add.</param>
+        /// <returns>This collection instance for method chaining.</returns>
+        /// <exception cref="Exception">Thrown when the type is not a valid handler implementation.</exception>
+        public static IHandlersCollection AddHandler(this IHandlersCollection handlers, Type handlerType)
+        {
+            if (!handlerType.IsHandlerRealization())
+                throw new Exception();
+
+            if (handlerType.IsCustomDescriptorsProvider())
+            {
+                if (!handlerType.HasParameterlessCtor())
+                    throw new Exception();
+
+                ICustomDescriptorsProvider provider = (ICustomDescriptorsProvider)Activator.CreateInstance(handlerType);
+                foreach (HandlerDescriptor handlerDescriptor in provider.DescribeHandlers())
+                    handlers.AddDescriptor(handlerDescriptor);
+            }
+            else
+            {
+                HandlerDescriptor descriptor = new HandlerDescriptor(DescriptorType.General, handlerType);
+                handlers.AddDescriptor(descriptor);
+            }
+
+            return handlers;
+        }
 
         /// <summary>
         /// Creates implicit handler from method

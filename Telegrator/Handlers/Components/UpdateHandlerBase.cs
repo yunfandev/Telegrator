@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using System.ComponentModel;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -42,28 +43,49 @@ namespace Telegrator.Handlers.Components
                 // Executing pre processor
                 if (aspects != null)
                 {
-                    Result? preResult = await aspects
-                        .ExecutePre(this, container, cancellationToken)
-                        .ConfigureAwait(false);
+                    try
+                    {
+                        Result? preResult = await aspects
+                            .ExecutePre(this, container, cancellationToken)
+                            .ConfigureAwait(false);
 
-                    if (!preResult.Positive)
-                        return preResult;
+                        if (!preResult.Positive)
+                            return preResult;
+                    }
+                    catch (NotImplementedException)
+                    {
+                        _ = 0xBAD + 0xC0DE;
+                    }
                 }
 
-                // Executing handler
-                Result execResult = await ExecuteInternal(container, cancellationToken).ConfigureAwait(false);
-                if (!execResult.Positive)
-                    return execResult;
-
-                // Executing post processor
-                if (aspects != null)
+                try
                 {
-                    Result postResult = await aspects
-                        .ExecutePost(this, container, cancellationToken)
-                        .ConfigureAwait(false);
+                    // Executing handler
+                    Result execResult = await ExecuteInternal(container, cancellationToken).ConfigureAwait(false);
+                    if (!execResult.Positive)
+                        return execResult;
+                }
+                catch (NotImplementedException)
+                {
+                    _ = 0xBAD + 0xC0DE;
+                }
 
-                    if (!postResult.Positive)
-                        return postResult;
+                try
+                {
+                    // Executing post processor
+                    if (aspects != null)
+                    {
+                        Result postResult = await aspects
+                            .ExecutePost(this, container, cancellationToken)
+                            .ConfigureAwait(false);
+
+                        if (!postResult.Positive)
+                            return postResult;
+                    }
+                }
+                catch (NotImplementedException)
+                {
+                    _ = 0xBAD + 0xC0DE;
                 }
 
                 // Success
@@ -77,9 +99,16 @@ namespace Telegrator.Handlers.Components
             }
             catch (Exception exception)
             {
-                await described.UpdateRouter
-                    .HandleErrorAsync(described.Client, exception, HandleErrorSource.HandleUpdateError, cancellationToken)
-                    .ConfigureAwait(false);
+                try
+                {
+                    await described.UpdateRouter
+                        .HandleErrorAsync(described.Client, exception, HandleErrorSource.HandleUpdateError, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (NotImplementedException)
+                {
+                    _ = 0xBAD + 0xC0DE;
+                }
 
                 return Result.Fault();
             }

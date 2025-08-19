@@ -9,6 +9,7 @@ using Telegrator.Hosting;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Configuration;
 using Telegrator.Hosting.Providers;
+using Telegrator.Hosting.Providers.Components;
 using Telegrator.MadiatorCore;
 
 #pragma warning disable IDE0001
@@ -21,7 +22,7 @@ namespace Telegrator.Hosting
     {
         private readonly HostApplicationBuilder _innerBuilder;
         private readonly TelegramBotHostBuilderSettings _settings;
-        private readonly HostHandlersCollection _handlers;
+        private readonly IHandlersCollection _handlers;
 
         /// <inheritdoc/>
         public IHandlersCollection Handlers => _handlers;
@@ -43,11 +44,26 @@ namespace Telegrator.Hosting
         /// </summary>
         /// <param name="hostApplicationBuilder"></param>
         /// <param name="settings"></param>
-        internal TelegramBotHostBuilder(HostApplicationBuilder hostApplicationBuilder, TelegramBotHostBuilderSettings? settings = null)
+        public TelegramBotHostBuilder(HostApplicationBuilder hostApplicationBuilder, TelegramBotHostBuilderSettings? settings = null)
         {
-            _innerBuilder = hostApplicationBuilder;
+            _innerBuilder = hostApplicationBuilder ?? throw new ArgumentNullException(nameof(hostApplicationBuilder));
             _settings = settings ?? new TelegramBotHostBuilderSettings();
             _handlers = new HostHandlersCollection(Services, _settings);
+
+            _innerBuilder.Logging.ClearProviders();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TelegramBotHostBuilder"/> class.
+        /// </summary>
+        /// <param name="hostApplicationBuilder"></param>
+        /// <param name="handlers"></param>
+        /// <param name="settings"></param>
+        public TelegramBotHostBuilder(HostApplicationBuilder hostApplicationBuilder, IHandlersCollection handlers, TelegramBotHostBuilderSettings? settings = null)
+        {
+            _innerBuilder = hostApplicationBuilder ?? throw new ArgumentNullException(nameof(hostApplicationBuilder));
+            _settings = settings ?? new TelegramBotHostBuilderSettings();
+            _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));
 
             _innerBuilder.Logging.ClearProviders();
         }
@@ -58,15 +74,18 @@ namespace Telegrator.Hosting
         /// <returns></returns>
         public TelegramBotHost Build()
         {
-            foreach (PreBuildingRoutine preBuildRoutine in _handlers.PreBuilderRoutines)
+            if (_handlers is IHostHandlersCollection hostHandlers)
             {
-                try
+                foreach (PreBuildingRoutine preBuildRoutine in hostHandlers.PreBuilderRoutines)
                 {
-                    preBuildRoutine.Invoke(this);
-                }
-                catch (NotImplementedException)
-                {
-                    _ = 0xBAD + 0xC0DE;
+                    try
+                    {
+                        preBuildRoutine.Invoke(this);
+                    }
+                    catch (NotImplementedException)
+                    {
+                        _ = 0xBAD + 0xC0DE;
+                    }
                 }
             }
 

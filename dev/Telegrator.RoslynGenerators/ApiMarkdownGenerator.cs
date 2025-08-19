@@ -1,11 +1,11 @@
+#if DEBUG
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text;
 using System.Xml.Linq;
-using Telegrator.RoslynExtensions;
+using Telegrator.RoslynGenerators.RoslynExtensions;
 
-#if DEBUG
 namespace Telegrator.RoslynGenerators
 {
     /// <summary>

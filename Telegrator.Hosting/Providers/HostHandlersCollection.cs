@@ -2,6 +2,7 @@
 using System.Reflection;
 using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
+using Telegrator.Hosting.Providers.Components;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 using Telegrator.Providers;
@@ -15,7 +16,7 @@ namespace Telegrator.Hosting.Providers
     public delegate void PreBuildingRoutine(ITelegramBotHostBuilder builder);
 
     /// <inheritdoc/>
-    public class HostHandlersCollection(IServiceCollection hostServiceColletion, ITelegratorOptions options) : HandlersCollection(options)
+    public class HostHandlersCollection(IServiceCollection hostServiceColletion, ITelegratorOptions options) : HandlersCollection(options), IHostHandlersCollection
     {
         private readonly IServiceCollection Services = hostServiceColletion;
 
@@ -25,20 +26,14 @@ namespace Telegrator.Hosting.Providers
         /// <summary>
         /// List of tasks that should be completed right before building the bot
         /// </summary>
-        public readonly List<PreBuildingRoutine> PreBuilderRoutines = [];
-
-        /// <inheritdoc/>
-        public override IHandlersCollection AddHandler(Type handlerType)
-        {
-            if (handlerType.IsPreBuildingRoutine(out MethodInfo? routineMethod))
-                PreBuilderRoutines.Add(routineMethod.CreateDelegate<PreBuildingRoutine>(null));
-
-            return base.AddHandler(handlerType);
-        }
+        public List<PreBuildingRoutine> PreBuilderRoutines { get; } = [];
 
         /// <inheritdoc/>
         public override IHandlersCollection AddDescriptor(HandlerDescriptor descriptor)
         {
+            if (descriptor.HandlerType.IsPreBuildingRoutine(out MethodInfo? routineMethod))
+                PreBuilderRoutines.Add(routineMethod.CreateDelegate<PreBuildingRoutine>(null));
+
             switch (descriptor.Type)
             {
                 case DescriptorType.General:

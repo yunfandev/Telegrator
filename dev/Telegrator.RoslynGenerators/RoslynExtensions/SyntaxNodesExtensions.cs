@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Telegrator.RoslynExtensions
+namespace Telegrator.RoslynGenerators.RoslynExtensions
 {
     public static class SyntaxNodesExtensions
     {

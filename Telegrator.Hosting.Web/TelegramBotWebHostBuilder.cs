@@ -5,10 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
-using Telegram.Bot.Polling;
 using Telegrator.Hosting.Components;
 using Telegrator.Hosting.Configuration;
 using Telegrator.Hosting.Providers;
+using Telegrator.Hosting.Providers.Components;
 using Telegrator.MadiatorCore;
 
 #pragma warning disable IDE0001
@@ -21,7 +21,7 @@ namespace Telegrator.Hosting.Web
     {
         private readonly WebApplicationBuilder _innerBuilder;
         private readonly TelegramBotWebOptions _settings;
-        private readonly HostHandlersCollection _handlers;
+        private readonly IHandlersCollection _handlers;
 
         /// <inheritdoc/>
         public IHandlersCollection Handlers => _handlers;
@@ -38,11 +38,29 @@ namespace Telegrator.Hosting.Web
         /// <inheritdoc/>
         public IHostEnvironment Environment => _innerBuilder.Environment;
 
-        internal TelegramBotWebHostBuilder(WebApplicationBuilder webApplicationBuilder, TelegramBotWebOptions settings)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TelegramBotWebHostBuilder"/> class.
+        /// </summary>
+        /// <param name="webApplicationBuilder"></param>
+        /// <param name="settings"></param>
+        public TelegramBotWebHostBuilder(WebApplicationBuilder webApplicationBuilder, TelegramBotWebOptions settings)
         {
-            _innerBuilder = webApplicationBuilder;
+            _innerBuilder = webApplicationBuilder ?? throw new ArgumentNullException(nameof(webApplicationBuilder));
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _handlers = new HostHandlersCollection(Services, _settings);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TelegramBotWebHostBuilder"/> class.
+        /// </summary>
+        /// <param name="webApplicationBuilder"></param>
+        /// <param name="handlers"></param>
+        /// <param name="settings"></param>
+        public TelegramBotWebHostBuilder(WebApplicationBuilder webApplicationBuilder, TelegramBotWebOptions settings, IHandlersCollection handlers)
+        {
+            _innerBuilder = webApplicationBuilder ?? throw new ArgumentNullException(nameof(webApplicationBuilder));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _handlers = handlers ?? throw new ArgumentNullException(nameof(settings));
         }
 
         /// <summary>
@@ -51,15 +69,18 @@ namespace Telegrator.Hosting.Web
         /// <returns></returns>
         public TelegramBotWebHost Build()
         {
-            foreach (PreBuildingRoutine preBuildRoutine in _handlers.PreBuilderRoutines)
+            if (_handlers is IHostHandlersCollection hostHandlers)
             {
-                try
+                foreach (PreBuildingRoutine preBuildRoutine in hostHandlers.PreBuilderRoutines)
                 {
-                    preBuildRoutine.Invoke(this);
-                }
-                catch (NotImplementedException)
-                {
-                    _ = 0xBAD + 0xC0DE;
+                    try
+                    {
+                        preBuildRoutine.Invoke(this);
+                    }
+                    catch (NotImplementedException)
+                    {
+                        _ = 0xBAD + 0xC0DE;
+                    }
                 }
             }
 

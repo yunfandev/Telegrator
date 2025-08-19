@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot.Types.Enums;
-using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore.Descriptors;
 
 namespace Telegrator.MadiatorCore
@@ -32,35 +31,12 @@ namespace Telegrator.MadiatorCore
         /// <returns>The handler descriptor list for the given update type.</returns>
         public HandlerDescriptorList this[UpdateType updateType] { get; }
 
-        /*
-        /// <summary>
-        /// Collects all handlers domain-wide and returns a new <see cref="IHandlersCollection"/>.
-        /// </summary>
-        /// <returns>A new <see cref="IHandlersCollection"/> with all handlers collected.</returns>
-        public IHandlersCollection CollectHandlersDomainWide();
-        */
-
         /// <summary>
         /// Adds a <see cref="HandlerDescriptor"/> to the collection and returns the updated collection.
         /// </summary>
         /// <param name="descriptor">The handler descriptor to add.</param>
         /// <returns>The updated <see cref="IHandlersCollection"/>.</returns>
         public IHandlersCollection AddDescriptor(HandlerDescriptor descriptor);
-
-        /// <summary>
-        /// Adds a handler of the specified type to the collection and returns the updated collection.
-        /// </summary>
-        /// <typeparam name="THandler">The type of handler to add, must inherit from <see cref="UpdateHandlerBase"/>.</typeparam>
-        /// <returns>The updated <see cref="IHandlersCollection"/>.</returns>
-        public IHandlersCollection AddHandler<THandler>() where THandler : UpdateHandlerBase;
-
-        /// <summary>
-        /// Adds a handler of the specified type to the collection and returns the updated collection.
-        /// </summary>
-        /// <param name="handlerType">The type of handler to add.</param>
-        /// <returns>The updated <see cref="IHandlersCollection"/>.</returns>
-        /// <exception cref="Exception">Thrown if the handler type is invalid.</exception>
-        public IHandlersCollection AddHandler(Type handlerType);
 
         /// <summary>
         /// Gets the <see cref="HandlerDescriptorList"/> for the specified <see cref="HandlerDescriptor"/>.

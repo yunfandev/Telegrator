@@ -55,10 +55,15 @@ namespace Telegrator.Hosting.Web
         IFeatureCollection IApplicationBuilder.ServerFeatures => ((IApplicationBuilder)_innerApp).ServerFeatures;
         IDictionary<string, object?> IApplicationBuilder.Properties => ((IApplicationBuilder)_innerApp).Properties;
 
-        internal TelegramBotWebHost(WebApplicationBuilder webApplicationBuilder, HostHandlersCollection handlers)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebApplicationBuilder"/> class.
+        /// </summary>
+        /// <param name="webApplicationBuilder">The proxied instance of host builder.</param>
+        /// <param name="handlers"></param>
+        public TelegramBotWebHost(WebApplicationBuilder webApplicationBuilder, IHandlersCollection handlers)
         {
             // Registering this host in services for easy access
-            RegisterHostServices(webApplicationBuilder, handlers);
+            RegisterHostServices(webApplicationBuilder.Services, handlers);
 
             // Building proxy application
             _innerApp = webApplicationBuilder.Build();
@@ -172,7 +177,7 @@ namespace Telegrator.Hosting.Web
             _disposed = true;
         }
 
-        private void LogHandlers(HostHandlersCollection handlers)
+        private void LogHandlers(IHandlersCollection handlers)
         {
             StringBuilder logBuilder = new StringBuilder("Registered handlers : ");
             if (!handlers.Keys.Any())
@@ -194,15 +199,15 @@ namespace Telegrator.Hosting.Web
             Logger.LogInformation(logBuilder.ToString());
         }
 
-        private void RegisterHostServices(WebApplicationBuilder hostApplicationBuilder, HostHandlersCollection handlers)
+        private void RegisterHostServices(IServiceCollection service, IHandlersCollection handlers)
         {
-            //hostApplicationBuilder.Services.RemoveAll<IHost>();
-            //hostApplicationBuilder.Services.AddSingleton<IHost>(this);
+            //service.RemoveAll<IHost>();
+            //service.AddSingleton<IHost>(this);
 
-            hostApplicationBuilder.Services.AddSingleton<ITelegramBotHost>(this);
-            hostApplicationBuilder.Services.AddSingleton<ITelegramBotWebHost>(this);
-            hostApplicationBuilder.Services.AddSingleton<ITelegratorBot>(this);
-            hostApplicationBuilder.Services.AddSingleton<IHandlersCollection>(handlers);
+            service.AddSingleton<ITelegramBotHost>(this);
+            service.AddSingleton<ITelegramBotWebHost>(this);
+            service.AddSingleton<ITelegratorBot>(this);
+            service.AddSingleton<IHandlersCollection>(handlers);
         }
     }
 }

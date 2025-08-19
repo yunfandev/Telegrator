@@ -1,4 +1,4 @@
-﻿namespace Telegrator.RoslynExtensions;
+﻿namespace Telegrator.RoslynGenerators.RoslynExtensions;
 
 public class TargteterNotFoundException() : Exception() { }
 

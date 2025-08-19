@@ -89,42 +89,6 @@ namespace Telegrator.Providers
         }
 
         /// <summary>
-        /// Adds a handler type to the collection.
-        /// </summary>
-        /// <typeparam name="THandler">The type of handler to add.</typeparam>
-        /// <returns>This collection instance for method chaining.</returns>
-        public virtual IHandlersCollection AddHandler<THandler>() where THandler : UpdateHandlerBase
-        {
-            AddHandler(typeof(THandler));
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a handler type to the collection.
-        /// </summary>
-        /// <param name="handlerType">The type of handler to add.</param>
-        /// <returns>This collection instance for method chaining.</returns>
-        /// <exception cref="Exception">Thrown when the type is not a valid handler implementation.</exception>
-        public virtual IHandlersCollection AddHandler(Type handlerType)
-        {
-            if (!handlerType.IsHandlerRealization())
-                throw new Exception();
-
-            if (handlerType.IsCustomDescriptorsProvider())
-            {
-                foreach (HandlerDescriptor handlerDescriptor in InvokeCustomDescriptorsProvider(handlerType))
-                    AddDescriptor(handlerDescriptor);
-            }
-            else
-            {
-                HandlerDescriptor descriptor = new HandlerDescriptor(DescriptorType.General, handlerType);
-                AddDescriptor(descriptor);
-            }
-
-            return this;
-        }
-
-        /// <summary>
         /// Gets or creates a descriptor list for the specified update type.
         /// </summary>
         /// <param name="descriptor">The handler descriptor to get the list for.</param>
@@ -162,21 +126,6 @@ namespace Telegrator.Providers
                 throw new Exception(descriptor.HandlerType.FullName);
 
             CommandAliasses.AddRange(alliasAttribute.Alliases);
-        }
-
-        /// <summary>
-        /// Invokes a custom descriptors provider to get handler descriptors.
-        /// </summary>
-        /// <param name="handlerType">The handler type that implements ICustomDescriptorsProvider.</param>
-        /// <returns>A collection of handler descriptors from the custom provider.</returns>
-        /// <exception cref="Exception">Thrown when the handler type doesn't have a parameterless constructor or cannot be instantiated.</exception>
-        protected virtual IEnumerable<HandlerDescriptor> InvokeCustomDescriptorsProvider(Type handlerType)
-        {
-            if (!handlerType.HasParameterlessCtor())
-                throw new Exception();
-
-            ICustomDescriptorsProvider? provider = (ICustomDescriptorsProvider?)Activator.CreateInstance(handlerType);
-            return provider == null ? throw new Exception() : provider.DescribeHandlers();
         }
     }
 }

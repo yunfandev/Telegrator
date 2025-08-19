@@ -5,9 +5,6 @@ using System.Text;
 using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
 using Telegrator.Hosting.Components;
-using Telegrator.Hosting.Logging;
-using Telegrator.Logging;
-using Telegrator.Hosting.Providers;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 
@@ -19,13 +16,14 @@ namespace Telegrator.Hosting
     public class TelegramBotHost : ITelegramBotHost
     {
         private readonly IHost _innerHost;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IUpdateRouter _updateRouter;
         private readonly ILogger<TelegramBotHost> _logger;
 
         private bool _disposed;
 
         /// <inheritdoc/>
-        public IServiceProvider Services => _innerHost.Services;
+        public IServiceProvider Services => _serviceProvider;
 
         /// <inheritdoc/>
         public IUpdateRouter UpdateRouter => _updateRouter;
@@ -38,15 +36,16 @@ namespace Telegrator.Hosting
         /// <summary>
         /// Initializes a new instance of the <see cref="TelegramBotHost"/> class.
         /// </summary>
-        /// <param name="hostApplicationBuilder">The service provider.</param>
+        /// <param name="hostApplicationBuilder">The proxied instance of host builder.</param>
         /// <param name="handlers"></param>
-        internal TelegramBotHost(HostApplicationBuilder hostApplicationBuilder, HostHandlersCollection handlers)
+        public TelegramBotHost(HostApplicationBuilder hostApplicationBuilder, IHandlersCollection handlers)
         {
             // Registering this host in services for easy access
-            RegisterHostServices(hostApplicationBuilder, handlers);
+            RegisterHostServices(hostApplicationBuilder.Services, handlers);
 
             // Building proxy hoster
             _innerHost = hostApplicationBuilder.Build();
+            _serviceProvider = _innerHost.Services;
 
             // Initializing bot info, as it requires to make a request via tg bot
             Services.GetRequiredService<ITelegramBotInfo>();
@@ -131,7 +130,7 @@ namespace Telegrator.Hosting
             _disposed = true;
         }
 
-        private void LogHandlers(HostHandlersCollection handlers)
+        private void LogHandlers(IHandlersCollection handlers)
         {
             StringBuilder logBuilder = new StringBuilder("Registered handlers : ");
             if (!handlers.Keys.Any())
@@ -153,14 +152,14 @@ namespace Telegrator.Hosting
             Logger.LogInformation(logBuilder.ToString());
         }
 
-        private void RegisterHostServices(HostApplicationBuilder hostApplicationBuilder, HostHandlersCollection handlers)
+        private void RegisterHostServices(IServiceCollection services, IHandlersCollection handlers)
         {
-            //hostApplicationBuilder.Services.RemoveAll<IHost>();
-            //hostApplicationBuilder.Services.AddSingleton<IHost>(this);
+            //services.RemoveAll<IHost>();
+            //services.AddSingleton<IHost>(this);
 
-            hostApplicationBuilder.Services.AddSingleton<ITelegramBotHost>(this);
-            hostApplicationBuilder.Services.AddSingleton<ITelegratorBot>(this);
-            hostApplicationBuilder.Services.AddSingleton<IHandlersCollection>(handlers);
+            services.AddSingleton<ITelegramBotHost>(this);
+            services.AddSingleton<ITelegratorBot>(this);
+            services.AddSingleton<IHandlersCollection>(handlers);
         }
     }
 }

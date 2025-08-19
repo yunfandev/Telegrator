@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Telegrator.RoslynExtensions
+namespace Telegrator.RoslynGenerators.RoslynExtensions
 {
     public static class DiagnosticsHelper
     {
