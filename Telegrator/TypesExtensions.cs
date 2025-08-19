@@ -1019,7 +1019,7 @@ namespace Telegrator
         /// <typeparam name="TSource"></typeparam>
         /// <param name="list"></param>
         /// <param name="elements"></param>
-        public static void Union<TSource>(this IList<TSource> list, params IEnumerable<TSource> elements)
+        public static void UnionAdd<TSource>(this IList<TSource> list, params IEnumerable<TSource> elements)
         {
             foreach (TSource item in elements)
             {

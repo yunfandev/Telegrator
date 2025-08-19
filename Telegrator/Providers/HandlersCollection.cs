@@ -70,10 +70,10 @@ namespace Telegrator.Providers
             if (MustHaveParameterlessCtor && !descriptor.HandlerType.HasParameterlessCtor())
                 throw new Exception("This handler (" + descriptor.HandlerType.FullName + "), must contain constructor without parameters.");
 
-            _allowedTypes.Union(descriptor.UpdateType);
+            _allowedTypes.UnionAdd(descriptor.UpdateType);
             MightAwaitAttribute[] mightAwaits = descriptor.HandlerType.GetCustomAttributes<MightAwaitAttribute>().ToArray();
             if (mightAwaits.Length > 0)
-                _allowedTypes.Union(mightAwaits.SelectMany(attr => attr.UpdateTypes));
+                _allowedTypes.UnionAdd(mightAwaits.SelectMany(attr => attr.UpdateTypes));
 
             IntersectCommands(descriptor);
             HandlerDescriptorList list = GetDescriptorList(descriptor);
