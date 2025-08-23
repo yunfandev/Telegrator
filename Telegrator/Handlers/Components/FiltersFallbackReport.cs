@@ -38,27 +38,53 @@ namespace Telegrator.Handlers.Components
         /// </summary>
         public List<FilterFallbackInfo> UpdateFilters { get; } = [];
 
+        public bool Only(string name, int index = 0)
+        {
+            FilterFallbackInfo? info = UpdateFilters.SingleSafe(info => info.Failed);
+            if (info != null && info.Name != name)
+                return false;
+
+            FilterFallbackInfo? target = UpdateFilters.ElementAtOrDefault(index);
+            return ReferenceEquals(target, info);
+        }
+
+        public bool Only(string[] names)
+        {
+            return UpdateFilters
+                .Where(info => info.Failed)
+                .Select(info => info.Name)
+                .SequenceEqual(names);
+        }
+
+        public bool Except(string name, int index = 0)
+        {
+            FilterFallbackInfo? info = UpdateFilters.SingleSafe(info => !info.Failed);
+            if (info != null && info.Name != name)
+                return false;
+
+            FilterFallbackInfo? target = UpdateFilters.ElementAtOrDefault(index);
+            return ReferenceEquals(target, info);
+        }
+
+        public bool Except(string[] names)
+        {
+            return UpdateFilters
+                .Where(info => !info.Failed)
+                .Select(info => info.Name)
+                .SequenceEqual(names);
+        }
+
+        public bool ExceptAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
+            => Except(nameof(T), index);
+
         /// <summary>
         /// Checks if the failure is due to a specific attribute type, excluding other failures.
         /// </summary>
         /// <typeparam name="T">The attribute type to check for.</typeparam>
         /// <param name="index">The index of the filter to check (default: 0).</param>
         /// <returns>True if the failure is exclusively due to the specified attribute type; otherwise, false.</returns>
-        public bool ExceptAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
-        {
-            string name = typeof(T).Name;
-            
-            IEnumerable<FilterFallbackInfo> failed = UpdateFilters.Where(info => info.Failed);
-            if (failed.Count() != 1)
-                return false;
-
-            FilterFallbackInfo info = failed.ElementAt(0);
-            if (info.Name != name)
-                return false;
-
-            FilterFallbackInfo? target = UpdateFilters.ElementAtOrDefault(index);
-            return target == info;
-        }
+        public bool OnlyAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
+            => Only(nameof(T), index);
     }
 
     /// <summary>

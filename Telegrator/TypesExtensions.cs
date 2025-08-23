@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -643,9 +644,6 @@ namespace Telegrator
 
             if (handlerType.IsCustomDescriptorsProvider())
             {
-                if (!handlerType.HasParameterlessCtor())
-                    throw new Exception();
-
                 ICustomDescriptorsProvider provider = (ICustomDescriptorsProvider)Activator.CreateInstance(handlerType);
                 foreach (HandlerDescriptor handlerDescriptor in provider.DescribeHandlers())
                     handlers.AddDescriptor(handlerDescriptor);
@@ -944,23 +942,6 @@ namespace Telegrator
             return source;
         }
 
-        /* Found built in method :_(
-        /// <summary>
-        /// Creates a new <see cref="IEnumerable{T}"/> with the elements of the <paramref name="source"/> that were successfully cast to the <typeparamref name="TResult"/>
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static IEnumerable<TResult> WhereCast<TResult>(this IEnumerable source)
-        {
-            foreach (object value in source)
-            {
-                if (value is TResult result)
-                    yield return result;
-            }
-        }
-        */
-
         /// <summary>
         /// Sets the value of a key in a dictionary, or if the key does not exist, adds it
         /// </summary>
@@ -1026,6 +1007,32 @@ namespace Telegrator
                 if (!list.Contains(item, EqualityComparer<TSource>.Default))
                     list.Add(item);
             }
+        }
+
+        public static int IndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            int index = 0;
+            foreach (T item in source)
+            {
+                if (predicate.Invoke(item))
+                    return index;
+
+                index++;
+            }
+
+            return -1;
+        }
+
+        public static IEnumerable<T> Repeat<T>(this T item, int times)
+            => Enumerable.Range(0, times).Select(_ => item);
+
+        public static T? SingleSafe<T>(this IEnumerable<T> source)
+            => source.Count() == 1 ? source.ElementAt(0) : default;
+
+        public static T? SingleSafe<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            source = source.Where(predicate);
+            return source.Count() == 1 ? source.ElementAt(0) : default;
         }
     }
 
@@ -1189,6 +1196,22 @@ namespace Telegrator
                 ReadOnlySpan<char> chunk = source.AsSpan().Slice(start, toSlice);
                 yield return chunk.ToString();
             }
+        }
+
+        public static string FirstLetterToUpper(this string target)
+        {
+            char[] chars = target.ToCharArray();
+            int index = chars.IndexOf(char.IsLetter);
+            chars[index] = char.ToUpper(chars[index]);
+            return new string(chars);
+        }
+
+        public static string FirstLetterToLower(this string target)
+        {
+            char[] chars = target.ToCharArray();
+            int index = chars.IndexOf(char.IsLetter);
+            chars[index] = char.ToLower(chars[index]);
+            return new string(chars);
         }
     }
 

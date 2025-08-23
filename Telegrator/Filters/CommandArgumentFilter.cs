@@ -42,6 +42,18 @@ namespace Telegrator.Filters
         protected abstract bool CanPassNext(FilterExecutionContext<Message> context);
     }
 
+    public class ArgumentCountFilter(int count) : Filter<Message>
+    {
+        private readonly int Count = count;
+
+        public override bool CanPass(FilterExecutionContext<Message> context)
+        {
+            CommandHandlerAttribute attr = context.CompletedFilters.Get<CommandHandlerAttribute>(0);
+            string[] args = attr.Arguments ??= context.Input.SplitArgs();
+            return args.Length >= Count;
+        }
+    }
+
     /// <summary>
     /// Filter that checks if a command argument starts with a specified content.
     /// </summary>

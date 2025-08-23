@@ -3,6 +3,10 @@ using Telegrator.Filters;
 
 namespace Telegrator.Annotations
 {
+    public class ArgumentCountAttribute(int count)
+        : MessageFilterAttribute(new ArgumentCountFilter(count))
+    { }
+
     /// <summary>
     /// Attribute for filtering messages where a command argument starts with the specified content.
     /// </summary>
@@ -50,7 +54,7 @@ namespace Telegrator.Annotations
     /// <param name="options">The regex options to use for the pattern matching.</param>
     /// <param name="matchTimeout">The timeout for the regex match operation.</param>
     /// <param name="index">The index of the argument to check (0-based).</param>
-    public class ArgumentRegexAttribute(string pattern, RegexOptions options = RegexOptions.None, TimeSpan matchTimeout = default, int index = 0)
-        : MessageFilterAttribute(new ArgumentRegexFilter(pattern, options, matchTimeout, index))
+    public class ArgumentRegexAttribute(string pattern, RegexOptions options = RegexOptions.None, int index = 0)
+        : MessageFilterAttribute(new ArgumentRegexFilter(pattern, options, index: index))
     { }
 }
