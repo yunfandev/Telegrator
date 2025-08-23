@@ -38,6 +38,12 @@ namespace Telegrator.Handlers.Components
         /// </summary>
         public List<FilterFallbackInfo> UpdateFilters { get; } = [];
 
+        /// <summary>
+        /// Checks if the failure is due to a specific filter.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool Only(string name, int index = 0)
         {
             FilterFallbackInfo? info = UpdateFilters.SingleSafe(info => info.Failed);
@@ -48,6 +54,11 @@ namespace Telegrator.Handlers.Components
             return ReferenceEquals(target, info);
         }
 
+        /// <summary>
+        /// Checks if the failure is due to a specific filter.
+        /// </summary>
+        /// <param name="names"></param>
+        /// <returns></returns>
         public bool Only(string[] names)
         {
             return UpdateFilters
@@ -56,6 +67,12 @@ namespace Telegrator.Handlers.Components
                 .SequenceEqual(names);
         }
 
+        /// <summary>
+        /// Checks if the failure is due to all filters except one.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool Except(string name, int index = 0)
         {
             FilterFallbackInfo? info = UpdateFilters.SingleSafe(info => !info.Failed);
@@ -66,6 +83,11 @@ namespace Telegrator.Handlers.Components
             return ReferenceEquals(target, info);
         }
 
+        /// <summary>
+        /// Checks if the failure is due to all filters except one.
+        /// </summary>
+        /// <param name="names"></param>
+        /// <returns></returns>
         public bool Except(string[] names)
         {
             return UpdateFilters
@@ -74,6 +96,12 @@ namespace Telegrator.Handlers.Components
                 .SequenceEqual(names);
         }
 
+        /// <summary>
+        /// Checks if the failure is due to aall attribute type, excluding one.
+        /// </summary>
+        /// <typeparam name="T">The attribute type to check for.</typeparam>
+        /// <param name="index">The index of the filter to check (default: 0).</param>
+        /// <returns>True if the failure is exclusively due to the specified attribute type; otherwise, false.</returns>
         public bool ExceptAttribute<T>(int index = 0) where T : UpdateFilterAttributeBase
             => Except(nameof(T), index);
 

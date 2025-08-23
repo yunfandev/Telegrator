@@ -1009,6 +1009,13 @@ namespace Telegrator
             }
         }
 
+        /// <summary>
+        /// Return index of first element that satisfies the condition
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public static int IndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {
             int index = 0;
@@ -1023,12 +1030,34 @@ namespace Telegrator
             return -1;
         }
 
+        /// <summary>
+        /// Returns an enumerable that repeats the item multiple times.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <param name="times"></param>
+        /// <returns></returns>
         public static IEnumerable<T> Repeat<T>(this T item, int times)
             => Enumerable.Range(0, times).Select(_ => item);
 
+        /// <summary>
+        /// Returns the only element of a sequence, or a default value if the sequence is empty.
+        /// This method returns default if there is more than one element in the sequence.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static T? SingleSafe<T>(this IEnumerable<T> source)
             => source.Count() == 1 ? source.ElementAt(0) : default;
 
+        /// <summary>
+        /// Returns the only element of a sequence that satisfies a specified condition or a default value if no such element exists.
+        /// This method return default if more than one element satisfies the condition.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public static T? SingleSafe<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {
             source = source.Where(predicate);
@@ -1198,6 +1227,11 @@ namespace Telegrator
             }
         }
 
+        /// <summary>
+        /// Return new string with first found letter set to upper case
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public static string FirstLetterToUpper(this string target)
         {
             char[] chars = target.ToCharArray();
@@ -1206,6 +1240,11 @@ namespace Telegrator
             return new string(chars);
         }
 
+        /// <summary>
+        /// Return new string with first found letter set to lower case
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public static string FirstLetterToLower(this string target)
         {
             char[] chars = target.ToCharArray();

@@ -42,10 +42,15 @@ namespace Telegrator.Filters
         protected abstract bool CanPassNext(FilterExecutionContext<Message> context);
     }
 
+    /// <summary>
+    /// Filter that checks if a command has arguments count >= <paramref name="count"/>.
+    /// </summary>
+    /// <param name="count"></param>
     public class ArgumentCountFilter(int count) : Filter<Message>
     {
         private readonly int Count = count;
 
+        /// <inheritdoc/>
         public override bool CanPass(FilterExecutionContext<Message> context)
         {
             CommandHandlerAttribute attr = context.CompletedFilters.Get<CommandHandlerAttribute>(0);
