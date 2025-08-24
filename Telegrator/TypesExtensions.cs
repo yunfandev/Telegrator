@@ -21,6 +21,7 @@ using Telegrator.Providers;
 using Telegrator.StateKeeping;
 using Telegrator.StateKeeping.Abstracts;
 using Telegrator.StateKeeping.Components;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Telegrator
 {
@@ -1251,6 +1252,38 @@ namespace Telegrator
             int index = chars.IndexOf(char.IsLetter);
             chars[index] = char.ToLower(chars[index]);
             return new string(chars);
+        }
+
+        /// <summary>
+        /// Checks if string contains a 'word'.
+        /// 'Word' must be a separate member of the text, and not have any alphabetic characters next to it.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="word"></param>
+        /// <param name="comparison"></param>
+        /// <param name="startIndex"></param>
+        /// <returns></returns>
+        public static bool ContainsWord(this string source, string word, StringComparison comparison = StringComparison.InvariantCulture, int startIndex = 0)
+        {
+            int index = source.IndexOf(word, startIndex, comparison);
+            if (index == -1)
+                return false;
+
+            if (index > 0)
+            {
+                char prev = source[index - 1];
+                if (char.IsLetter(prev))
+                    return false;
+            }
+
+            if (index + word.Length < source.Length)
+            {
+                char post = source[index + word.Length];
+                if (char.IsLetter(post))
+                    return false;
+            }
+
+            return true;
         }
     }
 

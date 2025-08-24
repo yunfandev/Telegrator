@@ -180,26 +180,6 @@ namespace Telegrator.Filters
 
         /// <inheritdoc/>
         protected override bool CanPassNext(FilterExecutionContext<Message> context)
-        {
-            int index = Text.IndexOf(Word, StartIndex, Comparison);
-            if (index == -1)
-                return false;
-
-            if (index > 0)
-            {
-                char prev = Text[index - 1];
-                if (char.IsLetter(prev))
-                    return false;
-            }
-
-            if (index + Word.Length < Text.Length)
-            {
-                char post = Text[index + Word.Length];
-                if (char.IsLetter(post))
-                    return false;
-            }
-
-            return true;
-        }
+            => Text.ContainsWord(Word, Comparison, StartIndex);
     }
 }
