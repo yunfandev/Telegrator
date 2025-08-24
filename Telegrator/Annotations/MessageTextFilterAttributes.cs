@@ -44,4 +44,15 @@ namespace Telegrator.Annotations
     public class HasTextAttribute()
         : MessageFilterAttribute(new TextNotNullOrEmptyFilter())
     { }
+
+    /// <summary>
+    /// Attribute for filtering messages where the text contains a 'word'.
+    /// 'Word' must be a separate member of the text, and not have any alphabetic characters next to it.
+    /// </summary>
+    /// <param name="word"></param>
+    /// <param name="comparison"></param>
+    /// <param name="startIndex"></param>
+    public class TextContainsWordAttribute(string word, StringComparison comparison = StringComparison.InvariantCulture, int startIndex = 0)
+        : MessageFilterAttribute(new TextContainsWordFilter(word, comparison, startIndex))
+    { }
 }

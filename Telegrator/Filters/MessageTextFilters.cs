@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Telegrator.Filters
 {
@@ -154,5 +155,51 @@ namespace Telegrator.Filters
         /// <returns>True if the text is not null or empty; otherwise, false.</returns>
         protected override bool CanPassNext(FilterExecutionContext<Message> _)
             => !string.IsNullOrEmpty(Text);
+    }
+
+    /// <summary>
+    /// Filter that checks if the message text contains a 'word'.
+    /// 'Word' must be a separate member of the text, and not have any alphabetic characters next to it.
+    /// </summary>
+    public class TextContainsWordFilter(string word, StringComparison comparison = StringComparison.InvariantCulture, int startIndex = 0) : MessageTextFilter
+    {
+        /// <summary>
+        /// The content to check if the message text equals.
+        /// </summary>
+        protected readonly string Word = word;
+
+        /// <summary>
+        /// The string comparison type to use for the check.
+        /// </summary>
+        protected readonly StringComparison Comparison = comparison;
+
+        /// <summary>
+        /// The search starting position.
+        /// </summary>
+        protected readonly int StartIndex = startIndex;
+
+        /// <inheritdoc/>
+        protected override bool CanPassNext(FilterExecutionContext<Message> context)
+        {
+            int index = Text.IndexOf(Word, StartIndex, Comparison);
+            if (index == -1)
+                return false;
+
+            if (index > 0)
+            {
+                char prev = Text[index - 1];
+                if (char.IsLetter(prev))
+                    return false;
+            }
+
+            if (index + Word.Length < Text.Length)
+            {
+                char post = Text[index + Word.Length];
+                if (char.IsLetter(post))
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
