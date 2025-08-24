@@ -3,6 +3,7 @@ using Telegrator.Aspects;
 using Telegrator.Handlers.Components;
 using Telegrator.Filters.Components;
 using Telegrator.MadiatorCore;
+using Telegrator.Handlers.Diagnostics;
 
 namespace Telegrator
 {

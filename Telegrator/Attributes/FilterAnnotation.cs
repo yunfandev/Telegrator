@@ -9,13 +9,16 @@ namespace Telegrator.Attributes
     /// Reactive way to implement a new <see cref="UpdateFilterAttribute{T}"/> of type <typeparamref name="T"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class FilterAnnotation<T> : UpdateFilterAttribute<T>, IFilter<T> where T : class
+    public abstract class FilterAnnotation<T> : UpdateFilterAttribute<T>, IFilter<T>, INamedFilter where T : class
     {
         /// <inheritdoc/>
         public virtual bool IsCollectible { get; } = false;
 
         /// <inheritdoc/>
         public override UpdateType[] AllowedTypes { get; } = typeof(T).GetAllowedUpdateTypes();
+
+        /// <inheritdoc/>
+        public string Name => GetType().Name;
 
         /// <summary>
         /// Initializes new instance of <see cref="FilterAnnotation{T}"/>

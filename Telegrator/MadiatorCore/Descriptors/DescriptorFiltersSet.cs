@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using Telegrator.Filters.Components;
-using Telegrator.Handlers.Components;
+using Telegrator.Handlers.Diagnostics;
 using Telegrator.Logging;
 
 namespace Telegrator.MadiatorCore.Descriptors

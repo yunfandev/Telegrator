@@ -6,6 +6,7 @@ using Telegram.Bot.Types.Enums;
 using Telegrator.Configuration;
 using Telegrator.Filters.Components;
 using Telegrator.Handlers.Components;
+using Telegrator.Handlers.Diagnostics;
 using Telegrator.Logging;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
