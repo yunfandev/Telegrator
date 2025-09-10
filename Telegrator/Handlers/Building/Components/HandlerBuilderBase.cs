@@ -5,7 +5,6 @@ using Telegrator.Filters.Components;
 using Telegrator.Handlers.Components;
 using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
-using Telegrator.StateKeeping.Abstracts;
 using Telegrator.StateKeeping.Components;
 
 namespace Telegrator.Handlers.Building.Components

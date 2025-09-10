@@ -11,7 +11,7 @@ using Telegrator.MadiatorCore;
 using Telegrator.MadiatorCore.Descriptors;
 using Telegrator.Providers;
 using Telegrator.StateKeeping;
-using Telegrator.StateKeeping.Abstracts;
+using Telegrator.StateKeeping.Components;
 
 namespace Telegrator
 {

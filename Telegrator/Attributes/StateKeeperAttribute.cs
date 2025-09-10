@@ -2,7 +2,6 @@
 using Telegrator.Annotations.StateKeeping;
 using Telegrator.Attributes.Components;
 using Telegrator.Filters.Components;
-using Telegrator.StateKeeping.Abstracts;
 using Telegrator.StateKeeping.Components;
 
 namespace Telegrator.Attributes

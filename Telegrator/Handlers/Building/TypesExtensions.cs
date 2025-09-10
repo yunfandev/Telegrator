@@ -3,7 +3,6 @@ using Telegrator.Annotations.StateKeeping;
 using Telegrator.Filters.Components;
 using Telegrator.Handlers.Building.Components;
 using Telegrator.StateKeeping;
-using Telegrator.StateKeeping.Abstracts;
 using Telegrator.StateKeeping.Components;
 
 namespace Telegrator.Handlers.Building
